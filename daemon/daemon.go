@@ -3,6 +3,7 @@ package daemon
 import (
 	"LiScreMon/daemon/store"
 	"fmt"
+	"io"
 	"log"
 	"log/slog"
 	"os"
@@ -51,7 +52,7 @@ func DaemonService() {
 		AddSource: true,
 	}
 
-	jsonLogger := slog.NewJSONHandler(logFile, &opts)
+	jsonLogger := slog.NewJSONHandler(io.MultiWriter(logFile, os.Stdout), &opts)
 	logger := slog.New(jsonLogger)
 	slog.SetDefault(logger)
 
@@ -80,9 +81,8 @@ func DaemonService() {
 
 	go func() {
 		<-sigs
+		app.db.Close()
 		xevent.Quit(X)
-		fmt.Println()
-		app.db.ReadAll()
 		os.Exit(0)
 	}()
 
@@ -105,14 +105,34 @@ func DaemonService() {
 		}
 		fmt.Println(window, "===========>", name)
 
-		registerWindowForEvents(window, name)
+		registerWindowForEvents(window)
 		addWindowTocurSessionNamedWindowMap(window, name)
 	}
 
 	netActiveWindow.WindowID = xevent.NoWindow
 
 	log.Println("LiScreMon started...")
+	fmt.Println()
+	fmt.Println()
 
+	// err = app.db.DeleteKey("daily")
+	// if err != nil {
+	// 	fmt.Println("delete failed:", err)
+	// } else {
+	// 	fmt.Println("delete successful")
+	// }
+
+	s, err := app.db.GetWeeklyScreenStats(store.Active)
+	if err != nil {
+		fmt.Println("error with GetWeeklyScreenStats:", err)
+	}
+
+	for k, v := range s {
+		fmt.Println(k, v)
+	}
+	fmt.Println()
+	fmt.Println()
+	fmt.Println()
 	// Start the event loop.
 	xevent.Main(X)
 }

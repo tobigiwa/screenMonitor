@@ -10,26 +10,27 @@ import (
 	"github.com/BurntSushi/xgbutil/xprop"
 )
 
-func InitMonitoringEvent(X *xgbutil.XUtil, windowIDs []xproto.Window) {
-	for _, windowId := range windowIDs {
-		registerWindow(windowId)
-	}
-}
-
 // currentlyOpenedWindows returns a list of all top-level windows.
 func currentlyOpenedWindows(X *xgbutil.XUtil) ([]xproto.Window, error) {
 	return ewmh.ClientListGet(X)
 }
 
-// addWindowTocurSessionOpenedWindowMap adds to the
-/* curSessionOpenedWindow map */
-// set Event mask on newly added windows and register them for events.
-func registerWindowForEvents(windowID xproto.Window, name string) {
+func setRootEventMask(X *xgbutil.XUtil) {
+	err := xproto.ChangeWindowAttributesChecked(X.Conn(), X.RootWin(), xproto.CwEventMask,
+		[]uint32{
+			xproto.EventMaskPropertyChange |
+				xproto.EventMaskSubstructureNotify}).Check()
+	if err != nil {
+		log.Fatal("Failed to select notify events for root:", err)
+	}
+}
+
+func registerWindowForEvents(windowID xproto.Window) {
 	err := xproto.ChangeWindowAttributesChecked(X.Conn(), windowID, xproto.CwEventMask,
 		[]uint32{
 			xproto.EventMaskStructureNotify}).Check()
 	if err != nil {
-		log.Fatalf("Failed to select notify events for window:%v:%v: error: %v", windowID, name, err)
+		log.Fatalf("Failed to select notify events for window:%v, error: %v", windowID, err)
 	}
 
 	registerWindow(windowID)

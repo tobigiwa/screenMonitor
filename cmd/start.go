@@ -11,7 +11,7 @@ import (
 
 var startCmd = &cobra.Command{
 	Use:   "start",
-	Short: "launch the daemon service",
+	Short: "starts the daemon service",
 	Long: `Command "start" launch the daemon service. It starts the background screen
 	monitoring and recording program of LiScreMon`,
 	Run: func(cmd *cobra.Command, args []string) {

@@ -2,7 +2,6 @@ package store
 
 import (
 	"bytes"
-	"encoding/gob"
 	"errors"
 	"fmt"
 	"os"
@@ -15,14 +14,41 @@ import (
 	"github.com/BurntSushi/xgb/xproto"
 )
 
+var (
+	ErrAppKeyMismatch = fmt.Errorf("key error: app name mismatch")
+	ErrDeserilization = fmt.Errorf("error deserializing data")
+	ErrSerilization   = fmt.Errorf("error serializing data")
+)
+
 type ScreenType string
 
 const (
-	Active  ScreenType = "active"
-	Passive ScreenType = "passive"
-
-	timeFormat string = "2006-01-02"
+	Active     ScreenType = "active"
+	Inactive   ScreenType = "inactive"
+	Open       ScreenType = "open"
+	timeFormat string     = "2006-01-02"
 )
+
+type Category string
+
+// date underneath is a
+/* string of a time.Time format. "2006-01-02" */
+type date string
+type dailyAppScreenTime map[date]stats
+
+type TimeInterval struct {
+	Start time.Time
+	End   time.Time
+}
+type stats struct {
+	Active         float64
+	Open           float64
+	Inactive       float64
+	ActiveTimeData []TimeInterval
+}
+type dailyActiveScreentime struct {
+	Stats stats
+}
 
 // ScreenTime represents the time spent on a particular app.
 type ScreenTime struct {
@@ -33,57 +59,24 @@ type ScreenTime struct {
 	Interval TimeInterval
 }
 
-type date string
-
-type dailyAppScreenTime map[date]stats
-
-type TimeInterval struct {
-	Start time.Time
-	End   time.Time
-}
-
-type stats struct {
-	Active         float64
-	Open           float64
-	Inactive       float64
-	ActiveTimeData []TimeInterval
-}
-
-type Category string
-
-type appInfo struct {
-	AppName           string
-	Icon              []byte
-	IsIconSet         bool
-	Category          Category
-	IsCategorySet     bool
-	DesktopCategories []string
-	ScreenStat        dailyAppScreenTime
-}
-
-func (ap *appInfo) serialize() ([]byte, error) {
-	var res bytes.Buffer
-	encoded := gob.NewEncoder(&res)
-	if err := encoded.Encode(ap); err != nil {
-		return nil, fmt.Errorf("%v:%w", err, ErrSerilization)
-	}
-	return res.Bytes(), nil
-}
-
-func (ap *appInfo) deserialize(data []byte) error {
-	decoded := gob.NewDecoder(bytes.NewReader(data))
-	if err := decoded.Decode(ap); err != nil {
-		return fmt.Errorf("%v:%w", err, ErrDeserilization)
-	}
-	return nil
-}
-
 func Key() date {
 	return date(fmt.Sprint(time.Now().Format(timeFormat)))
 }
 func ParseKey(key date) time.Time {
 	a, _ := time.Parse(timeFormat, string(key))
 	return a
+}
+
+func dbAppKey(appName string) []byte {
+	return []byte(fmt.Sprintf("app:%v", appName))
+}
+
+func dbAppPrefix() []byte {
+	return []byte("app:")
+}
+
+func dbActiveSTKey() []byte {
+	return []byte("active")
 }
 
 func getDesktopCategory(appName string) ([]string, error) {
@@ -118,8 +111,32 @@ func getDesktopCategory(appName string) ([]string, error) {
 
 	} else if OperatingSytem == "windows" {
 		return nil, nil
-
 	}
 
 	return nil, errors.New("just an error")
+}
+
+func availableStatForThatWeek(w time.Time) []date {
+	var n int
+	switch w.Weekday() {
+	case time.Monday:
+		n = 1
+	case time.Tuesday:
+		n = 2
+	case time.Wednesday:
+		n = 3
+	case time.Thursday:
+		n = 4
+	case time.Friday:
+		n = 5
+	case time.Saturday:
+		n = 6
+	case time.Sunday:
+		n = 7
+	}
+	arr := make([]date, 0, n)
+	for i := 0; i <= n; i++ {
+		arr = append(arr, date(fmt.Sprint(w.AddDate(0, 0, -i).Format(timeFormat))))
+	}
+	return arr
 }

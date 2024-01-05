@@ -2,9 +2,7 @@ package daemon
 
 import (
 	"fmt"
-	"log"
 
-	"github.com/BurntSushi/xgb/xproto"
 	"github.com/BurntSushi/xgbutil"
 	"github.com/BurntSushi/xgbutil/ewmh"
 	"github.com/BurntSushi/xgbutil/xevent"
@@ -15,17 +13,10 @@ var ()
 
 func registerRootWindowForEvents(X *xgbutil.XUtil) {
 
-	xevent.DestroyNotifyFun(destroyNotifyEventFuncRoot).Connect(X, X.RootWin())
-
 	xevent.MapNotifyFun(mapNotifyEventFuncRoot).Connect(X, X.RootWin())
 
 	xevent.PropertyNotifyFun(propertyNotifyEventFuncRoot).Connect(X, X.RootWin())
 }
-func destroyNotifyEventFuncRoot(xu *xgbutil.XUtil, ev xevent.DestroyNotifyEvent) {
-	log.Printf("ROOT<========Window %d:%s WAS DESTROYED!!! ev.Event:%v========>\n", ev.Window, curSessionNamedWindow[ev.Window], ev.Event)
-	xevent.Detach(X, ev.Window)
-}
-
 func propertyNotifyEventFuncRoot(X *xgbutil.XUtil, ev xevent.PropertyNotifyEvent) {
 	app.rootPropertyNotifyHandler(X, ev, netActiveWindowAtom, netClientStackingAtom)
 }
@@ -52,15 +43,5 @@ func mapNotifyEventFuncRoot(X *xgbutil.XUtil, ev xevent.MapNotifyEvent) {
 				return
 			}
 		}
-	}
-}
-
-func setRootEventMask(X *xgbutil.XUtil) {
-	err := xproto.ChangeWindowAttributesChecked(X.Conn(), X.RootWin(), xproto.CwEventMask,
-		[]uint32{
-			xproto.EventMaskPropertyChange |
-				xproto.EventMaskSubstructureNotify}).Check()
-	if err != nil {
-		log.Fatal("Failed to select notify events for root:", err)
 	}
 }

@@ -11,6 +11,7 @@ replace browser => ./web_browser
 require (
 	github.com/BurntSushi/xgb v0.0.0-20210121224620-deaf085860bc
 	github.com/dgraph-io/badger/v4 v4.2.0
+	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.8.0
 )
 
@@ -29,7 +30,6 @@ require (
 	github.com/google/flatbuffers v24.3.25+incompatible // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/klauspost/compress v1.17.8 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/stretchr/testify v1.9.0 // indirect
 	go.opencensus.io v0.24.0 // indirect

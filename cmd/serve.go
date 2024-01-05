@@ -32,7 +32,10 @@ Examples:
 		fmt.Println("web was called")
 		detach, _ := cmd.Flags().GetBool("detach")
 		fmt.Println(detach)
-		browser.Web(detach)
+		err := browser.Web()
+		if err != nil {
+			fmt.Println("web error:", err)
+		}
 	},
 }
 
