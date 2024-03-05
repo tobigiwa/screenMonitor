@@ -1,3 +1,7 @@
 .idea/
 .vscode/
+<<<<<<< HEAD
 store/badgerDB
+=======
+LiScreMon
+>>>>>>> 8f9e2e6 (.gitignore)
