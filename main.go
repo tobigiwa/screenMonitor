@@ -43,7 +43,6 @@ func main() {
 	setRootEventMask(X)
 
 	registerRootWindowForEvent(X)
-	
 
 	if windows, err = currentlyOpenedWindows(X); err != nil {
 		log.Fatal(err)
@@ -51,9 +50,9 @@ func main() {
 
 	log.Println("len(windows)=====>>>>>:", len(windows))
 	for _, window := range windows {
-		name, err := getApplicationName(X, window)
+		name, err := getWindowClassName(X, window)
 		if err != nil {
-			log.Printf("getApplicationName error on window %d:%v\n", window, err)
+			log.Printf("getWindowClassName error on window %d:%v\n", window, err)
 			continue
 		}
 
@@ -64,10 +63,6 @@ func main() {
 	}
 
 	fmt.Println()
-
-	if err := getInitActiveWindow(X); err != nil {
-		log.Fatal(err)
-	}
 
 	// Start the event loop.
 	xevent.Main(X)

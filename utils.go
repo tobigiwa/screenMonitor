@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/BurntSushi/xgb/xproto"
 	"github.com/BurntSushi/xgbutil"
@@ -10,22 +9,11 @@ import (
 	"github.com/BurntSushi/xgbutil/xprop"
 )
 
-func getInitActiveWindow(X *xgbutil.XUtil) error {
-	FocusWindow, err := ewmh.ActiveWindowGet(X)
-	if err != nil {
-		return err
+func InitMonitoringEvent(X *xgbutil.XUtil, windowIDs []xproto.Window) {
+	for _, windowId := range windowIDs {
+		registerWindowForEvents(windowId)
 	}
-	globalFocusEvent.WindowID = FocusWindow
-	globalFocusEvent.Time = time.Now()
-
-	return nil
 }
-
-// func InitMonitoringEvent(X *xgbutil.XUtil, windowIDs []xproto.Window) {
-// 	for _, windowId := range windowIDs {
-// 		registerWindowForEvents(windowId)
-// 	}
-// }
 
 // currentlyOpenedWindows returns a list of all top-level windows.
 func currentlyOpenedWindows(X *xgbutil.XUtil) ([]xproto.Window, error) {
@@ -51,9 +39,7 @@ func addWindowTocurSessionOpenedWindowMap(windowID xproto.Window, name string) {
 
 		xproto.ChangeWindowAttributes(X.Conn(), windowID, xproto.CwEventMask,
 			[]uint32{
-				xproto.EventMaskFocusChange |
-					// xproto.EventMaskPropertyChange |
-					xproto.EventMaskSubstructureNotify,
+				xproto.EventMaskSubstructureNotify,
 			})
 
 		registerWindowForEvents(windowID)
@@ -72,17 +58,15 @@ func addWindowTocurSessionNamedWindowMap(windowID xproto.Window, name string) {
 	}
 }
 
-func getApplicationName(X *xgbutil.XUtil, win xproto.Window) (string, error) {
+func getWindowClassName(X *xgbutil.XUtil, win xproto.Window) (string, error) {
 
-	var (
-		err error
-	)
+	var err error
 
 	if wmClass, err := xprop.PropValStrs(xprop.GetProperty(X, win, "WM_CLASS")); err == nil && (len(wmClass) == 2) {
 		return wmClass[1], nil
 	}
 
-	return "", fmt.Errorf("cannot resolve window name %v", err)
+	return "", err
 }
 
 func checkQueryTreeForParent(X *xgbutil.XUtil, window xproto.Window) (string, error) {
@@ -92,19 +76,13 @@ func checkQueryTreeForParent(X *xgbutil.XUtil, window xproto.Window) (string, er
 		err  error
 	)
 
-	if tree, err = xproto.QueryTree(X.Conn(), window).Reply(); err != nil {
-		return "", err
+	if tree, err = xproto.QueryTree(X.Conn(), window).Reply(); err == nil {
+		if parentName, ok := curSessionNamedWindow[tree.Parent]; ok {
+			fmt.Printf("window:%v name resolved from parent %s:\n", window, parentName)
+			return parentName, nil
+		}
 	}
 
-	if parentName, ok := curSessionNamedWindow[tree.Parent]; ok {
-		fmt.Printf("window:%v name resolved from parent %s:\n", window, parentName)
-		return parentName, nil
-	}
-
-	if windowName, ok := curSessionNamedWindow[window]; ok {
-		fmt.Printf("window:%v name resolved from window itself %s:\n", window, windowName)
-		return windowName, nil
-	}
-
-	return "", fmt.Errorf("window %v not found in curSessionNamedWindow, window is top-level == %v", window, tree.Parent == X.RootWin())
+	fmt.Printf("window's parent:%v for window:%v not found in curSessionNamedWindow, window is top-level == %v", tree.Parent, window, tree.Parent == X.RootWin())
+	return "", err
 }

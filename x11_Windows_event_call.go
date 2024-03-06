@@ -17,16 +17,7 @@ func registerWindowForEvents(windowId xproto.Window) {
 			deleteWindowFromcurSessionOpenedWindowMap(ev.Window)
 			log.Printf("<========Window %d:%s was destroyed ev.Event:%v========>\n", ev.Window, window.Name, ev.Event)
 		}
-	}).Connect(X, windowId)
-
-	xevent.FocusInFun(func(X *xgbutil.XUtil, ev xevent.FocusInEvent) {
-		fmt.Printf("+++++++Focus in on window %d:%+v\n", ev.Event, curSessionOpenedWindow[ev.Event].Name)
-		app.focusInEventHandler(ev)
-	}).Connect(X, windowId)
-
-	xevent.FocusOutFun(func(X *xgbutil.XUtil, ev xevent.FocusOutEvent) {
-		fmt.Printf("----Focus out on window %d:%+v", ev.Event, curSessionOpenedWindow[ev.Event].Name)
-		app.focusOutEventHandler(ev)
+		xevent.Detach(X, windowId)
 	}).Connect(X, windowId)
 
 	xevent.MapNotifyFun(func(X *xgbutil.XUtil, ev xevent.MapNotifyEvent) {
