@@ -2,6 +2,7 @@ package main
 
 import (
 	"LiScreMon/store"
+	"fmt"
 	"log"
 	"os"
 
@@ -39,24 +40,10 @@ func main() {
 		db: db,
 	}
 
-	if err = xproto.ChangeWindowAttributesChecked(X.Conn(), X.RootWin(), xproto.CwEventMask,
-		[]uint32{
-			xproto.EventMaskFocusChange |
-				// xproto.EventMaskPropertyChange |
-				// xproto.EventMaskLeaveWindow |
-				// xproto.EventMaskEnterWindow |
-				xproto.EventMaskSubstructureNotify}).Check(); err != nil {
-		log.Fatal("Failed to select notify events for root:", err)
-	}
+	setRootEventMask(X)
 
-	xevent.MapNotifyFun(func(X *xgbutil.XUtil, ev xevent.MapNotifyEvent) {
-		rootMapNotifyHandler(X, ev)
-	}).Connect(X, X.RootWin())
-
-	// xevent.PropertyNotifyFun(
-	// 	func(X *xgbutil.XUtil, ev xevent.PropertyNotifyEvent) {
-	// 		rootPropertyNotifyHandler(X, ev)
-	// 	}).Connect(X, X.RootWin())
+	registerRootWindowForEvent(X)
+	
 
 	if windows, err = currentlyOpenedWindows(X); err != nil {
 		log.Fatal(err)
@@ -66,19 +53,22 @@ func main() {
 	for _, window := range windows {
 		name, err := getApplicationName(X, window)
 		if err != nil {
-			log.Printf("getApplicationName error on window %d:%v\n\n", window, err)
-		} else {
-			log.Println(window, "====>", name)
+			log.Printf("getApplicationName error on window %d:%v\n", window, err)
+			continue
 		}
 
-		updateWindowInfo(window, name)
+		log.Println(window, "===========>", name)
+
+		addWindowTocurSessionOpenedWindowMap(window, name)
+		addWindowTocurSessionNamedWindowMap(window, name)
 	}
 
-	if err := SetDefaultFocusWindow(X); err != nil {
+	fmt.Println()
+
+	if err := getInitActiveWindow(X); err != nil {
 		log.Fatal(err)
 	}
 
-	InitMonitoringEvent(X, windows)
-
+	// Start the event loop.
 	xevent.Main(X)
 }
