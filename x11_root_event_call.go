@@ -16,9 +16,21 @@ var (
 
 func registerRootWindowForEvent(X *xgbutil.XUtil) {
 
+	xevent.DestroyNotifyFun(func(xu *xgbutil.XUtil, ev xevent.DestroyNotifyEvent) {
+		if window, ok := curSessionOpenedWindow[ev.Window]; ok {
+			deleteWindowFromcurSessionOpenedWindowMap(ev.Window)
+			log.Printf("ROOT<========Window %d:%s was destroyed ev.Event:%v========>\n", ev.Window, window.Name, ev.Event)
+		}
+		xevent.Detach(X, ev.Window)
+	}).Connect(X, X.RootWin())
+
 	xevent.MapNotifyFun(func(X *xgbutil.XUtil, ev xevent.MapNotifyEvent) {
 		fmt.Printf("\nrootMapNotifyHandler ev.window:%v ======++++++====> ev.event:%v\n", ev.Window, ev.Event)
-		rootMapNotifyHandler(X, ev)
+		app.rootMapNotifyHandler(X, ev)
+	}).Connect(X, X.RootWin())
+
+	xevent.VisibilityNotifyFun(func(xu *xgbutil.XUtil, ev xevent.VisibilityNotifyEvent) {
+		fmt.Printf("\nrootVisibilityNotifyHandler:::window:%v:name-%v got visibility of state--- %v\n", ev.Window, curSessionNamedWindow[ev.Window], ev.State)
 	}).Connect(X, X.RootWin())
 
 	netActiveWindowAtom, err = xprop.Atm(X, "_NET_ACTIVE_WINDOW")
@@ -26,28 +38,21 @@ func registerRootWindowForEvent(X *xgbutil.XUtil) {
 		log.Fatalf("Could not get _NET_ACTIVE_WINDOW atom: %v", err)
 	}
 
-	// attr, err := xproto.GetWindowAttributes(X.Conn(), X.RootWin()).Reply()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// // // Remove the MotionNotify mask
-	// _ = attr.AllEventMasks & ^(uint32)(xproto.EventMaskPropertyChange)
-
 	xevent.PropertyNotifyFun(
 		func(X *xgbutil.XUtil, ev xevent.PropertyNotifyEvent) {
-			fmt.Printf("\nrootPropertyNotifyHandler ev.window:%v ======++++++====> got atom %v, expecting atom %v\n\n", ev.Window, ev.Atom, netActiveWindowAtom)
-			rootPropertyNotifyHandler(X, ev, netActiveWindowAtom)
+			app.rootPropertyNotifyHandler(X, ev, netActiveWindowAtom)
 		}).Connect(X, X.RootWin())
-
 }
 
 func setRootEventMask(X *xgbutil.XUtil) {
 
-	if err = xproto.ChangeWindowAttributesChecked(X.Conn(), X.RootWin(), xproto.CwEventMask,
+	err = xproto.ChangeWindowAttributesChecked(X.Conn(), X.RootWin(), xproto.CwEventMask,
 		[]uint32{
 			xproto.EventMaskPropertyChange |
-				xproto.EventMaskSubstructureNotify}).Check(); err != nil {
+				xproto.EventMaskVisibilityChange |
+				xproto.EventMaskStructureNotify |
+				xproto.EventMaskSubstructureNotify}).Check()
+	if err != nil {
 		log.Fatal("Failed to select notify events for root:", err)
 	}
 

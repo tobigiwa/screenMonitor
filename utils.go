@@ -2,12 +2,27 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"time"
 
 	"github.com/BurntSushi/xgb/xproto"
 	"github.com/BurntSushi/xgbutil"
 	"github.com/BurntSushi/xgbutil/ewmh"
 	"github.com/BurntSushi/xgbutil/xprop"
 )
+
+func InitNetActiveWindow(X *xgbutil.XUtil) error {
+	activeWin, err := ewmh.ActiveWindowGet(X)
+	if err != nil {
+		return err
+	}
+
+	netActiveWindow.WindowID = activeWin
+	netActiveWindow.WindowName = curSessionNamedWindow[activeWin]
+	netActiveWindow.TimeStamp = time.Now()
+
+	return nil
+}
 
 func InitMonitoringEvent(X *xgbutil.XUtil, windowIDs []xproto.Window) {
 	for _, windowId := range windowIDs {
@@ -20,9 +35,8 @@ func currentlyOpenedWindows(X *xgbutil.XUtil) ([]xproto.Window, error) {
 	return ewmh.ClientListGet(X)
 }
 
-// deleteWindowInfo adds to the
+// deleteWindowInfo deletes from the
 /* curSessionOpenedWindow map */
-// and also set Event mask on newly added windows
 func deleteWindowFromcurSessionOpenedWindowMap(win xproto.Window) {
 	delete(curSessionOpenedWindow, win)
 }
@@ -37,10 +51,13 @@ func addWindowTocurSessionOpenedWindowMap(windowID xproto.Window, name string) {
 			Name: name,
 		}
 
-		xproto.ChangeWindowAttributes(X.Conn(), windowID, xproto.CwEventMask,
+		err := xproto.ChangeWindowAttributesChecked(X.Conn(), windowID, xproto.CwEventMask,
 			[]uint32{
-				xproto.EventMaskSubstructureNotify,
-			})
+				xproto.EventMaskVisibilityChange |
+					xproto.EventMaskStructureNotify}).Check()
+		if err != nil {
+			log.Fatalf("Failed to select notify events for window:%v:%v: error: %v", windowID, name, err)
+		}
 
 		registerWindowForEvents(windowID)
 		return
@@ -60,13 +77,17 @@ func addWindowTocurSessionNamedWindowMap(windowID xproto.Window, name string) {
 
 func getWindowClassName(X *xgbutil.XUtil, win xproto.Window) (string, error) {
 
-	var err error
-
-	if wmClass, err := xprop.PropValStrs(xprop.GetProperty(X, win, "WM_CLASS")); err == nil && (len(wmClass) == 2) {
+	wmClass, err1 := xprop.PropValStrs(xprop.GetProperty(X, win, "WM_CLASS"))
+	if err1 == nil && (len(wmClass) == 2) {
 		return wmClass[1], nil
 	}
 
-	return "", err
+	name, err2 := checkQueryTreeForParent(X, win)
+	if err2 == nil {
+		return name, nil
+	}
+
+	return "", fmt.Errorf("error on resolving name for window %d: %v, %w", win, err1, err2)
 }
 
 func checkQueryTreeForParent(X *xgbutil.XUtil, window xproto.Window) (string, error) {
@@ -78,7 +99,7 @@ func checkQueryTreeForParent(X *xgbutil.XUtil, window xproto.Window) (string, er
 
 	if tree, err = xproto.QueryTree(X.Conn(), window).Reply(); err == nil {
 		if parentName, ok := curSessionNamedWindow[tree.Parent]; ok {
-			fmt.Printf("window:%v name resolved from parent %s:\n", window, parentName)
+			fmt.Printf("window:%v name resolved from parent %s\n", window, parentName)
 			return parentName, nil
 		}
 	}

@@ -15,7 +15,7 @@ var (
 	X   *xgbutil.XUtil
 	err error
 
-	windows []xproto.Window
+	windows = make([]xproto.Window, 0, 10)
 
 	app *X11
 )
@@ -63,6 +63,10 @@ func main() {
 	}
 
 	fmt.Println()
+
+	if err := InitNetActiveWindow(X); err != nil {
+		log.Fatal("cannot get InitACtive window", err)
+	}
 
 	// Start the event loop.
 	xevent.Main(X)

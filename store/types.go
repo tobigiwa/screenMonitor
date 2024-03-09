@@ -26,19 +26,19 @@ type appInfo struct {
 	AppName           string
 	Icon              []byte
 	ActiveScreenStats dailyAppScreenTime
-	PasiveScreenStats dailyAppScreenTime
+	PassiveScreenStats dailyAppScreenTime
 }
 
-func (ap appInfo) serialize(data appInfo) ([]byte, error) {
+func (ap *appInfo) serialize() ([]byte, error) {
 	var res bytes.Buffer
 	encoded := gob.NewEncoder(&res)
-	if err := encoded.Encode(data); err != nil {
+	if err := encoded.Encode(ap); err != nil {
 		return nil, fmt.Errorf("%v:%w", err, ErrSerilization)
 	}
 	return res.Bytes(), nil
 }
 
-func (ap *appInfo) derialize(data []byte) error {
+func (ap *appInfo) deserialize(data []byte) error {
 	decoded := gob.NewDecoder(bytes.NewReader(data))
 	if err := decoded.Decode(ap); err != nil {
 		return fmt.Errorf("%v:%w", err, ErrDeserilization)

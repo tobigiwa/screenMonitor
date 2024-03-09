@@ -3,6 +3,7 @@ package main
 import (
 	"LiScreMon/store"
 	"sync"
+	"time"
 
 	"github.com/BurntSushi/xgb/xproto"
 )
@@ -28,6 +29,15 @@ type WindowInfo struct {
 	ID   xproto.Window
 	Name string
 }
+
+type netActiveWindowInfo struct {
+	WindowID   xproto.Window
+	WindowName string
+	TimeStamp  time.Time
+	DoNotCopy
+}
+
+var netActiveWindow = &netActiveWindowInfo{}
 
 type DoNotCopy [0]sync.Mutex
 
