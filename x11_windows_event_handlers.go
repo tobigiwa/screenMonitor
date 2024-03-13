@@ -21,7 +21,7 @@ func (x11 *X11) windowMapNotifyHandler(X *xgbutil.XUtil, ev xevent.MapNotifyEven
 		return
 	}
 
-	if name, err = getWindowClassName(X, ev.Window); err != nil {
+	if name, err = getWindowClassName(X, ev.Window); err != nil && (name != ""){
 		fmt.Printf("getWindowClassName:error on window %d:\n %v\n", ev.Window, err)
 		name = "name-not-found"
 	}

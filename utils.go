@@ -53,8 +53,8 @@ func addWindowTocurSessionOpenedWindowMap(windowID xproto.Window, name string) {
 
 		err := xproto.ChangeWindowAttributesChecked(X.Conn(), windowID, xproto.CwEventMask,
 			[]uint32{
-				xproto.EventMaskVisibilityChange |
-					xproto.EventMaskStructureNotify}).Check()
+				xproto.EventMaskStructureNotify |
+					xproto.EventMaskSubstructureNotify}).Check()
 		if err != nil {
 			log.Fatalf("Failed to select notify events for window:%v:%v: error: %v", windowID, name, err)
 		}
@@ -83,7 +83,7 @@ func getWindowClassName(X *xgbutil.XUtil, win xproto.Window) (string, error) {
 	}
 
 	name, err2 := checkQueryTreeForParent(X, win)
-	if err2 == nil {
+	if err2 == nil && (name != "") {
 		return name, nil
 	}
 
@@ -98,12 +98,27 @@ func checkQueryTreeForParent(X *xgbutil.XUtil, window xproto.Window) (string, er
 	)
 
 	if tree, err = xproto.QueryTree(X.Conn(), window).Reply(); err == nil {
-		if parentName, ok := curSessionNamedWindow[tree.Parent]; ok {
-			fmt.Printf("window:%v name resolved from parent %s\n", window, parentName)
+		if parentName, ok := curSessionNamedWindow[tree.Parent]; ok && (tree.Parent != tree.Root) { // root would'nt have been added to curSessionNamedWindow
 			return parentName, nil
 		}
-	}
 
-	fmt.Printf("window's parent:%v for window:%v not found in curSessionNamedWindow, window is top-level == %v", tree.Parent, window, tree.Parent == X.RootWin())
+		ChildrenLen := len(tree.Children)
+		for i := 0; i < ChildrenLen; i++ {
+			if childName, ok := curSessionNamedWindow[tree.Children[i]]; ok { // noticed this behavior from vscode
+				return childName, nil
+			}
+
+		}
+	}
 	return "", err
 }
+
+func WmTransientForGet(xu *xgbutil.XUtil, win xproto.Window) (xproto.Window, error) {
+	raw, err := xprop.GetProperty(xu, win, "WM_TRANSIENT_FOR")
+	if err != nil {
+		return 0, err
+	}
+	return xprop.PropValWindow(raw, err)
+}
+
+
