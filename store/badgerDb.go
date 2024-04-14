@@ -3,8 +3,13 @@ package store
 import (
 	"errors"
 	"fmt"
+	"log"
+	"math"
+	"strings"
 
 	badger "github.com/dgraph-io/badger/v4"
+	ui "github.com/gizak/termui/v3"
+	"github.com/gizak/termui/v3/widgets"
 )
 
 type BadgerDBStore struct {
@@ -157,6 +162,141 @@ func (bs *BadgerDBStore) BatchWriteUsage(data []ScreenTime) error {
 	}
 
 	return wb.Flush()
+}
+
+func (bs *BadgerDBStore) ReadAll() error {
+
+	c := map[string]float64{}
+	err := bs.db.View(func(txn *badger.Txn) error {
+		opts := badger.DefaultIteratorOptions
+		opts.PrefetchValues = true
+		opts.PrefetchSize = 10
+		it := txn.NewIterator(opts)
+		defer it.Close()
+		for it.Rewind(); it.Valid(); it.Next() {
+			item := it.Item()
+			// k := item.Key()
+			err := item.Value(func(v []byte) error {
+				// fmt.Printf("key=%s\n", string(k))
+				var app appInfo
+				if err := app.deserialize(v); err != nil {
+					return err
+				}
+				// fmt.Printf("value=%+v\n\n", app)
+				for key, value := range app.ActiveScreenStats {
+					c[key] += value
+				}
+
+				return nil
+			})
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+	fmt.Printf("c=%+v\n", c)
+	barChat(c)
+	return err
+}
+
+// func barChat(src map[string]float64) {
+// 	if err := ui.Init(); err != nil {
+// 		log.Fatalf("failed to initialize termui: %v", err)
+// 	}
+// 	defer ui.Close()
+
+// 	var (
+// 		labels = make([]string, 0, len(src))
+// 		data   = make([]float64, 0, len(src))
+// 	)
+
+// 	for key, value := range src {
+// 		form := ParseKey(key)
+// 		labels = append(labels, fmt.Sprintf("%s %d %s", ShortenDay(form.Weekday()), form.Day(), form.Month()))
+// 		data = append(data, value)
+
+// 	}
+
+// 	bc := widgets.NewBarChart()
+// 	bc.Data = data
+// 	bc.Labels = labels
+// 	bc.Title = "Bar Chart"
+// 	bc.SetRect(5, 5, 100, 25)
+// 	bc.BarWidth = 5
+// 	bc.BarColors = []ui.Color{ui.ColorRed, ui.ColorGreen}
+// 	bc.LabelStyles = []ui.Style{ui.NewStyle(ui.ColorBlue)}
+// 	bc.NumStyles = []ui.Style{ui.NewStyle(ui.ColorYellow)}
+
+// 	ui.Render(bc)
+
+// 	uiEvents := ui.PollEvents()
+// 	for {
+// 		e := <-uiEvents
+// 		switch e.ID {
+// 		case "q", "<C-c>":
+// 			return
+// 		}
+// 	}
+// }
+
+func barChat(src map[string]float64) {
+	if err := ui.Init(); err != nil {
+		log.Fatalf("failed to initialize termui: %v", err)
+	}
+	defer ui.Close()
+
+	var (
+		labels = make([]string, 0, len(src))
+		data   = make([]float64, 0, len(src))
+	)
+
+	for key, value := range src {
+		form := ParseKey(key)
+		// Split labels into multiple lines
+		label := fmt.Sprintf("%s %d %s", ShortenDay(form.Weekday()), form.Day(), form.Month())
+		label = strings.ReplaceAll(label, " ", "\n")
+		labels = append(labels, label)
+		data = append(data, value)
+	}
+
+	bc := widgets.NewBarChart()
+	bc.Border = true
+	bc.BorderStyle = ui.NewStyle(ui.ColorCyan)
+	bc.Data = data
+	bc.Labels = labels
+	bc.Title = "Bar Chart"
+	bc.TitleStyle.Bg = ui.ColorBlue
+	bc.SetRect(5, 5, 100, 25)
+	bc.BarWidth = 7
+	bc.BarGap = 2
+	bc.BarColors = []ui.Color{ui.ColorBlue, ui.ColorYellow}
+	bc.LabelStyles = []ui.Style{ui.NewStyle(ui.ColorCyan)}
+	bc.NumStyles = []ui.Style{ui.NewStyle(ui.ColorBlack)}
+	bc.NumFormatter = func(n float64) string {
+		return fmt.Sprintf("%.1f", roundTo1DP(n))
+	}
+
+	// Create a Paragraph widget for y-axis labels
+	p := widgets.NewParagraph()
+	p.Title = "Y-axis"
+	p.Text = "0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10"
+	p.SetRect(0, 20, 5, 25)
+
+	ui.Render(bc, p)
+
+	uiEvents := ui.PollEvents()
+	for {
+		e := <-uiEvents
+		switch e.ID {
+		case "q", "<C-c>":
+			return
+		}
+	}
+}
+
+func roundTo1DP(n float64) float64 {
+	return math.Round(n*10) / 10
 }
 
 // func (bs *BadgerDBStore) WriteUsage(data []ScreenTime) error {

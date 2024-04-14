@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/BurntSushi/xgb/xproto"
 	"github.com/BurntSushi/xgbutil"
@@ -39,6 +41,16 @@ func main() {
 	app = &X11{
 		db: db,
 	}
+
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	
+	go func() {
+		<-sigs
+		app.db.ReadAll()
+		xevent.Quit(X)
+		os.Exit(0)
+	}()
 
 	setRootEventMask(X)
 
