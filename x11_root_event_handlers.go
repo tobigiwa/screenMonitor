@@ -49,7 +49,7 @@ func (x11 *X11) rootPropertyNotifyHandler(X *xgbutil.XUtil, ev xevent.PropertyNo
 					Interval: store.TimeInterval{Start: formerActiveWindow.TimeStamp, End: time.Now()},
 				}
 
-				fmt.Printf("New active window ID =====> %v:%v:%v\n", currActiveWindow, curSessionNamedWindow[currActiveWindow])
+				fmt.Printf("New active window ID =====> %v:%v\n", currActiveWindow, curSessionNamedWindow[currActiveWindow])
 				fmt.Printf("time elapsed for last window %v:%v was %v in minutes and %v in seconds \n", formerActiveWindow.WindowID, curSessionNamedWindow[formerActiveWindow.WindowID], time.Since(netActiveWindow.TimeStamp).Minutes(), time.Since(netActiveWindow.TimeStamp).Seconds())
 
 				var ok bool
