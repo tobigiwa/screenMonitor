@@ -1,6 +1,5 @@
 package store
 
-type Repository interface {
+type IRepository interface {
 	WriteUsage(data ScreenTime) error
-	ReadAll() error
 }

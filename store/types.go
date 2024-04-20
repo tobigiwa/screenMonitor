@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/gob"
 	"fmt"
+	"time"
 )
 
 type ScreenType string
@@ -15,18 +16,33 @@ const (
 
 // ScreenTime represents the time spent on a particular app.
 type ScreenTime struct {
-	AppName string
-	Type    ScreenType
-	Time    float64
+	AppName  string
+	Type     ScreenType
+	Duration float64
+	Interval TimeInterval
 }
 
-type dailyAppScreenTime map[string]float64
+type date string
+
+type dailyAppScreenTime map[date]stats
+
+type TimeInterval struct {
+	Start time.Time
+	End   time.Time
+}
+
+type stats struct {
+	Active         float64
+	Open           float64
+	Inactive       float64
+	ActiveTimeData []TimeInterval
+}
 
 type appInfo struct {
-	AppName           string
-	Icon              []byte
-	ActiveScreenStats dailyAppScreenTime
-	PassiveScreenStats dailyAppScreenTime
+	AppName    string
+	Icon       []byte
+	Category   string
+	ScreenStat dailyAppScreenTime
 }
 
 func (ap *appInfo) serialize() ([]byte, error) {

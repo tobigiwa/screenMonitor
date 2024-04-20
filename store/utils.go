@@ -5,10 +5,10 @@ import (
 	"time"
 )
 
-func Key() string {
+func Key() date {
 	now := time.Now()
 	day, month, year := now.Day(), now.Month(), time.Now().Year()
-	return fmt.Sprintf("%d:%d:%d", day, month, year)
+	return date(fmt.Sprintf("%d:%d:%d", day, month, year))
 }
 func ParseKey(key string) time.Time {
 	a, _ := time.Parse("2:1:2006", key)

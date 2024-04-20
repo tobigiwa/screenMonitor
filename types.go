@@ -21,7 +21,8 @@ var (
 
 	// curSessionNamedWindow is a map of all current session "named" windows.
 	// An X session is typically a time between login and logout (or restart/shutdown).
-	// Only windows with knowm WM_CLASS are added to this map.
+	// Only windows with knowm WM_CLASS are added to this map. The X_ID are always unique
+	// for a particular window in each session.
 	curSessionNamedWindow = make(map[xproto.Window]string)
 )
 
@@ -42,5 +43,5 @@ var netActiveWindow = &netActiveWindowInfo{}
 type DoNotCopy [0]sync.Mutex
 
 type X11 struct {
-	db store.Repository
+	db store.IRepository
 }
