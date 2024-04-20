@@ -13,7 +13,7 @@ import (
 
 var ()
 
-func registerRootWindowForEvent(X *xgbutil.XUtil) {
+func registerRootWindowForEvents(X *xgbutil.XUtil) {
 
 	xevent.DestroyNotifyFun(destroyNotifyEventFuncRoot).Connect(X, X.RootWin())
 
@@ -22,11 +22,8 @@ func registerRootWindowForEvent(X *xgbutil.XUtil) {
 	xevent.PropertyNotifyFun(propertyNotifyEventFuncRoot).Connect(X, X.RootWin())
 }
 func destroyNotifyEventFuncRoot(xu *xgbutil.XUtil, ev xevent.DestroyNotifyEvent) {
-	if window, ok := curSessionOpenedWindow[ev.Window]; ok {
-		deleteWindowFromcurSessionOpenedWindowMap(ev.Window)
-		log.Printf("ROOT<========Window %d:%s WAS DESTROYED!!! ev.Event:%v========>\n", ev.Window, window.Name, ev.Event)
-		xevent.Detach(X, ev.Window)
-	}
+	log.Printf("ROOT<========Window %d:%s WAS DESTROYED!!! ev.Event:%v========>\n", ev.Window, curSessionNamedWindow[ev.Window], ev.Event)
+	xevent.Detach(X, ev.Window)
 }
 
 func propertyNotifyEventFuncRoot(X *xgbutil.XUtil, ev xevent.PropertyNotifyEvent) {
@@ -60,7 +57,7 @@ func mapNotifyEventFuncRoot(X *xgbutil.XUtil, ev xevent.MapNotifyEvent) {
 }
 
 func setRootEventMask(X *xgbutil.XUtil) {
-	err = xproto.ChangeWindowAttributesChecked(X.Conn(), X.RootWin(), xproto.CwEventMask,
+	err := xproto.ChangeWindowAttributesChecked(X.Conn(), X.RootWin(), xproto.CwEventMask,
 		[]uint32{
 			xproto.EventMaskPropertyChange |
 				xproto.EventMaskSubstructureNotify}).Check()

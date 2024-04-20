@@ -13,15 +13,10 @@ import (
 )
 
 func (x11 *X11) rootMapNotifyHandler(X *xgbutil.XUtil, ev xevent.MapNotifyEvent) {
-	if name, ok := curSessionNamedWindow[ev.Window]; ok {
-		addWindowTocurSessionOpenedWindowMap(ev.Window, name)
-		return
-	}
 
 	name, _ := getWindowClassName(X, ev.Window)
 
 	if name != "" {
-		addWindowTocurSessionOpenedWindowMap(ev.Window, name)
 		addWindowTocurSessionNamedWindowMap(ev.Window, name)
 	}
 }
@@ -54,7 +49,7 @@ func (x11 *X11) rootPropertyNotifyHandler(X *xgbutil.XUtil, ev xevent.PropertyNo
 					Interval: store.TimeInterval{Start: formerActiveWindow.TimeStamp, End: time.Now()},
 				}
 
-				fmt.Printf("New active window ID =====> %v:%v:%v\n", currActiveWindow, curSessionNamedWindow[currActiveWindow], curSessionOpenedWindow[currActiveWindow].Name)
+				fmt.Printf("New active window ID =====> %v:%v:%v\n", currActiveWindow, curSessionNamedWindow[currActiveWindow])
 				fmt.Printf("time elapsed for last window %v:%v was %v in minutes and %v in seconds \n", formerActiveWindow.WindowID, curSessionNamedWindow[formerActiveWindow.WindowID], time.Since(netActiveWindow.TimeStamp).Minutes(), time.Since(netActiveWindow.TimeStamp).Seconds())
 
 				var ok bool
@@ -67,7 +62,6 @@ func (x11 *X11) rootPropertyNotifyHandler(X *xgbutil.XUtil, ev xevent.PropertyNo
 					// The reason for this is because, this https://tronche.com/gui/x/icccm/sec-4.html#:~:text=It%20is%20important%20not,the%20window%20is%20mapped. might not be
 					// adhered to by all applications. So, we are sure it can steal focus, so we include it.
 					curSessionNamedWindow[currActiveWindow] = netActiveWindow.WindowName
-					curSessionOpenedWindow[currActiveWindow] = WindowInfo{Name: netActiveWindow.WindowName, ID: currActiveWindow}
 				}
 
 				if s.AppName != "" { // like mentioned earlier, if we don't have a name, lost metric

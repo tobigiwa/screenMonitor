@@ -11,7 +11,7 @@ import (
 	"github.com/BurntSushi/xgbutil/xprop"
 )
 
-func registerWindowForEvents(windowId xproto.Window) {
+func registerWindow(windowId xproto.Window) {
 
 	xevent.DestroyNotifyFun(destroyNotifyEventFuncWindow).Connect(X, windowId)
 
@@ -19,11 +19,8 @@ func registerWindowForEvents(windowId xproto.Window) {
 }
 
 func destroyNotifyEventFuncWindow(xu *xgbutil.XUtil, ev xevent.DestroyNotifyEvent) {
-	if window, ok := curSessionOpenedWindow[ev.Window]; ok {
-		deleteWindowFromcurSessionOpenedWindowMap(ev.Window)
-		log.Printf("WINDOW<========Window %d:%s WAS DESTROYED!!! ev.Event:%v========>\n", ev.Window, window.Name, ev.Event)
-		xevent.Detach(X, ev.Window)
-	}
+	log.Printf("WINDOW<========Window %d:%s WAS DESTROYED!!! ev.Event:%v========>\n", ev.Window, curSessionNamedWindow[ev.Window], ev.Event)
+	xevent.Detach(X, ev.Window)
 }
 
 func mapNotifyEventFuncWindow(X *xgbutil.XUtil, ev xevent.MapNotifyEvent) {

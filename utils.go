@@ -12,7 +12,7 @@ import (
 
 func InitMonitoringEvent(X *xgbutil.XUtil, windowIDs []xproto.Window) {
 	for _, windowId := range windowIDs {
-		registerWindowForEvents(windowId)
+		registerWindow(windowId)
 	}
 }
 
@@ -21,32 +21,18 @@ func currentlyOpenedWindows(X *xgbutil.XUtil) ([]xproto.Window, error) {
 	return ewmh.ClientListGet(X)
 }
 
-// deleteWindowInfo deletes window X_ID from the
-/* curSessionOpenedWindow map */
-func deleteWindowFromcurSessionOpenedWindowMap(win xproto.Window) {
-	delete(curSessionOpenedWindow, win)
-}
-
 // addWindowTocurSessionOpenedWindowMap adds to the
 /* curSessionOpenedWindow map */
 // set Event mask on newly added windows and register them for events.
-func addWindowTocurSessionOpenedWindowMap(windowID xproto.Window, name string) {
-	if _, exists := curSessionOpenedWindow[windowID]; !exists {
-		curSessionOpenedWindow[windowID] = WindowInfo{
-			ID:   windowID,
-			Name: name,
-		}
-
-		err := xproto.ChangeWindowAttributesChecked(X.Conn(), windowID, xproto.CwEventMask,
-			[]uint32{
-				xproto.EventMaskStructureNotify}).Check()
-		if err != nil {
-			log.Fatalf("Failed to select notify events for window:%v:%v: error: %v", windowID, name, err)
-		}
-
-		registerWindowForEvents(windowID)
-		return
+func registerWindowForEvents(windowID xproto.Window, name string) {
+	err := xproto.ChangeWindowAttributesChecked(X.Conn(), windowID, xproto.CwEventMask,
+		[]uint32{
+			xproto.EventMaskStructureNotify}).Check()
+	if err != nil {
+		log.Fatalf("Failed to select notify events for window:%v:%v: error: %v", windowID, name, err)
 	}
+
+	registerWindow(windowID)
 }
 
 // addWindowTocurSessionNamedWindowMap adds to the

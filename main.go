@@ -15,32 +15,29 @@ import (
 )
 
 var (
-	X   *xgbutil.XUtil
-	err error
-
-	windows = make([]xproto.Window, 0, 10)
-
+	X                     *xgbutil.XUtil
+	windows               = make([]xproto.Window, 0, 10)
 	netActiveWindowAtom   xproto.Atom
 	netClientStackingAtom xproto.Atom
-
-	app *X11
+	netActiveWindow       = &netActiveWindowInfo{}
+	app                   *X11
 )
 
 func main() {
 
 	path, err := os.UserHomeDir()
 	if err != nil {
-		log.Fatal(err) // fail
+		log.Fatal(err) // exit
 	}
 
 	dirPath := path + "/liScreMon"
 	if err := os.MkdirAll(dirPath, 0755); err != nil {
-		log.Fatal(err) // fail
+		log.Fatal(err) // exit
 	}
 
 	logFile, err := os.OpenFile(dirPath+"/log.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		log.Fatal(err) // fail
+		log.Fatal(err) // exit
 	}
 	defer logFile.Close()
 
@@ -60,7 +57,6 @@ func main() {
 	}
 
 	// X server connection
-
 	for {
 		if X, err = xgbutil.NewConn(); err != nil { // we wait till we connect to X server
 			log.Println(err)
@@ -87,7 +83,7 @@ func main() {
 
 	setRootEventMask(X)
 
-	registerRootWindowForEvent(X)
+	registerRootWindowForEvents(X)
 
 	if windows, err = currentlyOpenedWindows(X); err != nil {
 		log.Fatal(err)
@@ -97,13 +93,11 @@ func main() {
 	for _, window := range windows {
 		name, err := getWindowClassName(X, window)
 		if err != nil {
-			log.Printf("getWindowClassName error on window %d:%v\n", window, err)
 			continue
 		}
-
 		log.Println(window, "===========>", name)
 
-		addWindowTocurSessionOpenedWindowMap(window, name)
+		registerWindowForEvents(window, name)
 		addWindowTocurSessionNamedWindowMap(window, name)
 	}
 
