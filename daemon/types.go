@@ -1,7 +1,7 @@
-package main
+package daemon
 
 import (
-	"LiScreMon/store"
+	"LiScreMon/daemon/store"
 	"sync"
 	"time"
 

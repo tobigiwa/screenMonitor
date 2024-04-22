@@ -1,4 +1,4 @@
-package main
+package daemon
 
 import (
 	"fmt"
@@ -42,7 +42,6 @@ func mapNotifyEventFuncRoot(X *xgbutil.XUtil, ev xevent.MapNotifyEvent) {
 	}
 
 	if windowTypes, err := ewmh.WmWindowTypeGet(X, ev.Window); err == nil || len(windowTypes) >= 1 {
-		fmt.Printf("\nlen of window type is %d and are %v:%v\n\n", len(windowTypes), windowTypes, ev.Window)
 		for i := 0; i < len(windowTypes); i++ {
 			if windowTypes[i] == "_NET_WM_WINDOW_TYPE_NORMAL" {
 				// _NET_WM_WINDOW_TYPE_NORMAL indicates that this is a normal, top-level window, either managed or override-redirect.

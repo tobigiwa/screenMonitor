@@ -27,44 +27,10 @@ func (bs *BadgerDBStore) Close() error {
 	return bs.db.Close()
 }
 
-func (bs *BadgerDBStore) get(key string) ([]byte, error) {
-	var (
-		valCopy []byte
-		err     error
-	)
-	err = bs.db.View(func(txn *badger.Txn) error {
-		item, err := txn.Get([]byte(key))
-		if err != nil {
-			return err
-		}
-		valCopy, err = item.ValueCopy(nil)
-		if err != nil {
-			return err
-		}
-		return nil
-	})
-	return valCopy, err
-}
-
-func (bs *BadgerDBStore) set(key, value []byte) error {
-	return bs.db.Update(
-		func(txn *badger.Txn) error {
-			return txn.Set([]byte(key), []byte(value))
-		})
-}
-
-func (bs *BadgerDBStore) delete(key string) error {
-	return bs.db.Update(
-		func(txn *badger.Txn) error {
-			return txn.Delete([]byte(key))
-		})
-}
-
 func (bs *BadgerDBStore) WriteUsage(data ScreenTime) error {
 	return bs.db.Update(func(txn *badger.Txn) error {
 
-		item, err := txn.Get([]byte(data.AppName))
-
+		item, err := txn.Get(dbAppKey(data.AppName))
 		var (
 			newApp  bool
 			appInfo appInfo
@@ -76,9 +42,16 @@ func (bs *BadgerDBStore) WriteUsage(data ScreenTime) error {
 		}
 
 		if newApp {
-			fmt.Printf("new app :%v\n\n", data.AppName)
 			appInfo.AppName = data.AppName
 			appInfo.ScreenStat = make(dailyAppScreenTime)
+			if icon, err := GetWmIcon(data.WindowID); err == nil {
+				appInfo.Icon = icon
+				appInfo.IsIconSet = true
+			}
+			if categories, err := getDesktopCategory(data.AppName); err == nil {
+				appInfo.DesktopCategories = categories
+				appInfo.IsCategorySet = true
+			}
 		}
 
 		if err == nil && !newApp {
@@ -92,6 +65,21 @@ func (bs *BadgerDBStore) WriteUsage(data ScreenTime) error {
 
 			if data.AppName != appInfo.AppName {
 				return ErrAppKeyMismatch
+			}
+
+			if !appInfo.IsIconSet {
+				if icon, err := GetWmIcon(data.WindowID); err == nil {
+					appInfo.Icon = icon
+					appInfo.IsIconSet = true
+				}
+			}
+
+			if !appInfo.IsCategorySet {
+				if categories, err := getDesktopCategory(data.AppName); err == nil {
+					appInfo.DesktopCategories = categories
+					appInfo.IsCategorySet = true
+				}
+
 			}
 			fmt.Printf("existing appName:%v, time so far is: %v:%v\n\n", data.AppName, appInfo.ScreenStat[Key()].Active, appInfo.ScreenStat[Key()].Open)
 		}
@@ -114,6 +102,50 @@ func (bs *BadgerDBStore) WriteUsage(data ScreenTime) error {
 
 		return txn.Set([]byte(data.AppName), byteData)
 	})
+}
+
+func dbAppKey(appName string) []byte {
+	return []byte(fmt.Sprintf("app:%v", appName))
+}
+
+func getAppPrefix() []byte {
+	return []byte("app:")
+}
+
+func (bs *BadgerDBStore) ReadAll() error {
+
+	keeper := make([]appInfo, 0, 30)
+	err := bs.db.View(func(txn *badger.Txn) error {
+		opts := badger.DefaultIteratorOptions
+		opts.PrefetchValues = true
+		opts.PrefetchSize = 10
+		it := txn.NewIterator(opts)
+		defer it.Close()
+
+		prefix := getAppPrefix()
+		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
+
+			err := it.Item().Value(func(v []byte) error {
+				var app appInfo
+				if err := app.deserialize(v); err != nil {
+					return err
+				}
+				keeper = append(keeper, app)
+				return nil
+			})
+
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+
+	for i := 0; i < len(keeper); i++ {
+		s := keeper[i]
+		fmt.Println(s.AppName, s.ScreenStat[Key()].Active)
+	}
+	return err
 }
 
 func (bs *BadgerDBStore) BatchWriteUsage(data []ScreenTime) error {
@@ -171,41 +203,6 @@ func (bs *BadgerDBStore) BatchWriteUsage(data []ScreenTime) error {
 
 	return wb.Flush()
 }
-
-// func (bs *BadgerDBStore) ReadAll() error {
-
-// 	c := map[date]float64{}
-// 	err := bs.db.View(func(txn *badger.Txn) error {
-// 		opts := badger.DefaultIteratorOptions
-// 		opts.PrefetchValues = true
-// 		opts.PrefetchSize = 10
-// 		it := txn.NewIterator(opts)
-// 		defer it.Close()
-// 		for it.Rewind(); it.Valid(); it.Next() {
-// 			item := it.Item()
-// 			// k := item.Key()
-// 			err := item.Value(func(v []byte) error {
-// 				// fmt.Printf("key=%s\n", string(k))
-// 				var app appInfo
-// 				if err := app.deserialize(v); err != nil {
-// 					return err
-// 				}
-// 				// fmt.Printf("value=%+v\n\n", app)
-// 				for key, value := range app.ScreenStat {
-// 					c[key] += value
-// 				}
-
-// 				return nil
-// 			})
-// 			if err != nil {
-// 				return err
-// 			}
-// 		}
-// 		return nil
-// 	})
-// 	fmt.Printf("c=%+v\n", c)
-// 	return err
-// }
 
 // func (bs *BadgerDBStore) WriteUsage(data []ScreenTime) error {
 //     // Group data by app name.
