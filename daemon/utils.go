@@ -1,9 +1,8 @@
-package main
+package daemon
 
 import (
 	"fmt"
 	"log"
-	"time"
 
 	"github.com/BurntSushi/xgb/xproto"
 	"github.com/BurntSushi/xgbutil"
@@ -11,57 +10,30 @@ import (
 	"github.com/BurntSushi/xgbutil/xprop"
 )
 
-func InitNetActiveWindow(X *xgbutil.XUtil) error {
-	activeWin, err := ewmh.ActiveWindowGet(X)
-	if err != nil {
-		return err
-	}
-
-	netActiveWindow.WindowID = activeWin
-	netActiveWindow.WindowName = curSessionNamedWindow[activeWin]
-	netActiveWindow.TimeStamp = time.Now()
-
-	return nil
-}
-
-func InitMonitoringEvent(X *xgbutil.XUtil, windowIDs []xproto.Window) {
-	for _, windowId := range windowIDs {
-		registerWindowForEvents(windowId)
-	}
-}
-
 // currentlyOpenedWindows returns a list of all top-level windows.
 func currentlyOpenedWindows(X *xgbutil.XUtil) ([]xproto.Window, error) {
 	return ewmh.ClientListGet(X)
 }
 
-// deleteWindowInfo deletes from the
-/* curSessionOpenedWindow map */
-func deleteWindowFromcurSessionOpenedWindowMap(win xproto.Window) {
-	delete(curSessionOpenedWindow, win)
+func setRootEventMask(X *xgbutil.XUtil) {
+	err := xproto.ChangeWindowAttributesChecked(X.Conn(), X.RootWin(), xproto.CwEventMask,
+		[]uint32{
+			xproto.EventMaskPropertyChange |
+				xproto.EventMaskSubstructureNotify}).Check()
+	if err != nil {
+		log.Fatal("Failed to select notify events for root:", err)
+	}
 }
 
-// addWindowTocurSessionOpenedWindowMap adds to the
-/* curSessionOpenedWindow map */
-// set Event mask on newly added windows and register them for events.
-func addWindowTocurSessionOpenedWindowMap(windowID xproto.Window, name string) {
-	if _, exists := curSessionOpenedWindow[windowID]; !exists {
-		curSessionOpenedWindow[windowID] = WindowInfo{
-			ID:   windowID,
-			Name: name,
-		}
-
-		err := xproto.ChangeWindowAttributesChecked(X.Conn(), windowID, xproto.CwEventMask,
-			[]uint32{
-				xproto.EventMaskStructureNotify |
-					xproto.EventMaskSubstructureNotify}).Check()
-		if err != nil {
-			log.Fatalf("Failed to select notify events for window:%v:%v: error: %v", windowID, name, err)
-		}
-
-		registerWindowForEvents(windowID)
-		return
+func registerWindowForEvents(windowID xproto.Window) {
+	err := xproto.ChangeWindowAttributesChecked(X.Conn(), windowID, xproto.CwEventMask,
+		[]uint32{
+			xproto.EventMaskStructureNotify}).Check()
+	if err != nil {
+		log.Fatalf("Failed to select notify events for window:%v, error: %v", windowID, err)
 	}
+
+	registerWindow(windowID)
 }
 
 // addWindowTocurSessionNamedWindowMap adds to the
@@ -107,18 +79,25 @@ func checkQueryTreeForParent(X *xgbutil.XUtil, window xproto.Window) (string, er
 			if childName, ok := curSessionNamedWindow[tree.Children[i]]; ok { // noticed this behavior from vscode
 				return childName, nil
 			}
-
 		}
 	}
 	return "", err
 }
 
-func WmTransientForGet(xu *xgbutil.XUtil, win xproto.Window) (xproto.Window, error) {
-	raw, err := xprop.GetProperty(xu, win, "WM_TRANSIENT_FOR")
+// needeAtom returns atom in the following other
+//
+// index 0: _NET_ACTIVE_WINDOW
+//
+// index 1: _NET_CLIENT_LIST_STACKING
+func neededAtom() []xproto.Atom {
+	netActiveWindowAtom, err := xprop.Atm(X, "_NET_ACTIVE_WINDOW")
 	if err != nil {
-		return 0, err
+		log.Fatalf("Could not get _NET_ACTIVE_WINDOW atom: %v", err)
 	}
-	return xprop.PropValWindow(raw, err)
+	netClientStackingAtom, err := xprop.Atm(X, "_NET_CLIENT_LIST_STACKING")
+	if err != nil {
+		log.Fatalf("Could not get _NET_CLIENT_LIST_STACKING atom: %v", err)
+	}
+
+	return []xproto.Atom{netActiveWindowAtom, netClientStackingAtom}
 }
-
-

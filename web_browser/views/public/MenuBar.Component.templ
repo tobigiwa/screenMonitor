@@ -1,0 +1,127 @@
+package publiccomponent
+
+templ MenuBar() {
+	<div class="menu-bar">
+		@animation()
+		@navBar()
+	</div>
+}
+
+templ animation() {
+	<div class="hold-animation">
+		<div class="wrapper-animation">
+			<div class="animation" id="lottie-animation"></div>
+		</div>
+		<div class="quote">
+			<p>'If You Can't Measure It, You Can't Manage It'</p>
+		</div>
+	</div>
+}
+
+templ navBar() {
+	<div class="nav-bar">
+		<!-- <div class="triangle"></div> -->
+		<nav>
+			<ul>
+				<li class="wide">
+					<a href="#" class="links" tabindex="0">
+						<img
+							src="assets/svg/no_1.svg"
+							class="icon"
+						/>Screentime
+					</a>
+				</li>
+				<li class="wide">
+					<a href="#" class="links wide" tabindex="0">
+						<img
+							src="assets/svg/no_2.svg"
+							class="icon"
+						/>Focus
+					</a>
+				</li>
+				<li class="wide">
+					<a href="#" class="links wide" tabindex="0">
+						<img
+							src="assets/svg/no_3.svg"
+							class="icon"
+						/>Stats
+					</a>
+				</li>
+				<li class="wide">
+					<a href="#" class="links wide" tabindex="0">
+						<img
+							src="assets/svg/no_4.svg"
+							class="icon"
+						/>Memories
+					</a>
+				</li>
+				<li class="hidden">
+					<a href="#" class="links" tabindex="0">
+						<img
+							src="assets/svg/no_5_settings.svg"
+							class="icon"
+						/>Settings
+					</a>
+				</li>
+				<li class="hidden">
+					<a href="#" class="links" tabindex="0">
+						<img
+							src="assets/svg/no_6_logout.svg"
+							class="icon"
+						/>Logout
+					</a>
+				</li>
+				<li class="narrow" title="Screentime">
+					<a href="#" class="links" tabindex="0">
+						<img
+							src="assets/svg/no_1.svg"
+							class="icon"
+						/>
+					</a>
+				</li>
+				<li class="narrow" title="Focus">
+					<a href="#" class="links" tabindex="0">
+						<img
+							src="assets/svg/no_2.svg"
+							class="icon"
+						/>
+					</a>
+				</li>
+				<li class="narrow" title="Stats">
+					<a href="#" class="links" tabindex="0">
+						<img
+							src="assets/svg/no_3.svg"
+							class="icon"
+						/>
+					</a>
+				</li>
+				<li class="narrow" title="Memories">
+					<a href="#" class="links" tabindex="0">
+						<img
+							src="assets/svg/no_4.svg"
+							class="icon"
+						/>
+					</a>
+				</li>
+				<li class="narrow" title="Settings">
+					<a href="#" class="links" tabindex="0">
+						<img
+							src="assets/svg/no_5_settings.svg"
+							class="icon"
+						/>
+					</a>
+				</li>
+				<li class="narrow" title="Logout">
+					<a href="#" class="links" tabindex="0">
+						<img
+							src="assets/svg/no_6_logout.svg"
+							class="icon"
+						/>
+					</a>
+				</li>
+			</ul>
+		</nav>
+	</div>
+}
+
+
