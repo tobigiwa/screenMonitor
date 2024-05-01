@@ -1,11 +1,12 @@
-package daemon
+package monitoring
 
 import (
-	"LiScreMon/daemon/store"
+	store "LiScreMon/daemon/repository"
 	"sync"
 	"time"
 
 	"github.com/BurntSushi/xgb/xproto"
+	"github.com/BurntSushi/xgbutil"
 )
 
 type netActiveWindowInfo struct {
@@ -17,6 +18,7 @@ type netActiveWindowInfo struct {
 
 type DoNotCopy [0]sync.Mutex
 
-type X11 struct {
-	db store.IRepository
+type X11Monitor struct {
+	X11Connection *xgbutil.XUtil
+	Db            store.IRepository
 }

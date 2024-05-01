@@ -1,4 +1,4 @@
-package store
+package repository
 
 type IRepository interface {
 	WriteUsage(data ScreenTime) error

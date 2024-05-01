@@ -1,7 +1,6 @@
-package daemon
+package monitoring
 
 import (
-	"LiScreMon/daemon/store"
 	"fmt"
 	"log"
 	"time"
@@ -10,11 +9,12 @@ import (
 	"github.com/BurntSushi/xgbutil"
 	"github.com/BurntSushi/xgbutil/ewmh"
 	"github.com/BurntSushi/xgbutil/xevent"
+	"LiScreMon/daemon/repository"
 )
 
-func (x11 X11) rootMapNotifyHandler(X *xgbutil.XUtil, ev xevent.MapNotifyEvent) {
+func rootMapNotifyHandler(x11Conn *xgbutil.XUtil, ev xevent.MapNotifyEvent) {
 
-	name, _ := getWindowClassName(X, ev.Window)
+	name, _ := getWindowClassName(x11Conn, ev.Window)
 	registerWindowForEvents(ev.Window) // For DestroyNotify on the window
 
 	if name != "" {
@@ -23,17 +23,17 @@ func (x11 X11) rootMapNotifyHandler(X *xgbutil.XUtil, ev xevent.MapNotifyEvent) 
 	}
 }
 
-func (x11 *X11) rootPropertyNotifyHandler(X *xgbutil.XUtil, ev xevent.PropertyNotifyEvent, netActiveWindowAtom, netClientStackingAtom xproto.Atom) {
+func (x11 *X11Monitor) rootPropertyNotifyHandler(x11Conn *xgbutil.XUtil, ev xevent.PropertyNotifyEvent, netActiveWindowAtom, netClientStackingAtom xproto.Atom) {
 
 	if ev.Atom == netActiveWindowAtom {
-		if currActiveWindow, err := ewmh.ActiveWindowGet(X); (err == nil) && (currActiveWindow != 0) { // 0 is root, to much noise
+		if currActiveWindow, err := ewmh.ActiveWindowGet(x11Conn); (err == nil) && (currActiveWindow != 0) { // 0 is root, to much noise
 
 			if formerActiveWindow := netActiveWindow; formerActiveWindow.WindowID != currActiveWindow { // this helps takes care of noise from tabs switch
 
 				if formerActiveWindow.WindowID == xevent.NoWindow { // at first run
 					netActiveWindow.WindowID = currActiveWindow                             // SET THE WINDOW ID
 					netActiveWindow.TimeStamp = time.Now()                                  // SET THE TIME
-					netActiveWindow.WindowName, _ = getWindowClassName(X, currActiveWindow) // SET THE NAME
+					netActiveWindow.WindowName, _ = getWindowClassName(x11Conn, currActiveWindow) // SET THE NAME
 
 					if netActiveWindow.WindowName != "" {
 						curSessionNamedWindow[currActiveWindow] = netActiveWindow.WindowName // include it the named windows
@@ -42,15 +42,15 @@ func (x11 *X11) rootPropertyNotifyHandler(X *xgbutil.XUtil, ev xevent.PropertyNo
 				}
 
 				if formerActiveWindow.WindowName == "" {
-					formerActiveWindow.WindowName, _ = getWindowClassName(X, currActiveWindow) // NET_ACTIVE_WINDOW SHOULD ALWAYS HAVE A NAME, if not, that is lost metric.
+					formerActiveWindow.WindowName, _ = getWindowClassName(x11Conn, currActiveWindow) // NET_ACTIVE_WINDOW SHOULD ALWAYS HAVE A NAME, if not, that is lost metric.
 				}
 
-				s := store.ScreenTime{
+				s := repository.ScreenTime{
 					WindowID: formerActiveWindow.WindowID,
 					AppName:  formerActiveWindow.WindowName,
-					Type:     store.Active,
+					Type:     repository.Active,
 					Duration: time.Since(formerActiveWindow.TimeStamp).Hours(),
-					Interval: store.TimeInterval{Start: formerActiveWindow.TimeStamp, End: time.Now()},
+					Interval: repository.TimeInterval{Start: formerActiveWindow.TimeStamp, End: time.Now()},
 				}
 
 				fmt.Printf("New active window ID =====> %v:%v\ntime elapsed for last window %v:%v was %vsecs\n",
@@ -61,7 +61,7 @@ func (x11 *X11) rootPropertyNotifyHandler(X *xgbutil.XUtil, ev xevent.PropertyNo
 				netActiveWindow.WindowID = currActiveWindow                                        // SET THE WINDOW ID
 				netActiveWindow.TimeStamp = time.Now()                                             // SET THE TIME
 				if netActiveWindow.WindowName, ok = curSessionNamedWindow[currActiveWindow]; !ok { // SET THE NAME
-					netActiveWindow.WindowName, _ = getWindowClassName(X, currActiveWindow)
+					netActiveWindow.WindowName, _ = getWindowClassName(x11Conn, currActiveWindow)
 					// if name does not already exist in curSessionNamedWindow (like those transient windows we skipped earlier), include it.
 					// The reason for this is because, this https://tronche.com/gui/x/icccm/sec-4.html#:~:text=It%20is%20important%20not,the%20window%20is%20mapped. might not be
 					// adhered to by all applications. So, we are sure it can steal focus, so we include it.
@@ -69,7 +69,7 @@ func (x11 *X11) rootPropertyNotifyHandler(X *xgbutil.XUtil, ev xevent.PropertyNo
 				}
 
 				if s.AppName != "" { // Mentioned earlier, if we don't have a name, lost metric.
-					if err := x11.db.WriteUsage(s); err != nil {
+					if err := x11.Db.WriteUsage(s); err != nil {
 						log.Fatalf("write to db error:%v", err)
 					}
 				}
@@ -77,21 +77,4 @@ func (x11 *X11) rootPropertyNotifyHandler(X *xgbutil.XUtil, ev xevent.PropertyNo
 
 		}
 	}
-
-	// if ev.Atom == netClientStackingAtom {
-	// 	fmt.Println("netClientStackingAtom changed")
-	// 	arr, err := ewmh.ClientListStackingGet(X)
-	// 	if err != nil {
-	// 		log.Println("netClientStackingAtom: error getting client list stacking:%v", err)
-	// 	}
-	// 	for _, v := range arr {
-	// 		fmt.Printf("%v   ", curSessionNamedWindow[v])
-	// 	}
-	// 	fmt.Println()
-	// 	fmt.Println()
-	// }
-
-	// fmt.Printf("New active window ID =====> %v:%v\ntime elapsed for last window %v:%v was %vsecs\n",
-	// 	currActiveWindow, curSessionNamedWindow[currActiveWindow], formerActiveWindow.WindowID, curSessionNamedWindow[formerActiveWindow.WindowID], time.Since(netActiveWindow.TimeStamp).Seconds())
-
 }

@@ -1,4 +1,4 @@
-package daemon
+package monitoring
 
 import (
 	"fmt"
@@ -26,7 +26,7 @@ func setRootEventMask(X *xgbutil.XUtil) {
 }
 
 func registerWindowForEvents(windowID xproto.Window) {
-	err := xproto.ChangeWindowAttributesChecked(X.Conn(), windowID, xproto.CwEventMask,
+	err := xproto.ChangeWindowAttributesChecked(x11Conn.Conn(), windowID, xproto.CwEventMask,
 		[]uint32{
 			xproto.EventMaskStructureNotify}).Check()
 	if err != nil {
@@ -90,11 +90,11 @@ func checkQueryTreeForParent(X *xgbutil.XUtil, window xproto.Window) (string, er
 //
 // index 1: _NET_CLIENT_LIST_STACKING
 func neededAtom() []xproto.Atom {
-	netActiveWindowAtom, err := xprop.Atm(X, "_NET_ACTIVE_WINDOW")
+	netActiveWindowAtom, err := xprop.Atm(x11Conn, "_NET_ACTIVE_WINDOW")
 	if err != nil {
 		log.Fatalf("Could not get _NET_ACTIVE_WINDOW atom: %v", err)
 	}
-	netClientStackingAtom, err := xprop.Atm(X, "_NET_CLIENT_LIST_STACKING")
+	netClientStackingAtom, err := xprop.Atm(x11Conn, "_NET_CLIENT_LIST_STACKING")
 	if err != nil {
 		log.Fatalf("Could not get _NET_CLIENT_LIST_STACKING atom: %v", err)
 	}
