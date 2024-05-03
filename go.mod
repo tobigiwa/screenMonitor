@@ -4,10 +4,6 @@ go 1.22.1
 
 require github.com/BurntSushi/xgbutil v0.0.0-20190907113008-ad855c713046
 
-require browser v0.0.0
-
-replace browser => ./web_browser
-
 require (
 	github.com/BurntSushi/xgb v0.0.0-20210121224620-deaf085860bc
 	github.com/dgraph-io/badger/v4 v4.2.0
@@ -16,7 +12,6 @@ require (
 )
 
 require (
-	github.com/a-h/templ v0.2.663 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/dgraph-io/ristretto v0.1.1 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect

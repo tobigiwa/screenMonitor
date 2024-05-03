@@ -36,7 +36,7 @@ func DaemonService() {
 	opts := slog.HandlerOptions{
 		AddSource: true,
 	}
-	jsonLogger := slog.NewJSONHandler(io.MultiWriter(logFile, os.Stdout), &opts)
+	jsonLogger := slog.NewTextHandler(io.MultiWriter(logFile, os.Stdout), &opts)
 	logger := slog.New(jsonLogger)
 	slog.SetDefault(logger)
 
@@ -52,7 +52,7 @@ func DaemonService() {
 		os.Exit(0)
 	}(sigs)
 
-	go service.StartService(homeDir, sigs)
+	go service.StartService(configDir, sigs)
 
 	log.Println("LiScreMon started...")
 	// Start the event loop.

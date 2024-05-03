@@ -1,4 +1,4 @@
-package publiccomponent
+package frontend
 
 import "math/rand"
 
@@ -17,14 +17,9 @@ var (
 +-+-+-+-+-+-+-+-+-+
 |L|i|S|c|r|e|M|o|n|
 +-+-+-+-+-+-+-+-+-+`
-
-	art4 string = `
-.-.-. .-.-. .-.-. .-.-. .-.-. .-.-. .-.-. .-.-. .-.-.
-'. L )'. i )'. S )'. c )'. r )'. e )'. M )'. o )'. n )
-  ).'   ).'   ).'   ).'   ).'   ).'   ).'   ).'   ).'`
 )
 
-var arrayOfArt = []string{art1, art2, art3, art4}
+var arrayOfArt = []string{art1, art2, art3}
 
 func getRandomArt() string {
 	randonIndex := rand.Intn(len(arrayOfArt))
