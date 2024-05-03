@@ -4,7 +4,6 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"browser"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -32,10 +31,7 @@ Examples:
 		fmt.Println("web was called")
 		detach, _ := cmd.Flags().GetBool("detach")
 		fmt.Println(detach)
-		err := browser.Web()
-		if err != nil {
-			fmt.Println("web error:", err)
-		}
+
 	},
 }
 
