@@ -1,7 +1,7 @@
 package monitoring
 
 import (
-	store "LiScreMon/daemon/repository"
+	store "LiScreMon/daemon/internal/database/repository"
 	"sync"
 	"time"
 

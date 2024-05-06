@@ -24,7 +24,7 @@ func (m *Message) encode() ([]byte, error) {
 
 type App struct {
 	logger     *slog.Logger
-	daemonConn *net.UnixConn
+	daemonConn net.Conn
 }
 
 func NewApp(logger *slog.Logger) (*App, error) {
@@ -39,7 +39,7 @@ func NewApp(logger *slog.Logger) (*App, error) {
 	}, nil
 }
 
-func listenToDaemonService() (*net.UnixConn, error) {
+func listenToDaemonService() (net.Conn, error) {
 	var (
 		unix     = "unix"
 		homeDir  string
@@ -54,12 +54,12 @@ func listenToDaemonService() (*net.UnixConn, error) {
 	if unixAddr, err = net.ResolveUnixAddr(unix, socketDir); err != nil {
 		return nil, err
 	}
+
 	conn, err := net.DialUnix(unix, nil, unixAddr)
 	if err != nil {
 		return nil, err
 	}
 	return conn, nil
-
 }
 
 func (a *App) CheckDaemonService() error {

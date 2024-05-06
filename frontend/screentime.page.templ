@@ -1,6 +1,5 @@
 package frontend
 
-
 templ ScreenTimePage() {
 	<!DOCTYPE html>
 	<html lang="en">
@@ -53,8 +52,8 @@ templ chartControls() {
 				/>
 			</button>
 			<button class="left-controls-button text">Months</button>
-			<button class="left-controls-button text" hx-get="/thisweek" hx-trigger="click">Last Week</button>
-			<button class="left-controls-button text">This Week</button>
+			<button class="left-controls-button text" hx-get="/weekStat?week=lastweek" hx-swap="none">Last Week</button>
+			<button class="left-controls-button text" hx-get="/weekStat?week=thisweek" hx-swap="none">This Week</button>
 			<button class="left-controls-button img">
 				<img
 					class="chart__controls--img"

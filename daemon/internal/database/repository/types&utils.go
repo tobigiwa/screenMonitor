@@ -59,12 +59,20 @@ type ScreenTime struct {
 	Interval TimeInterval
 }
 
+type KeyValuePair struct {
+    Key   string
+    Value float64
+}
+
 func Key() date {
 	return date(fmt.Sprint(time.Now().Format(timeFormat)))
 }
-func ParseKey(key date) time.Time {
-	a, _ := time.Parse(timeFormat, string(key))
-	return a
+func ParseKey(key date) (time.Time, error) {
+	a, err := time.Parse(timeFormat, string(key))
+	if err != nil {
+		return time.Time{}, err
+	}
+	return a, nil
 }
 
 func dbAppKey(appName string) []byte {
@@ -132,7 +140,7 @@ func availableStatForThatWeek(w time.Time) []date {
 	case time.Saturday:
 		n = 6
 	case time.Sunday:
-		n = 7
+		n = 0
 	}
 	arr := make([]date, 0, n)
 	for i := 0; i <= n; i++ {

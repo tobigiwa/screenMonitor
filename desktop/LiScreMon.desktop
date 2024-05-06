@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Exec=/home/tobigiwa/go/bin/LiScreMon start
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+Name[en_US]=LiScreMon
+Name=LiScreMon
+Comment[en_US]=ME...
+Comment=ME...

@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"LiScreMon/daemon/repository"
+	"LiScreMon/daemon/internal/database/repository"
 
 	"github.com/BurntSushi/xgb/xproto"
 	"github.com/BurntSushi/xgbutil"
@@ -25,14 +25,9 @@ var (
 	x11Conn               *xgbutil.XUtil
 )
 
-func InitMonitoring(configDir string) X11Monitor {
+func InitMonitoring(db *repository.BadgerDBStore) X11Monitor {
 
-	// database
-	db, err := repository.NewBadgerDb(configDir + "/badgerDB/")
-	if err != nil {
-		log.Fatal(err) // exit
-	}
-
+	var err error
 	// X server connection
 	for {
 		if x11Conn, err = xgbutil.NewConn(); err != nil { // we wait till we connect to X server

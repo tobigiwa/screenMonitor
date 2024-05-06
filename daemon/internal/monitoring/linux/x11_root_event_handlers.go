@@ -1,15 +1,15 @@
 package monitoring
 
 import (
-	"fmt"
 	"log"
 	"time"
+
+	"LiScreMon/daemon/internal/database/repository"
 
 	"github.com/BurntSushi/xgb/xproto"
 	"github.com/BurntSushi/xgbutil"
 	"github.com/BurntSushi/xgbutil/ewmh"
 	"github.com/BurntSushi/xgbutil/xevent"
-	"LiScreMon/daemon/repository"
 )
 
 func rootMapNotifyHandler(x11Conn *xgbutil.XUtil, ev xevent.MapNotifyEvent) {
@@ -31,8 +31,8 @@ func (x11 *X11Monitor) rootPropertyNotifyHandler(x11Conn *xgbutil.XUtil, ev xeve
 			if formerActiveWindow := netActiveWindow; formerActiveWindow.WindowID != currActiveWindow { // this helps takes care of noise from tabs switch
 
 				if formerActiveWindow.WindowID == xevent.NoWindow { // at first run
-					netActiveWindow.WindowID = currActiveWindow                             // SET THE WINDOW ID
-					netActiveWindow.TimeStamp = time.Now()                                  // SET THE TIME
+					netActiveWindow.WindowID = currActiveWindow                                   // SET THE WINDOW ID
+					netActiveWindow.TimeStamp = time.Now()                                        // SET THE TIME
 					netActiveWindow.WindowName, _ = getWindowClassName(x11Conn, currActiveWindow) // SET THE NAME
 
 					if netActiveWindow.WindowName != "" {
@@ -53,8 +53,8 @@ func (x11 *X11Monitor) rootPropertyNotifyHandler(x11Conn *xgbutil.XUtil, ev xeve
 					Interval: repository.TimeInterval{Start: formerActiveWindow.TimeStamp, End: time.Now()},
 				}
 
-				fmt.Printf("New active window ID =====> %v:%v\ntime elapsed for last window %v:%v was %vsecs\n",
-					currActiveWindow, curSessionNamedWindow[currActiveWindow], formerActiveWindow.WindowID, curSessionNamedWindow[formerActiveWindow.WindowID], time.Since(netActiveWindow.TimeStamp).Seconds())
+				// fmt.Printf("New active window ID =====> %v:%v\ntime elapsed for last window %v:%v was %vsecs\n",
+				// currActiveWindow, curSessionNamedWindow[currActiveWindow], formerActiveWindow.WindowID, curSessionNamedWindow[formerActiveWindow.WindowID], time.Since(netActiveWindow.TimeStamp).Seconds())
 
 				// SETTING THE NEW _NET_ACTIVE_WINDOW
 				var ok bool
