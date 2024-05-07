@@ -10,24 +10,25 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 )
 
-// Web launches a webserver for LiScreMon to be
-// displayed on your local machine browser
 func main() {
 
-	// logging services
 	opts := slog.HandlerOptions{
 		AddSource: true,
 	}
 
-	jsonLogger := slog.NewTextHandler(os.Stdout, &opts)
-	logger := slog.New(jsonLogger)
+	textLogger := slog.NewTextHandler(os.Stdout, &opts)
+	logger := slog.New(textLogger)
 	slog.SetDefault(logger)
 
 	app, err := webserver.NewApp(logger)
 	if err != nil {
+		if strings.Contains(err.Error(), "connection refused") {
+			log.Fatalln("daemon service is not running", err)
+		}
 		log.Fatalln("error creating app:", err)
 	}
 
@@ -45,9 +46,14 @@ func main() {
 
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, os.Interrupt, syscall.SIGTERM)
+
 	go func(done chan os.Signal) {
 		<-done
 		close(done)
+
+		if err := app.CloseDaemonConnection(); err != nil {
+			fmt.Println("error closing socket connection with daemon, error:", err)
+		}
 
 		if err := server.Shutdown(context.TODO()); err != nil {
 			log.Fatalf("Graceful server shutdown Failed:%+v\n", err)
@@ -58,5 +64,6 @@ func main() {
 	if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		log.Fatalln("Server error:", err)
 	}
-	log.Println("SERVER STOPPED GRACEFULLY")
+	fmt.Println()
+	fmt.Println("SERVER STOPPED GRACEFULLY")
 }

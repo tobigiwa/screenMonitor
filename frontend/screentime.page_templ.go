@@ -10,6 +10,7 @@ import "context"
 import "io"
 import "bytes"
 
+// import "github.com/go-echarts/go-echarts/v2/charts"
 func ScreenTimePage() templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
@@ -23,7 +24,7 @@ func ScreenTimePage() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><script src=\"https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.7.4/lottie.min.js\"></script><script src=\"https://unpkg.com/htmx.org@1.9.12\" integrity=\"sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2\" crossorigin=\"anonymous\"></script><script src=\"https://cdn.jsdelivr.net/npm/chart.js\"></script><link rel=\"stylesheet\" href=\"/assets/styles/screentime.css\"><script src=\"assets/js/screentime.js\"></script><title>ScreenTimePage</title></head><body><div class=\"page\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><link rel=\"stylesheet\" href=\"/assets/styles/screentime.css\"><script src=\"assets/js/out.js\"></script><title>ScreenTimePage</title></head><body><div class=\"page\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -67,7 +68,7 @@ func main() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = chartWrapper().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = ChartWrapper().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -90,7 +91,14 @@ func main() templ.Component {
 	})
 }
 
-func chartWrapper() templ.Component {
+//	templ ChartWrapper(chart *charts.Bar) {
+//		<div class="chart-wrapper">
+//			<div id="echart">
+//				@ConvertChartToTemplComponent(chart)
+//			</div>
+//		</div>
+//	}
+func ChartWrapper() templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -103,7 +111,7 @@ func chartWrapper() templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"chart-wrapper\"><canvas id=\"chart\"></canvas></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"chart-wrapper\"><canvas id=\"echart\"></canvas></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -151,7 +159,7 @@ func chartControls() templ.Component {
 			templ_7745c5c3_Var5 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"chart-controls\"><div class=\"left-controls\"><button class=\"left-controls-button img\"><img class=\"chart__controls--img\" src=\"assets/svg/angle-left-svgrepo-com.svg\" alt=\"\"></button> <button class=\"left-controls-button text\">Months</button> <button class=\"left-controls-button text\" hx-get=\"/thisweek\" hx-trigger=\"click\">Last Week</button> <button class=\"left-controls-button text\">This Week</button> <button class=\"left-controls-button img\"><img class=\"chart__controls--img\" src=\"assets/svg/angle-right-svgrepo-com.svg\" alt=\"\"></button></div><div class=\"right-controls\"><button class=\"right-controls-button text\" href=\"#\">Ascending</button> <button class=\"right-controls-button text\" href=\"#\">Descending</button></div></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"chart-controls\"><div class=\"left-controls\"><button class=\"left-controls-button img\"><img class=\"chart__controls--img\" src=\"assets/svg/angle-left-svgrepo-com.svg\" alt=\"\"></button> <button class=\"left-controls-button text\">Months</button> <button class=\"left-controls-button text\" hx-get=\"/weekStat?week=lastweek\" hx-swap=\"none\" hx-on::afterOnLoad=\"loadGraph()\">Last Week</button> <button class=\"left-controls-button text\" hx-get=\"/weekStat?week=thisweek\" hx-swap=\"none\">This Week</button> <button class=\"left-controls-button img\"><img class=\"chart__controls--img\" src=\"assets/svg/angle-right-svgrepo-com.svg\" alt=\"\"></button></div><div class=\"right-controls\"><button class=\"right-controls-button text\" href=\"#\">Ascending</button> <button class=\"right-controls-button text\" href=\"#\">Descending</button></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -1,8 +1,9 @@
 package daemon
 
 import (
-	monitoring "LiScreMon/daemon/monitoring/linux"
-	"LiScreMon/daemon/service"
+	"LiScreMon/daemon/internal/database/repository"
+	monitoring "LiScreMon/daemon/internal/monitoring/linux"
+	"LiScreMon/daemon/internal/service"
 	"io"
 	"log"
 	"log/slog"
@@ -13,7 +14,7 @@ import (
 	"github.com/BurntSushi/xgbutil/xevent"
 )
 
-func DaemonService() {
+func DaemonServiceLinux() {
 
 	// config directory
 	homeDir, err := os.UserHomeDir()
@@ -22,12 +23,15 @@ func DaemonService() {
 	}
 
 	configDir := homeDir + "/liScreMon"
+	socketDir := configDir + "/socket/"
+	logFilePath := configDir + "/log.txt"
+
 	if err := os.MkdirAll(configDir, 0755); err != nil {
 		log.Fatal(err) // exit
 	}
 
 	// logging
-	logFile, err := os.OpenFile(configDir+"/log.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	logFile, err := os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Fatal(err) // exit
 	}
@@ -40,21 +44,30 @@ func DaemonService() {
 	logger := slog.New(jsonLogger)
 	slog.SetDefault(logger)
 
-	monitor := monitoring.InitMonitoring(configDir)
+	// database
+	db, err := repository.NewBadgerDb(configDir + "/badgerDB/")
+	if err != nil {
+		log.Fatal(err) // exit
+	}
 
-	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, os.Interrupt, syscall.SIGTERM)
+	monitor := monitoring.InitMonitoring(db)
 
-	go func(signal chan os.Signal) {
-		<-signal
-		monitor.Db.Close()
+	signal1 := make(chan os.Signal, 1)
+	signal.Notify(signal1, os.Interrupt, syscall.SIGTERM)
+
+	go service.StartService(socketDir, db)
+
+	go func() {
+		<-signal1
+		close(signal1)
+
 		xevent.Quit(monitor.X11Connection)
+		service.SocketConn.Close()
+		monitor.Db.Close()
+
 		os.Exit(0)
-	}(sigs)
+	}()
 
-	go service.StartService(configDir, sigs)
-
-	log.Println("LiScreMon started...")
 	// Start the event loop.
 	xevent.Main(monitor.X11Connection)
 }

@@ -1,7 +1,7 @@
 /*
 Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 */
-package cmd
+package cli
 
 import (
 	"LiScreMon/daemon"
@@ -15,7 +15,7 @@ var startCmd = &cobra.Command{
 	Long: `Command "start" launch the daemon service. It starts the background screen
 	monitoring and recording program of LiScreMon`,
 	Run: func(cmd *cobra.Command, args []string) {
-		daemon.DaemonService()
+		daemon.DaemonServiceLinux()
 	},
 }
 

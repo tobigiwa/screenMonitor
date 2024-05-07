@@ -1,17 +1,14 @@
 package frontend
 
-
+// import "github.com/go-echarts/go-echarts/v2/charts"
 templ ScreenTimePage() {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-			<script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.7.4/lottie.min.js"></script>
-			<script src="https://unpkg.com/htmx.org@1.9.12" integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2" crossorigin="anonymous"></script>
-			<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 			<link rel="stylesheet" href="/assets/styles/screentime.css"/>
-			<script src="assets/js/screentime.js"></script>
+			<script src="assets/js/out.js"></script>
 			<title>ScreenTimePage</title>
 		</head>
 		<body>
@@ -26,15 +23,24 @@ templ ScreenTimePage() {
 templ main() {
 	<div class="main">
 		@Header()
-		@chartWrapper()
+		// @ChartWrapper(createBarChart())
+		@ChartWrapper()
 		@chartControls()
 		@chartHighlight()
 	</div>
 }
 
-templ chartWrapper() {
+//
+// templ ChartWrapper(chart *charts.Bar) {
+// 	<div class="chart-wrapper">
+// 		<div id="echart">
+// 			@ConvertChartToTemplComponent(chart)
+// 		</div>
+// 	</div>
+// }
+templ ChartWrapper() {
 	<div class="chart-wrapper">
-		<canvas id="chart"></canvas>
+		<canvas id="echart"></canvas>
 	</div>
 }
 
@@ -53,8 +59,8 @@ templ chartControls() {
 				/>
 			</button>
 			<button class="left-controls-button text">Months</button>
-			<button class="left-controls-button text" hx-get="/thisweek" hx-trigger="click">Last Week</button>
-			<button class="left-controls-button text">This Week</button>
+			<button class="left-controls-button text" hx-get="/weekStat?week=lastweek" hx-swap="none" hx-on::afterOnLoad="loadGraph()">Last Week</button>
+			<button class="left-controls-button text" hx-get="/weekStat?week=thisweek" hx-swap="none">This Week</button>
 			<button class="left-controls-button img">
 				<img
 					class="chart__controls--img"

@@ -115,11 +115,12 @@ func (bs *BadgerDBStore) DeleteKey(key string) error {
 	})
 }
 
-// the arguement still needs the time, also if pc watch is messed, so is the result
-func (bs *BadgerDBStore) GetWeeklyScreenStats(s ScreenType) (map[date]float64, error) {
+func (bs *BadgerDBStore) GetWeeklyScreenStats(s ScreenType, dayWhat string) ([]KeyValuePair, error) {
 
-	var newKey bool
-	result := make(map[date]float64, 7)
+	var (
+		newKey bool
+		result = make([]KeyValuePair, 0, 7)
+	)
 	err := bs.db.Update(func(txn *badger.Txn) error {
 		item, err := txn.Get([]byte("daily"))
 
@@ -151,42 +152,47 @@ func (bs *BadgerDBStore) GetWeeklyScreenStats(s ScreenType) (map[date]float64, e
 			return err
 		}
 
-		statsForThatWeek := availableStatForThatWeek(time.Now())
-		// fmt.Println(statsForThatWeek, len(statsForThatWeek))
+		wellFormattedDate, err := ParseKey(date(dayWhat))
+		if err != nil {
+			return err
+		}
+
+		statsForThatWeek := availableStatForThatWeek(wellFormattedDate)
 
 		for i := 0; i < len(statsForThatWeek); i++ {
 			day := statsForThatWeek[i]
 
 			statsForThatDay, ok := dailyST[day]
-			// fmt.Println(ok, string(day))
 			if !ok {
-				// fmt.Printf("no entry for day:%s\n", day)
 				statsForThatDay, err = bs.getDayActivity(day)
-				// fmt.Printf("statsForThatDay:%v and err:%v\n", statsForThatDay, err)
 				if err != nil {
-					// fmt.Println("we would continue for day:", string(day))
 					continue
 				}
 
-				today := ParseKey(date(time.Now().Format(timeFormat)))
-				if today.After(ParseKey(day)) {
-					// fmt.Printf("writing new entry for day:%s\n", day)
+				maybePastOrFutureDay, _ := ParseKey(day)
+				today, _ := ParseKey(date(time.Now().Format(timeFormat)))
+				if today.After(maybePastOrFutureDay) {
 					dailyST[day] = statsForThatDay
 					data, err := dailyST.serialize()
 					if err == nil {
 						txn.Set([]byte("daily"), data)
-						// fmt.Printf("entry for day:%s successful\n", day)
 					}
 				}
 			}
-
+			res := KeyValuePair{}
 			switch s {
 			case Active:
-				result[day] = statsForThatDay.Stats.Active
+				res.Key = string(day)
+				res.Value = statsForThatDay.Stats.Active
+				result = append(result, res)
 			case Inactive:
-				result[day] = statsForThatDay.Stats.Inactive
+				res.Key = string(day)
+				res.Value = statsForThatDay.Stats.Active
+				result = append(result, res)
 			case Open:
-				result[day] = statsForThatDay.Stats.Open
+				res.Key = string(day)
+				res.Value = statsForThatDay.Stats.Active
+				result = append(result, res)
 			}
 		}
 

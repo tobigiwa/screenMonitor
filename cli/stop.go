@@ -1,7 +1,7 @@
 /*
 Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 */
-package cmd
+package cli
 
 import (
 	"bytes"
@@ -31,9 +31,7 @@ When this command is invoked, it prints "stop called" to the standard output and
 		}
 
 		fmt.Println(strings.TrimSpace(string(result)))
-		fmt.Println(os.Getpid())
 		arrayOfpidByte := bytes.Split(result, []byte(" "))
-		fmt.Println(arrayOfpidByte, len(arrayOfpidByte))
 
 		if len(arrayOfpidByte) > 1 {
 			pid := os.Getpid()
