@@ -63,7 +63,7 @@ body {
 
     .wrap-animation {
         background-color: var(--black-color);
-        width: 80%;
+        width: 70%;
         border-radius: 10%;
 
         #lottie-animation {
@@ -233,15 +233,17 @@ body {
         border-radius: 2%;
         border-bottom-left-radius: 0%;
         border-bottom-right-radius: 0%;
+        /* width: 100%; */
 
         display: flex;
         align-items: center;
         justify-content: center;
         overflow: hidden;
 
-        & canvas {
+        #echart {
             width: 100% !important;
             height: auto !important;
+            background-color: var(--white-color);
         }
     }
 

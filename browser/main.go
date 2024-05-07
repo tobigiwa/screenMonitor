@@ -64,5 +64,6 @@ func main() {
 	if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		log.Fatalln("Server error:", err)
 	}
+	fmt.Println()
 	fmt.Println("SERVER STOPPED GRACEFULLY")
 }

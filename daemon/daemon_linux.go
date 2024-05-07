@@ -3,7 +3,7 @@ package daemon
 import (
 	"LiScreMon/daemon/internal/database/repository"
 	monitoring "LiScreMon/daemon/internal/monitoring/linux"
-	"fmt"
+	"LiScreMon/daemon/internal/service"
 	"io"
 	"log"
 	"log/slog"
@@ -23,12 +23,15 @@ func DaemonServiceLinux() {
 	}
 
 	configDir := homeDir + "/liScreMon"
+	socketDir := configDir + "/socket/"
+	logFilePath := configDir + "/log.txt"
+
 	if err := os.MkdirAll(configDir, 0755); err != nil {
 		log.Fatal(err) // exit
 	}
 
 	// logging
-	logFile, err := os.OpenFile(configDir+"/log.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	logFile, err := os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Fatal(err) // exit
 	}
@@ -49,38 +52,22 @@ func DaemonServiceLinux() {
 
 	monitor := monitoring.InitMonitoring(db)
 
-	sig1 := make(chan os.Signal, 1)
-	signal.Notify(sig1, os.Interrupt, syscall.SIGTERM)
+	signal1 := make(chan os.Signal, 1)
+	signal.Notify(signal1, os.Interrupt, syscall.SIGTERM)
 
-	// ctx, cancel := context.WithCancel(context.Background())
-	// go service.StartService(ctx, configDir, db)
+	go service.StartService(socketDir, db)
 
 	go func() {
-		<-sig1
-		close(sig1)
-		// cancel()
-		if err := syscall.Unlink(configDir + "/socket/" + "liScreMon.sock"); err != nil {
-			fmt.Println("unlink", err)
-		}
-
-		data, err := monitor.Db.GetWeeklyScreenStats(repository.Active, "2024-05-04")
-		if err != nil {
-			log.Println("error:", err)
-		}
-		for _, value := range data {
-			fmt.Println(value.Key, value.Value)
-		}
-
-		monitor.Db.Close()
+		<-signal1
+		close(signal1)
 
 		xevent.Quit(monitor.X11Connection)
+		service.SocketConn.Close()
+		monitor.Db.Close()
+
 		os.Exit(0)
 	}()
 
-	log.Println("LiScreMon started...")
 	// Start the event loop.
 	xevent.Main(monitor.X11Connection)
 }
-
-// sig2 := make(chan os.Signal, 1)
-// signal.Notify(sig2, os.Interrupt, syscall.SIGTERM)
