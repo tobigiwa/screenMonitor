@@ -3,3 +3,4 @@
 store/badgerDB
 LiScreMon
 frontend/node_modules/
+frontend/assets/js/out*
