@@ -2,3 +2,4 @@
 .vscode/
 store/badgerDB
 LiScreMon
+frontend/node_modules/
