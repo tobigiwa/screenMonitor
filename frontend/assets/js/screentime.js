@@ -3,16 +3,6 @@ import 'htmx.org';
 // import * as echarts from 'echarts';
 import Chart from 'chart.js/auto';
 
-document.addEventListener( 'DOMContentLoaded', function ()
-{
-    lottie.loadAnimation( {
-        container: document.getElementById( 'lottie-animation' ),
-        renderer: 'svg',
-        loop: true,
-        autoplay: true,
-        path: "assets/animation/Animation - 1712666371830.json"
-    } );
-} );
 
 // document.addEventListener( 'DOMContentLoaded', function ()
 // {
@@ -24,6 +14,99 @@ document.addEventListener( 'DOMContentLoaded', function ()
 //     };
 // } );
 
+let myChart;
+
+document.addEventListener( 'DOMContentLoaded', function ()
+{
+
+    loadAnimation();
+    onFullPageReload();
+    leftcontrolchartButtons();
+
+} );
+
+function loadAnimation ()
+{
+    lottie.loadAnimation( {
+        container: document.getElementById( 'lottie-animation' ),
+        renderer: 'svg',
+        loop: true,
+        autoplay: true,
+        path: "assets/animation/Animation - 1712666371830.json"
+    } );
+}
+function onFullPageReload ()
+{
+    window.onload = function ()
+    {
+        console.log( 'Page fully loaded and ready' );
+        var thisWeekButton = document.querySelector( '#thisWeekButton' );
+
+        if ( thisWeekButton ) {
+            thisWeekButton.click();
+        }
+    };
+}
+
+function leftcontrolchartButtons ()
+{
+    var chartControlButtons = document.querySelectorAll( '.left-controls-button' );
+    chartControlButtons.forEach( function ( button )
+    {
+        button.addEventListener( 'htmx:afterRequest', function ( event )
+        {
+            if ( !event.detail.successful ) {
+                console.log( "request not successful" );
+                return;
+            }
+
+            console.log( 'XMLHttpRequest response: ', event.detail.xhr.response );
+            let response;
+            try {
+                response = JSON.parse( event.detail.xhr.response );
+            } catch ( error ) {
+                console.error( 'Invalid response: not a valid JSON string' );
+                return;
+            }
+            drawWeekStatChar( response );
+        } );
+    } );
+}
+
+function drawWeekStatChar ( response )
+{
+    const ctx = document.getElementById( 'echart' );
+    if ( myChart ) {
+        myChart.destroy();
+    }
+
+    let labels = response.weekStatResponse.formattedDay;
+    let data = response.weekStatResponse.values;
+
+    // Create the chart
+    myChart = new Chart( ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [ {
+                label: 'Days of the week',
+                data: data,
+                borderWidth: 1,
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+            } ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    } );
+}
 
 document.addEventListener( 'keydown', function ( e )
 {
@@ -48,56 +131,4 @@ document.addEventListener( 'keydown', function ( e )
         toFocus.focus();
         e.preventDefault();
     }
-} );
-
-document.addEventListener( 'DOMContentLoaded', function ()
-{
-    const ctx = document.getElementById( 'echart' );
-    new Chart( ctx, {
-        type: 'bar',
-        data: {
-            labels: [ 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday' ],
-            datasets: [ {
-                label: 'Days of the week',
-                data: [ 12, 19, 3, 5, 2, 3, 11 ],
-                borderWidth: 1,
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                borderColor: 'rgba(255, 99, 132, 1)',
-            } ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    } );
-} );
-
-
-document.addEventListener( 'DOMContentLoaded', function ()
-{
-    console.log( 'htmx:afterRequest event fired' );
-    var chartControlButtons = document.querySelectorAll( '.left-controls-button' );
-
-    chartControlButtons.forEach( function ( button )
-    {
-        button.addEventListener( 'htmx:afterRequest', function ( event )
-        {
-            if ( !event.detail.successful ) {
-                console.log( "request not successful" );
-                return;
-            }
-
-            console.log( 'AJAX request has finished for button: ', button );
-            console.log( 'AJAX request status: ', event.detail.successful );
-            console.log( 'XMLHttpRequest: ', event.detail.xhr );
-            console.log( 'XMLHttpRequest response: ', event.detail.xhr.response );
-        } );
-    } );
-
-
 } );

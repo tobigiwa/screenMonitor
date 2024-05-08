@@ -33,8 +33,8 @@ type Category string
 
 // date underneath is a
 /* string of a time.Time format. "2006-01-02" */
-type date string
-type dailyAppScreenTime map[date]stats
+type Date string
+type dailyAppScreenTime map[Date]stats
 
 type TimeInterval struct {
 	Start time.Time
@@ -60,14 +60,14 @@ type ScreenTime struct {
 }
 
 type KeyValuePair struct {
-    Key   string
-    Value float64
+	Key   string
+	Value float64
 }
 
-func Key() date {
-	return date(fmt.Sprint(time.Now().Format(timeFormat)))
+func Key() Date {
+	return Date(fmt.Sprint(time.Now().Format(timeFormat)))
 }
-func ParseKey(key date) (time.Time, error) {
+func ParseKey(key Date) (time.Time, error) {
 	a, err := time.Parse(timeFormat, string(key))
 	if err != nil {
 		return time.Time{}, err
@@ -124,27 +124,12 @@ func getDesktopCategory(appName string) ([]string, error) {
 	return nil, errors.New("just an error")
 }
 
-func availableStatForThatWeek(w time.Time) []date {
-	var n int
-	switch w.Weekday() {
-	case time.Monday:
-		n = 1
-	case time.Tuesday:
-		n = 2
-	case time.Wednesday:
-		n = 3
-	case time.Thursday:
-		n = 4
-	case time.Friday:
-		n = 5
-	case time.Saturday:
-		n = 6
-	case time.Sunday:
-		n = 0
-	}
-	arr := make([]date, 0, n)
-	for i := 0; i <= n; i++ {
-		arr = append(arr, date(fmt.Sprint(w.AddDate(0, 0, -i).Format(timeFormat))))
+func daysInThatWeek(w time.Time) [7]Date {
+
+	var arr [7]Date
+	startOftheWeek := w.AddDate(0, 0, -int(w.Weekday()))
+	for i := 0; i < 7; i++ {
+		arr[i] = Date(fmt.Sprint(startOftheWeek.AddDate(0, 0, i).Format(timeFormat)))
 	}
 	return arr
 }

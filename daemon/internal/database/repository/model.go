@@ -33,7 +33,7 @@ func (ap *appInfo) deserialize(data []byte) error {
 	return nil
 }
 
-type dailyScreentimeAnalytics map[date]dailyActiveScreentime
+type dailyScreentimeAnalytics map[Date]dailyActiveScreentime
 
 func (d *dailyScreentimeAnalytics) serialize() ([]byte, error) {
 	var res bytes.Buffer

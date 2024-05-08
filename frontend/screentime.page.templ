@@ -60,7 +60,7 @@ templ chartControls() {
 			</button>
 			<button class="left-controls-button text">Months</button>
 			<button class="left-controls-button text" hx-get="/weekStat?week=lastweek" hx-swap="none" hx-on::afterOnLoad="loadGraph()">Last Week</button>
-			<button class="left-controls-button text" hx-get="/weekStat?week=thisweek" hx-swap="none">This Week</button>
+			<button class="left-controls-button text" id="thisWeekButton" hx-get="/weekStat?week=thisweek" hx-swap="none">This Week</button>
 			<button class="left-controls-button img">
 				<img
 					class="chart__controls--img"
@@ -69,9 +69,10 @@ templ chartControls() {
 				/>
 			</button>
 		</div>
+		<div class="spacing"></div>
 		<div class="right-controls">
-			<button class="right-controls-button text" href="#">Ascending</button>
-			<button class="right-controls-button text" href="#">Descending</button>
+			<button class="right-controls-button text" href="#">Asc.</button>
+			<button class="right-controls-button text" href="#">Desc.</button>
 		</div>
 	</div>
 }

@@ -84,7 +84,7 @@ func treatMessage(c net.Conn) {
 
 		switch msg.Endpoint {
 		case "startConnection":
-			msg = Message{StringData: `hELLo.., this is the DaemonService speaking, your connection is established.`}
+			msg = Message{StringDataResponse: `hELLo.., this is the DaemonService speaking, your connection is established.`}
 
 		case "closeConnection":
 			fmt.Println("we got a close connection message")
@@ -92,7 +92,8 @@ func treatMessage(c net.Conn) {
 			return
 
 		case "weekStat":
-			msg = ServiceInstance.weekStat(msg)
+			weekStat := ServiceInstance.weekStat(msg)
+			msg.WeekStatResponse = weekStat
 		}
 
 		bytes, err := msg.encode()

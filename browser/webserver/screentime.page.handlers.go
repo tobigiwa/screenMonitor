@@ -2,7 +2,6 @@ package webserver
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -35,40 +34,53 @@ func (a *App) WeekStat(w http.ResponseWriter, r *http.Request) {
 	case "thisweek":
 		today := time.Now().Format(timeFormat)
 		msg = Message{
-			Endpoint:   endpoint,
-			StringData: today,
+			Endpoint:          endpoint,
+			StringDataRequest: today,
 		}
 	case "lastweek":
+		today := time.Now()
+		var lastSaturday time.Time
+
+		if today.Weekday() == time.Saturday {
+			lastSaturday = today.AddDate(0, 0, -7)
+		} else {
+			daysSinceSaturday := int(today.Weekday()+1) % 7
+			lastSaturday = today.AddDate(0, 0, -daysSinceSaturday)
+		}
+
+		msg = Message{
+			Endpoint:          endpoint,
+			StringDataRequest: lastSaturday.Format(timeFormat),
+		}
 	}
 
-	bytes, err := msg.encode()
+	bytes, err := msg.encode() // encode message in byte
 	if err != nil {
 		a.logger.Log(context.TODO(), slog.LevelError, err.Error())
 		return
 	}
-	if _, err = a.daemonConn.Write(bytes); err != nil {
+	if _, err = a.daemonConn.Write(bytes); err != nil { // write to socket
 		a.logger.Log(context.TODO(), slog.LevelError, err.Error())
 		return
 	}
 
 	buf := make([]byte, 512)
-	if _, err = a.daemonConn.Read(buf); err != nil {
+	if _, err = a.daemonConn.Read(buf); err != nil { // wait and read response from socket
 		a.logger.Log(context.TODO(), slog.LevelError, err.Error())
 		return
 	}
 
-	if err = msg.decode(buf); err != nil {
+	if err = msg.decode(buf); err != nil { // decode response to Message struct
 		a.logger.Log(context.TODO(), slog.LevelError, err.Error())
 		return
 	}
 
-	data, err := msg.decodeToJson()
+	data, err := msg.decodeToJson() // convert response to json
 	if err != nil {
 		a.logger.Log(context.TODO(), slog.LevelError, err.Error())
 	}
 
-	fmt.Printf("\n%+v\n\n", msg)
-	w.Write(data)
+	w.Write(data) // write json response to http response
 
 }
 
@@ -88,4 +100,8 @@ func (a *App) CloseDaemonConnection() error {
 		return err
 	}
 	return a.daemonConn.Close()
+}
+
+func (a *App) writeToFrontend(buf []byte) error {
+	return nil
 }
