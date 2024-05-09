@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/gob"
 	"encoding/json"
-	"fmt"
 	"log/slog"
 	"net"
 	"os"
@@ -106,6 +105,5 @@ func (a *App) CheckDaemonService() error {
 	if err = msg.decode(buf); err != nil {
 		return err
 	}
-	fmt.Printf("%+v\n\n", msg)
 	return nil
 }

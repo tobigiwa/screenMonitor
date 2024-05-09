@@ -1,5 +1,5 @@
 import lottie from 'lottie-web';
-import 'htmx.org';
+import htmx from 'htmx.org';
 // import * as echarts from 'echarts';
 import Chart from 'chart.js/auto';
 
@@ -15,6 +15,7 @@ import Chart from 'chart.js/auto';
 // } );
 
 let myChart;
+let currentSaturday;
 
 document.addEventListener( 'DOMContentLoaded', function ()
 {
@@ -35,11 +36,11 @@ function loadAnimation ()
         path: "assets/animation/Animation - 1712666371830.json"
     } );
 }
+
 function onFullPageReload ()
 {
     window.onload = function ()
     {
-        console.log( 'Page fully loaded and ready' );
         var thisWeekButton = document.querySelector( '#thisWeekButton' );
 
         if ( thisWeekButton ) {
@@ -65,10 +66,11 @@ function leftcontrolchartButtons ()
             try {
                 response = JSON.parse( event.detail.xhr.response );
             } catch ( error ) {
-                console.error( 'Invalid response: not a valid JSON string' );
+                console.error( 'Invalid response: not a valid JSON string', error );
                 return;
             }
             drawWeekStatChar( response );
+            arrowButton();
         } );
     } );
 }
@@ -82,8 +84,8 @@ function drawWeekStatChar ( response )
 
     let labels = response.weekStatResponse.formattedDay;
     let data = response.weekStatResponse.values;
+    currentSaturday = response.weekStatResponse.keys[ 6 ];
 
-    // Create the chart
     myChart = new Chart( ctx, {
         type: 'bar',
         data: {
@@ -106,6 +108,25 @@ function drawWeekStatChar ( response )
             }
         }
     } );
+}
+
+function arrowButton ()
+{
+    console.log( "in arrowButton", currentSaturday );
+
+    let backwardButton = document.querySelector( '.backward-arrow' );
+    let endPointA = '/weekStat?week=backward-arrow&saturday=' + currentSaturday;
+
+    backwardButton.setAttribute( 'hx-get', endPointA );
+    backwardButton.setAttribute( 'hx-swap', 'none' );
+    htmx.process( backwardButton );
+
+    let forwardButton = document.querySelector( '.forward-arrow' );
+    let endPointB = '/weekStat?week=forward-arrow&saturday=' + currentSaturday;
+
+    forwardButton.setAttribute( 'hx-get', endPointB );
+    forwardButton.setAttribute( 'hx-swap', 'none' );
+    htmx.process( forwardButton );
 }
 
 document.addEventListener( 'keydown', function ( e )

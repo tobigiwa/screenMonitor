@@ -253,7 +253,6 @@ body {
         height: 2.2rem;
         background-color: var(--primary-color1);
 
-
         .left-controls {
             flex: 0 0 1;
             justify-content: flex-start;
@@ -265,6 +264,22 @@ body {
             .chart__controls--img {
                 width: 35px;
             }
+
+            .select-month {
+
+                & select {
+                    height: 100%;
+                    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+                    font-size: 1rem;
+                    padding: 0 1em;
+                    background-color: var(--primary-color2);
+                    color: white;
+                    border: 0;
+                    width: 100%;
+                }
+
+            }
+
         }
 
         .right-controls {

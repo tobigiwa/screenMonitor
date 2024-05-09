@@ -5,6 +5,7 @@ import (
 	"encoding/gob"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"os"
@@ -59,7 +60,7 @@ func handleConnection(listener *net.UnixListener) {
 				fmt.Println("connection closed, daemonService says 🖐")
 				return
 			} else {
-				fmt.Println("error accepting connection...uh we muuve:", err)
+				fmt.Println("error accepting connection...buh we muuve:", err)
 				continue
 			}
 		}
@@ -71,7 +72,6 @@ func handleConnection(listener *net.UnixListener) {
 
 func treatMessage(c net.Conn) {
 	for {
-
 		var (
 			msg Message
 			err error
@@ -79,6 +79,11 @@ func treatMessage(c net.Conn) {
 
 		if err = gob.NewDecoder(c).Decode(&msg); err != nil {
 			log.Println("error reading message:", err)
+			if errors.Is(err, io.EOF) {
+				fmt.Println("client connection closed")
+				c.Close()
+				return
+			}
 			continue
 		}
 

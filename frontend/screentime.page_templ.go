@@ -10,6 +10,8 @@ import "context"
 import "io"
 import "bytes"
 
+import "time"
+
 // import "github.com/go-echarts/go-echarts/v2/charts"
 func ScreenTimePage() templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
@@ -159,7 +161,43 @@ func chartControls() templ.Component {
 			templ_7745c5c3_Var5 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"chart-controls\"><div class=\"left-controls\"><button class=\"left-controls-button img\"><img class=\"chart__controls--img\" src=\"assets/svg/angle-left-svgrepo-com.svg\" alt=\"\"></button> <button class=\"left-controls-button text\">Months</button> <button class=\"left-controls-button text\" hx-get=\"/weekStat?week=lastweek\" hx-swap=\"none\" hx-on::afterOnLoad=\"loadGraph()\">Last Week</button> <button class=\"left-controls-button text\" id=\"thisWeekButton\" hx-get=\"/weekStat?week=thisweek\" hx-swap=\"none\">This Week</button> <button class=\"left-controls-button img\"><img class=\"chart__controls--img\" src=\"assets/svg/angle-right-svgrepo-com.svg\" alt=\"\"></button></div><div class=\"spacing\"></div><div class=\"right-controls\"><button class=\"right-controls-button text\" href=\"#\">Asc.</button> <button class=\"right-controls-button text\" href=\"#\">Desc.</button></div></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"chart-controls\"><div class=\"left-controls\"><div class=\"select-month\"><select name=\"Month\" id=\"\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		for _, v := range monthDropDownSelectArray() {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<option value=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var6 string
+			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(v)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `screentime.page.templ`, Line: 59, Col: 23}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var7 string
+			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(v)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `screentime.page.templ`, Line: 59, Col: 29}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</option>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</select></div><button class=\"left-controls-button img backward-arrow\"><img class=\"chart__controls--img\" src=\"assets/svg/angle-left-svgrepo-com.svg\" alt=\"\"></button> <button class=\"left-controls-button text\" hx-get=\"/weekStat?week=lastweek\" hx-swap=\"none\">Last Week</button> <button class=\"left-controls-button text\" id=\"thisWeekButton\" hx-get=\"/weekStat?week=thisweek\" hx-swap=\"none\">This Week</button> <button class=\"left-controls-button img forward-arrow\"><img class=\"chart__controls--img\" src=\"assets/svg/angle-right-svgrepo-com.svg\" alt=\"\"></button></div><div class=\"spacing\"></div><div class=\"right-controls\"><button class=\"right-controls-button text\" href=\"#\">Asc.</button> <button class=\"right-controls-button text\" href=\"#\">Desc.</button></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -168,4 +206,14 @@ func chartControls() templ.Component {
 		}
 		return templ_7745c5c3_Err
 	})
+}
+
+func monthDropDownSelectArray() [4]string {
+	today := time.Now()
+	past4Month := [4]string{}
+	for i := 0; i <= 3; i++ {
+		m := today.AddDate(0, -i, 0)
+		past4Month[i] = m.Month().String()
+	}
+	return past4Month
 }
