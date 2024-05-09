@@ -115,11 +115,11 @@ func (bs *BadgerDBStore) DeleteKey(key string) error {
 	})
 }
 
-func (bs *BadgerDBStore) GetWeeklyScreenStats(s ScreenType, dayWhat string) ([]KeyValuePair, error) {
+func (bs *BadgerDBStore) GetWeeklyScreenStats(s ScreenType, dayWhat string) ([7]KeyValuePair, error) {
 
 	var (
 		newKey bool
-		result = make([]KeyValuePair, 0, 7)
+		result [7]KeyValuePair
 	)
 	err := bs.db.Update(func(txn *badger.Txn) error {
 		item, err := txn.Get([]byte("daily"))
@@ -152,47 +152,55 @@ func (bs *BadgerDBStore) GetWeeklyScreenStats(s ScreenType, dayWhat string) ([]K
 			return err
 		}
 
-		wellFormattedDate, err := ParseKey(date(dayWhat))
+		wellFormattedDate, err := ParseKey(Date(dayWhat))
 		if err != nil {
 			return err
 		}
 
-		statsForThatWeek := availableStatForThatWeek(wellFormattedDate)
+		statsForThatWeek := daysInThatWeek(wellFormattedDate)
 
 		for i := 0; i < len(statsForThatWeek); i++ {
-			day := statsForThatWeek[i]
 
-			statsForThatDay, ok := dailyST[day]
+			thatDayInDateType := statsForThatWeek[i]
+			thatDayIntimeType, _ := ParseKey(thatDayInDateType)
+
+			today, _ := ParseKey(Date(time.Now().Format(timeFormat)))
+
+			res := KeyValuePair{}
+			if thatDayIntimeType.After(today.AddDate(0, 0, 1)) {
+				res.Key = string(thatDayInDateType)
+				res.Value = 0
+				result[i] = res
+			}
+
+			statsForThatDay, ok := dailyST[thatDayInDateType]
 			if !ok {
-				statsForThatDay, err = bs.getDayActivity(day)
+				statsForThatDay, err = bs.getDayActivity(thatDayInDateType)
 				if err != nil {
 					continue
 				}
 
-				maybePastOrFutureDay, _ := ParseKey(day)
-				today, _ := ParseKey(date(time.Now().Format(timeFormat)))
-				if today.After(maybePastOrFutureDay) {
-					dailyST[day] = statsForThatDay
+				if today.After(thatDayIntimeType) {
+					dailyST[thatDayInDateType] = statsForThatDay
 					data, err := dailyST.serialize()
 					if err == nil {
 						txn.Set([]byte("daily"), data)
 					}
 				}
 			}
-			res := KeyValuePair{}
 			switch s {
 			case Active:
-				res.Key = string(day)
+				res.Key = string(thatDayInDateType)
 				res.Value = statsForThatDay.Stats.Active
-				result = append(result, res)
+				result[i] = res
 			case Inactive:
-				res.Key = string(day)
+				res.Key = string(thatDayInDateType)
 				res.Value = statsForThatDay.Stats.Active
-				result = append(result, res)
+				result[i] = res
 			case Open:
-				res.Key = string(day)
+				res.Key = string(thatDayInDateType)
 				res.Value = statsForThatDay.Stats.Active
-				result = append(result, res)
+				result[i] = res
 			}
 		}
 
@@ -200,15 +208,15 @@ func (bs *BadgerDBStore) GetWeeklyScreenStats(s ScreenType, dayWhat string) ([]K
 	})
 
 	if err != nil {
-		return nil, err
+		return [7]KeyValuePair{}, err
 	}
 	if newKey {
-		return nil, errors.New("new key created")
+		return [7]KeyValuePair{}, errors.New("new key created")
 	}
 	return result, nil
 }
 
-func (bs *BadgerDBStore) getDayActivity(day date) (dailyActiveScreentime, error) {
+func (bs *BadgerDBStore) getDayActivity(day Date) (dailyActiveScreentime, error) {
 
 	var res dailyActiveScreentime
 	err := bs.db.View(func(txn *badger.Txn) error {

@@ -4,24 +4,25 @@ import (
 	"bytes"
 	"encoding/gob"
 	"encoding/json"
-	"fmt"
 	"log/slog"
 	"net"
 	"os"
 )
 
 type Message struct {
-	Endpoint   string         `json:"endpoint"`
-	SliceData  []KeyValuePair `json:"sliceData"`
-	StringData string         `json:"stringData"`
-	IntData    int            `json:"intData"`
-	IsError    bool           `json:"isError"`
-	Error      error          `json:"error"`
+	Endpoint           string          `json:"endpoint"`
+	StringDataRequest  string          `json:"stringDataRequest"`
+	StringDataResponse string          `json:"stringDataResponse"`
+	WeekStatResponse   WeekStatMessage `json:"weekStatResponse"`
 }
-
-type KeyValuePair struct {
-	Key   string  `json:"key"`
-	Value float64 `json:"value"`
+type WeekStatMessage struct {
+	Keys         [7]string  `json:"keys"`
+	FormattedDay [7]string  `json:"formattedDay"`
+	Values       [7]float64 `json:"values"`
+	Month        string     `json:"month"`
+	Year         string     `json:"year"`
+	IsError      bool       `json:"isError"`
+	Error        error      `json:"error"`
 }
 
 func (m *Message) encode() ([]byte, error) {
@@ -86,8 +87,8 @@ func listenToDaemonService() (net.Conn, error) {
 
 func (a *App) CheckDaemonService() error {
 	msg := Message{
-		Endpoint:   "startConnection",
-		StringData: "I wish this project prospered.",
+		Endpoint:          "startConnection",
+		StringDataRequest: "I wish this project prospered.",
 	}
 	bytes, err := msg.encode()
 	if err != nil {
@@ -104,6 +105,5 @@ func (a *App) CheckDaemonService() error {
 	if err = msg.decode(buf); err != nil {
 		return err
 	}
-	fmt.Printf("%+v\n\n", msg)
 	return nil
 }

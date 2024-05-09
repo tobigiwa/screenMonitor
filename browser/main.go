@@ -37,8 +37,6 @@ func main() {
 		log.Fatalln("error connectig to daemon service:", err)
 	}
 
-	log.Println("Connected to daemon service")
-
 	server := &http.Server{
 		Addr:    ":8080",
 		Handler: app.Routes(),

@@ -244,6 +244,7 @@ body {
             width: 100% !important;
             height: auto !important;
             background-color: var(--white-color);
+            border-radius: 5px;
         }
     }
 
@@ -252,15 +253,8 @@ body {
         height: 2.2rem;
         background-color: var(--primary-color1);
 
-        .right-controls {
-            flex: 3;
-            justify-content: flex-end;
-            background-color: var(--primary-color1);
-            display: flex;
-        }
-
         .left-controls {
-            flex: 7;
+            flex: 0 0 1;
             justify-content: flex-start;
             background-color: var(--black-color);
             display: flex;
@@ -270,11 +264,41 @@ body {
             .chart__controls--img {
                 width: 35px;
             }
+
+            .select-month {
+
+                & select {
+                    height: 100%;
+                    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+                    font-size: 1rem;
+                    padding: 0 1em;
+                    background-color: var(--primary-color2);
+                    color: white;
+                    border: 0;
+                    width: 100%;
+                }
+
+            }
+
+        }
+
+        .right-controls {
+            flex: 0 0 1;
+            justify-content: flex-end;
+            display: flex;
+            background-color: var(--black-color);
+            border-bottom-left-radius: 10px;
+
+        }
+
+        .spacing {
+            flex: 5;
+            background-color: var(--primary-color1);
         }
 
         .left-controls-button,
         .right-controls-button {
-            border-radius: 2px;
+            border-radius: 5px;
             background-color: var(--primary-color2);
             color: var(--white-color);
         }
@@ -283,7 +307,6 @@ body {
         .img:hover {
             border-radius: 5px;
             transform: scale(1.1);
-
         }
     }
 

@@ -1,5 +1,7 @@
 package frontend
 
+import "time"
+
 // import "github.com/go-echarts/go-echarts/v2/charts"
 templ ScreenTimePage() {
 	<!DOCTYPE html>
@@ -51,17 +53,24 @@ templ chartHighlight() {
 templ chartControls() {
 	<div class="chart-controls">
 		<div class="left-controls">
-			<button class="left-controls-button img">
+		<div class="select-month">
+				<select name="Month" id="">
+					for _, v := range monthDropDownSelectArray() {
+						<option value={ v }>{ v }</option>
+					}
+				</select>
+				// <span class="custom-arrow"></span>
+			</div>
+			<button class="left-controls-button img backward-arrow">
 				<img
 					class="chart__controls--img"
 					src="assets/svg/angle-left-svgrepo-com.svg"
 					alt=""
 				/>
 			</button>
-			<button class="left-controls-button text">Months</button>
-			<button class="left-controls-button text" hx-get="/weekStat?week=lastweek" hx-swap="none" hx-on::afterOnLoad="loadGraph()">Last Week</button>
-			<button class="left-controls-button text" hx-get="/weekStat?week=thisweek" hx-swap="none">This Week</button>
-			<button class="left-controls-button img">
+			<button class="left-controls-button text" hx-get="/weekStat?week=lastweek" hx-swap="none">Last Week</button>
+			<button class="left-controls-button text" id="thisWeekButton" hx-get="/weekStat?week=thisweek" hx-swap="none">This Week</button>
+			<button class="left-controls-button img forward-arrow">
 				<img
 					class="chart__controls--img"
 					src="assets/svg/angle-right-svgrepo-com.svg"
@@ -69,9 +78,20 @@ templ chartControls() {
 				/>
 			</button>
 		</div>
+		<div class="spacing"></div>
 		<div class="right-controls">
-			<button class="right-controls-button text" href="#">Ascending</button>
-			<button class="right-controls-button text" href="#">Descending</button>
+			<button class="right-controls-button text" href="#">Asc.</button>
+			<button class="right-controls-button text" href="#">Desc.</button>
 		</div>
 	</div>
+}
+
+func monthDropDownSelectArray() [4]string {
+	today := time.Now()
+	past4Month := [4]string{}
+	for i := 0; i <= 3; i++ {
+		m := today.AddDate(0, -i, 0)
+		past4Month[i] = m.Month().String()
+	}
+	return past4Month
 }
