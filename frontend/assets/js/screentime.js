@@ -85,7 +85,7 @@ function drawWeekStatChar ( response )
 
     let labels = response.weekStatResponse.formattedDay;
     let data = response.weekStatResponse.values;
-    let label = `Screentime for ${response.weekStatResponse.formattedDay[ 0 ].slice( 5, )} - ${response.weekStatResponse.formattedDay[ 6 ]} ${response.weekStatResponse.month}`;
+    let label = `from ${response.weekStatResponse.formattedDay[ 0 ].slice( 5, )} - ${response.weekStatResponse.formattedDay[ 6 ]} ${response.weekStatResponse.month}`;
     currentSaturday = response.weekStatResponse.keys[ 6 ];
 
     myChart = new Chart( ctx, {
@@ -97,13 +97,13 @@ function drawWeekStatChar ( response )
                 data: data,
                 borderWidth: 1,
                 backgroundColor: [
-                    'rgba(255, 99, 132, 0.2)',
-                    'rgba(255, 159, 64, 0.2)',
-                    'rgba(255, 205, 86, 0.2)',
-                    'rgba(75, 192, 192, 0.2)',
-                    'rgba(54, 162, 235, 0.2)',
-                    'rgba(153, 102, 255, 0.2)',
-                    'rgba(201, 203, 207, 0.2)',
+                    'rgba(255, 99, 132, 0.5)',
+                    'rgba(255, 159, 64, 0.5)',
+                    'rgba(255, 205, 86, 0.5)',
+                    'rgba(75, 192, 192, 0.5)',
+                    'rgba(54, 162, 235, 0.5)',
+                    'rgba(153, 102, 255, 0.5)',
+                    'rgba(201, 203, 207, 0.5)',
 
                 ],
                 borderColor: [
@@ -125,7 +125,34 @@ function drawWeekStatChar ( response )
                     beginAtZero: true,
                     title: {
                         display: true,
-                        text: 'in hours',
+                        text: 'in Hours',
+                    }
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Weekly Screentime'
+                },
+                tooltip: {
+                    usePointStyle: true,
+                    callbacks: {
+                        labelTextColor: function ( tooltipItem )
+                        {
+                            return '#ffffff';
+                        },
+                        labelPointStyle: function ( tooltipItem )
+                        {
+                            return {
+                                pointStyle: 'triangle',
+                                rotation: 0
+                            };
+                        },
+                        label: function ( tooltipItem )
+                        {
+                            var value = 'Active Uptime: ' + Number( tooltipItem.parsed.y.toFixed( 2 ) ) + 'Hrs';
+                            return value;
+                        },
                     }
                 }
             }
@@ -133,24 +160,48 @@ function drawWeekStatChar ( response )
     } );
 }
 
+// function setCurrentMonth ( month )
+// {
+//     let selectElement = document.querySelector( '.month' );
+//     let selectOptions = selectElement.options;
+
+//     // Check if the month is in the dropdown
+//     let monthInDropdown = Array.from( selectOptions ).some( option => option.value == month );
+
+//     if ( monthInDropdown ) {
+//         selectElement.value = month;
+//         selectElement.style.fontSize = "initial";
+//         selectElement.style.fontStyle = "initial";
+//     } else {
+//         selectElement.value = "";
+//         selectElement.style.fontSize = "smaller";
+//         selectElement.style.fontStyle = "italic";
+//     }
+// }
+
+
 function setCurrentMonth ( month )
 {
     let selectElement = document.querySelector( '.month' );
     let selectOptions = selectElement.options;
 
-    // Check if the month is in the dropdown
+    for ( let option of selectOptions ) {
+        option.style.fontSize = "initial";
+        option.style.fontStyle = "normal";
+    }
+
     let monthInDropdown = Array.from( selectOptions ).some( option => option.value == month );
 
     if ( monthInDropdown ) {
         selectElement.value = month;
-        selectElement.style.fontSize = "initial";
-        selectElement.style.fontStyle = "initial";
     } else {
+        let placeholderOption = selectElement.querySelector( '#placeholder' );
+        placeholderOption.style.fontSize = "smaller";
+        placeholderOption.style.fontStyle = "italic";
         selectElement.value = "";
-        selectElement.style.fontSize = "smaller";
-        selectElement.style.fontStyle = "italic";
     }
 }
+
 function arrowButton ()
 {
 
@@ -158,14 +209,12 @@ function arrowButton ()
     let endPointA = '/weekStat?week=backward-arrow&saturday=' + currentSaturday;
 
     backwardButton.setAttribute( 'hx-get', endPointA );
-    backwardButton.setAttribute( 'hx-swap', 'none' );
     htmx.process( backwardButton );
 
     let forwardButton = document.querySelector( '.forward-arrow' );
     let endPointB = '/weekStat?week=forward-arrow&saturday=' + currentSaturday;
 
     forwardButton.setAttribute( 'hx-get', endPointB );
-    forwardButton.setAttribute( 'hx-swap', 'none' );
     htmx.process( forwardButton );
 }
 

@@ -161,7 +161,7 @@ func chartControls() templ.Component {
 			templ_7745c5c3_Var5 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"chart-controls\"><div class=\"left-controls\"><div class=\"select-month\"><select name=\"month\" class=\"month\" hx-get=\"/weekStat?week=month\" hx-vals=\"js{month: this.value}\" hx-swap=\"none\"><option value=\"\" id=\"placeholder\" disabled selected>Last 3 Month</option> ")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"chart-controls\"><div class=\"left-controls\"><div class=\"select-month\"><select name=\"month\" class=\"month\" hx-get=\"/weekStat?week=month\" hx-vals=\"js{month: this.value}\" hx-swap=\"none\" hx-indicator=\"#echart\"><option value=\"\" id=\"placeholder\" disabled selected>Last 3 Month</option> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -197,7 +197,7 @@ func chartControls() templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</select></div><button class=\"left-controls-button img backward-arrow\"><img class=\"chart__controls--img\" src=\"assets/svg/angle-left-svgrepo-com.svg\" alt=\"\"></button> <button class=\"left-controls-button text\" hx-get=\"/weekStat?week=lastweek\" hx-swap=\"none\">Last Week</button> <button class=\"left-controls-button text\" id=\"thisWeekButton\" hx-get=\"/weekStat?week=thisweek\" hx-swap=\"none\">This Week</button> <button class=\"left-controls-button img forward-arrow\"><img class=\"chart__controls--img\" src=\"assets/svg/angle-right-svgrepo-com.svg\" alt=\"\"></button></div><div class=\"spacing\"></div><div class=\"right-controls\"><button class=\"right-controls-button text\" href=\"#\">Asc.</button> <button class=\"right-controls-button text\" href=\"#\">Desc.</button></div></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</select></div><button class=\"left-controls-button img backward-arrow\" hx-swap=\"none\" hx-indicator=\"#echart\"><img class=\"chart__controls--img\" src=\"assets/svg/angle-left-svgrepo-com.svg\" alt=\"\"></button> <button class=\"left-controls-button text\" hx-get=\"/weekStat?week=lastweek\" hx-swap=\"none\" hx-indicator=\"#echart\">Last Week</button> <button class=\"left-controls-button text\" id=\"thisWeekButton\" hx-get=\"/weekStat?week=thisweek\" hx-swap=\"none\" hx-indicator=\"#echart\">This Week</button> <button class=\"left-controls-button img forward-arrow\" hx-swap=\"none\" hx-indicator=\"#echart\"><img class=\"chart__controls--img\" src=\"assets/svg/angle-right-svgrepo-com.svg\" alt=\"\"></button></div><div class=\"spacing\"></div><div class=\"right-controls\"><button class=\"right-controls-button text\" href=\"#\">Asc.</button> <button class=\"right-controls-button text\" href=\"#\">Desc.</button></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

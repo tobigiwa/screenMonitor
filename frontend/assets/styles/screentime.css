@@ -265,23 +265,15 @@ body {
             }
 
             .select-month {
-                font-size: larger;
-                /* font-style: normal; */
-
                 & select {
                     height: 100%;
                     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-                    font-size: 1rem;
                     padding: 0 1em;
                     background-color: var(--primary-color2);
                     color: white;
                     border: 0;
                     width: 100%;
-
-                    #placeholder {
-                        font-size: smaller;
-                        font-style: italic;
-                    }
+                    outline: none;
                 }
             }
         }
@@ -303,6 +295,7 @@ body {
         .left-controls-button,
         .right-controls-button {
             border-radius: 5px;
+            font-weight: bold;
             background-color: var(--primary-color2);
             color: var(--white-color);
         }
