@@ -233,7 +233,6 @@ body {
         border-radius: 2%;
         border-bottom-left-radius: 0%;
         border-bottom-right-radius: 0%;
-        /* width: 100%; */
 
         display: flex;
         align-items: center;
@@ -266,6 +265,8 @@ body {
             }
 
             .select-month {
+                font-size: larger;
+                /* font-style: normal; */
 
                 & select {
                     height: 100%;
@@ -276,10 +277,13 @@ body {
                     color: white;
                     border: 0;
                     width: 100%;
+
+                    #placeholder {
+                        font-size: smaller;
+                        font-style: italic;
+                    }
                 }
-
             }
-
         }
 
         .right-controls {
@@ -326,7 +330,6 @@ body {
         .left-controls-button.text {
             display: none;
         }
-
     }
 
     @media(max-width: 550px) {

@@ -55,8 +55,8 @@ func (s *Service) weekStat(msg Message) WeekStatMessage {
 		}
 	}
 
-	startOftheWeek, _ := repository.ParseKey(repository.Date(data[0].Key))
-	year, month, _ := startOftheWeek.Date()
+	saturdayOftheWeek, _ := repository.ParseKey(repository.Date(data[6].Key))
+	year, month, _ := saturdayOftheWeek.Date()
 	stringMonth := month.String()
 
 	var weekStat WeekStatMessage

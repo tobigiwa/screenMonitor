@@ -69,15 +69,15 @@ func (a *App) WeekStat(w http.ResponseWriter, r *http.Request) {
 			Endpoint:          endpoint,
 			StringDataRequest: lastSaturday,
 		}
-		
+
 		cacheLastSaturday = lastSaturday
 
 	case "backward-arrow", "forward-arrow":
 		var (
-			t        time.Time
-			err      error
-			saturday string
-			q        string
+			t            time.Time
+			err          error
+			lastSaturday string
+			q            string
 		)
 
 		if q = r.URL.Query().Get("saturday"); q == "" {
@@ -90,10 +90,10 @@ func (a *App) WeekStat(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if query == "backward-arrow" {
-			saturday = returnLastSaturday(t)
+			lastSaturday = returnLastSaturday(t)
 			msg = Message{
 				Endpoint:          endpoint,
-				StringDataRequest: saturday,
+				StringDataRequest: lastSaturday,
 			}
 		}
 
@@ -102,20 +102,40 @@ func (a *App) WeekStat(w http.ResponseWriter, r *http.Request) {
 				w.Write(weekStatCache["thisweek"])
 				return
 			}
-			saturday = returnNextSaturday(t)
+			lastSaturday = returnNextSaturday(t)
 			msg = Message{
 				Endpoint:          endpoint,
-				StringDataRequest: saturday,
+				StringDataRequest: lastSaturday,
 			}
 		}
 
-		if jsonResponse, ok := weekStatCache[saturday]; ok {
+		if jsonResponse, ok := weekStatCache[lastSaturday]; ok {
 			w.Write(jsonResponse)
 			return
 		}
 
-		cacheLastSaturday = saturday
+		cacheLastSaturday = lastSaturday
 
+	case "month":
+		var lastSaturday, q string
+		if q = r.URL.Query().Get("month"); q == "" {
+			log.Fatalf("empty query")
+		}
+		if lastSaturday = lastSaturdayOfTheMonth(q); lastSaturday == "" {
+			log.Fatal("invalid input")
+		}
+
+		if jsonResponse, ok := weekStatCache[lastSaturday]; ok {
+			w.Write(jsonResponse)
+			return
+		}
+
+		msg = Message{
+			Endpoint:          endpoint,
+			StringDataRequest: lastSaturday,
+		}
+
+		cacheLastSaturday = lastSaturday
 	}
 
 	fmt.Println("would be consulting the deamonservice")
@@ -135,24 +155,6 @@ func (a *App) WeekStat(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonResponse)
 }
 
-func (a *App) CloseDaemonConnection() error {
-
-	msg := Message{
-		Endpoint: "closeConnection",
-	}
-
-	bytes, err := msg.encode()
-	if err != nil {
-		a.logger.Log(context.TODO(), slog.LevelError, err.Error())
-		return err
-	}
-	if _, err = a.daemonConn.Write(bytes); err != nil {
-		a.logger.Log(context.TODO(), slog.LevelError, err.Error())
-		return err
-	}
-	return a.daemonConn.Close()
-}
-
 func (a *App) writeToFrontend(msg Message) ([]byte, error) {
 	bytes, err := msg.encode() // encode message in byte
 	if err != nil {
@@ -162,7 +164,7 @@ func (a *App) writeToFrontend(msg Message) ([]byte, error) {
 		return nil, err
 	}
 
-	buf := make([]byte, 512)
+	buf := make([]byte, 1024)
 	if _, err = a.daemonConn.Read(buf); err != nil { // wait and read response from socket
 		return nil, err
 	}
@@ -192,4 +194,23 @@ func futureDate(t time.Time) bool {
 	today := time.Now()
 	nextWeekDay := t.AddDate(0, 0, 7)
 	return nextWeekDay.After(today)
+}
+
+func lastSaturdayOfTheMonth(month string) string {
+	t, err := time.Parse("January", month)
+	if err != nil {
+		fmt.Println(err)
+		return ""
+	}
+	NextMonth := time.Date(time.Now().Year(), t.Month()+1, 1, 0, 0, 0, 0, time.UTC)
+
+	var s time.Time
+	for {
+		NextMonth = NextMonth.AddDate(0, 0, -1)
+		if NextMonth.Weekday() == time.Saturday {
+			s = NextMonth
+			break
+		}
+	}
+	return s.Format(timeFormat)
 }

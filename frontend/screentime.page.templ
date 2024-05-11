@@ -53,13 +53,13 @@ templ chartHighlight() {
 templ chartControls() {
 	<div class="chart-controls">
 		<div class="left-controls">
-		<div class="select-month">
-				<select name="Month" id="">
+			<div class="select-month">
+				<select name="month" class="month" hx-get="/weekStat?week=month" hx-vals="js{month: this.value}" hx-swap="none">
+					<option value="" id="placeholder" disabled selected>Last 3 Month</option>
 					for _, v := range monthDropDownSelectArray() {
-						<option value={ v }>{ v }</option>
+						<option class="option" value={ v }>{ v }</option>
 					}
 				</select>
-				// <span class="custom-arrow"></span>
 			</div>
 			<button class="left-controls-button img backward-arrow">
 				<img
@@ -86,11 +86,11 @@ templ chartControls() {
 	</div>
 }
 
-func monthDropDownSelectArray() [4]string {
+func monthDropDownSelectArray() [3]string {
 	today := time.Now()
-	past4Month := [4]string{}
-	for i := 0; i <= 3; i++ {
-		m := today.AddDate(0, -i, 0)
+	past4Month := [3]string{}
+	for i := 0; i < 3; i++ {
+		m := today.AddDate(0, -(i + 1), 0)
 		past4Month[i] = m.Month().String()
 	}
 	return past4Month

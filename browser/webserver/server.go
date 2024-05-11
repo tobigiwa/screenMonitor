@@ -105,5 +105,6 @@ func (a *App) CheckDaemonService() error {
 	if err = msg.decode(buf); err != nil {
 		return err
 	}
+
 	return nil
 }

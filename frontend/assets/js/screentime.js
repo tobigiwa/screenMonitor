@@ -51,10 +51,10 @@ function onFullPageReload ()
 
 function leftcontrolchartButtons ()
 {
-    var chartControlButtons = document.querySelectorAll( '.left-controls-button' );
-    chartControlButtons.forEach( function ( button )
+    var chartControl = document.querySelectorAll( '.left-controls-button, .month' );
+    chartControl.forEach( function ( control )
     {
-        button.addEventListener( 'htmx:afterRequest', function ( event )
+        control.addEventListener( 'htmx:afterRequest', function ( event )
         {
             if ( !event.detail.successful ) {
                 console.log( "request not successful" );
@@ -70,6 +70,7 @@ function leftcontrolchartButtons ()
                 return;
             }
             drawWeekStatChar( response );
+            setCurrentMonth( response.weekStatResponse.month );
             arrowButton();
         } );
     } );
@@ -84,6 +85,7 @@ function drawWeekStatChar ( response )
 
     let labels = response.weekStatResponse.formattedDay;
     let data = response.weekStatResponse.values;
+    let label = `Screentime for ${response.weekStatResponse.formattedDay[ 0 ].slice( 5, )} - ${response.weekStatResponse.formattedDay[ 6 ]} ${response.weekStatResponse.month}`;
     currentSaturday = response.weekStatResponse.keys[ 6 ];
 
     myChart = new Chart( ctx, {
@@ -91,11 +93,28 @@ function drawWeekStatChar ( response )
         data: {
             labels: labels,
             datasets: [ {
-                label: 'Days of the week',
+                label: label,
                 data: data,
                 borderWidth: 1,
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                borderColor: 'rgba(255, 99, 132, 1)',
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(255, 159, 64, 0.2)',
+                    'rgba(255, 205, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(201, 203, 207, 0.2)',
+
+                ],
+                borderColor: [
+                    'rgb(255, 99, 132)',
+                    'rgb(255, 159, 64)',
+                    'rgb(255, 205, 86)',
+                    'rgb(75, 192, 192)',
+                    'rgb(54, 162, 235)',
+                    'rgb(153, 102, 255)',
+                    'rgb(201, 203, 207)',
+                ],
             } ]
         },
         options: {
@@ -103,16 +122,37 @@ function drawWeekStatChar ( response )
             maintainAspectRatio: false,
             scales: {
                 y: {
-                    beginAtZero: true
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'in hours',
+                    }
                 }
             }
         }
     } );
 }
 
+function setCurrentMonth ( month )
+{
+    let selectElement = document.querySelector( '.month' );
+    let selectOptions = selectElement.options;
+
+    // Check if the month is in the dropdown
+    let monthInDropdown = Array.from( selectOptions ).some( option => option.value == month );
+
+    if ( monthInDropdown ) {
+        selectElement.value = month;
+        selectElement.style.fontSize = "initial";
+        selectElement.style.fontStyle = "initial";
+    } else {
+        selectElement.value = "";
+        selectElement.style.fontSize = "smaller";
+        selectElement.style.fontStyle = "italic";
+    }
+}
 function arrowButton ()
 {
-    console.log( "in arrowButton", currentSaturday );
 
     let backwardButton = document.querySelector( '.backward-arrow' );
     let endPointA = '/weekStat?week=backward-arrow&saturday=' + currentSaturday;

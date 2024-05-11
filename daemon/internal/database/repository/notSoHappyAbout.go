@@ -64,5 +64,6 @@ func wmIcon(icon ewmh.WmIcon) ([]byte, error) {
 	if err := png.Encode(buf, img); err != nil {
 		return nil, err
 	}
+	
 	return buf.Bytes(), nil
 }
