@@ -175,7 +175,7 @@ func (bs *BadgerDBStore) GetWeeklyScreenStats(s ScreenType, dayWhat string) ([7]
 
 			statsForThatDay, ok := dailyST[thatDayInDateType]
 			if !ok {
-				statsForThatDay, err = bs.getDayActivity(thatDayInDateType)
+				statsForThatDay, err = bs.getDailyStat(thatDayInDateType)
 				if err != nil {
 					continue
 				}
@@ -216,7 +216,7 @@ func (bs *BadgerDBStore) GetWeeklyScreenStats(s ScreenType, dayWhat string) ([7]
 	return result, nil
 }
 
-func (bs *BadgerDBStore) getDayActivity(day Date) (dailyActiveScreentime, error) {
+func (bs *BadgerDBStore) getDailyStat(day Date) (dailyActiveScreentime, error) {
 
 	var res dailyActiveScreentime
 	err := bs.db.View(func(txn *badger.Txn) error {
@@ -226,7 +226,7 @@ func (bs *BadgerDBStore) getDayActivity(day Date) (dailyActiveScreentime, error)
 		it := txn.NewIterator(opts)
 		defer it.Close()
 
-		prefix := dbAppPrefix()
+		prefix := dbAppPrefix
 		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
 			err := it.Item().Value(func(v []byte) error {
 
@@ -257,61 +257,61 @@ func (bs *BadgerDBStore) getDayActivity(day Date) (dailyActiveScreentime, error)
 	return res, nil
 }
 
-func (bs *BadgerDBStore) BatchWriteUsage(data []ScreenTime) error {
-	wb := bs.db.NewWriteBatch()
-	defer wb.Cancel()
+// func (bs *BadgerDBStore) BatchWriteUsage(data []ScreenTime) error {
+// 	wb := bs.db.NewWriteBatch()
+// 	defer wb.Cancel()
 
-	for _, d := range data {
-		item, err := bs.db.NewTransaction(false).Get([]byte(d.AppName))
-		var newApp bool
-		if newApp = errors.Is(err, badger.ErrKeyNotFound); err != nil && !newApp {
-			return err
-		}
+// 	for _, d := range data {
+// 		item, err := bs.db.NewTransaction(false).Get([]byte(d.AppName))
+// 		var newApp bool
+// 		if newApp = errors.Is(err, badger.ErrKeyNotFound); err != nil && !newApp {
+// 			return err
+// 		}
 
-		var appInfo appInfo
+// 		var appInfo appInfo
 
-		if newApp {
-			fmt.Printf("new app :%v\n\n", d.AppName)
-			appInfo.AppName = d.AppName
-			appInfo.ScreenStat = make(dailyAppScreenTime)
-		}
+// 		if newApp {
+// 			fmt.Printf("new app :%v\n\n", d.AppName)
+// 			appInfo.AppName = d.AppName
+// 			appInfo.ScreenStat = make(dailyAppScreenTime)
+// 		}
 
-		if err == nil {
-			valCopy, err := item.ValueCopy(nil)
-			if err != nil {
-				return err
-			}
-			if err := appInfo.deserialize(valCopy); err != nil {
-				return err
-			}
-			if d.AppName != appInfo.AppName {
-				return ErrAppKeyMismatch
-			}
-			fmt.Printf("existing appName:%v, time so far is: %v:%v\n\n", d.AppName, appInfo.ScreenStat[Key()].Active, appInfo.ScreenStat[Key()].Inactive)
-		}
+// 		if err == nil {
+// 			valCopy, err := item.ValueCopy(nil)
+// 			if err != nil {
+// 				return err
+// 			}
+// 			if err := appInfo.deserialize(valCopy); err != nil {
+// 				return err
+// 			}
+// 			if d.AppName != appInfo.AppName {
+// 				return ErrAppKeyMismatch
+// 			}
+// 			fmt.Printf("existing appName:%v, time so far is: %v:%v\n\n", d.AppName, appInfo.ScreenStat[Key()].Active, appInfo.ScreenStat[Key()].Inactive)
+// 		}
 
-		if d.Type == Active {
-			stat := appInfo.ScreenStat[Key()]
-			stat.Active += d.Duration
-			appInfo.ScreenStat[Key()] = stat
-		} else {
-			stat := appInfo.ScreenStat[Key()]
-			stat.Inactive += d.Duration
-			appInfo.ScreenStat[Key()] = stat
-		}
+// 		if d.Type == Active {
+// 			stat := appInfo.ScreenStat[Key()]
+// 			stat.Active += d.Duration
+// 			appInfo.ScreenStat[Key()] = stat
+// 		} else {
+// 			stat := appInfo.ScreenStat[Key()]
+// 			stat.Inactive += d.Duration
+// 			appInfo.ScreenStat[Key()] = stat
+// 		}
 
-		ser, err := appInfo.serialize()
-		if err != nil {
-			return err
-		}
+// 		ser, err := appInfo.serialize()
+// 		if err != nil {
+// 			return err
+// 		}
 
-		if err := wb.Set([]byte(d.AppName), ser); err != nil {
-			return err
-		}
-	}
+// 		if err := wb.Set([]byte(d.AppName), ser); err != nil {
+// 			return err
+// 		}
+// 	}
 
-	return wb.Flush()
-}
+// 	return wb.Flush()
+// }
 
 // func (bs *BadgerDBStore) WriteUsage(data []ScreenTime) error {
 //     // Group data by app name.

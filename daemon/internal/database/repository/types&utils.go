@@ -18,6 +18,16 @@ var (
 	ErrAppKeyMismatch = fmt.Errorf("key error: app name mismatch")
 	ErrDeserilization = fmt.Errorf("error deserializing data")
 	ErrSerilization   = fmt.Errorf("error serializing data")
+
+	ErrKeyNotFound = fmt.Errorf("data does not exist")
+
+	ErrFutureWeek = fmt.Errorf("requested date(week) is in the future, no time travelling with this func")
+	ErrFutureDay = fmt.Errorf("requested date(day) is in the future, no time travelling with this func")
+)
+
+var (
+	ZeroValueWeeklyStat = WeeklyStat{}
+	ZeroValueDailyStat  = DailyStat{}
 )
 
 type ScreenType string
@@ -75,16 +85,19 @@ func ParseKey(key Date) (time.Time, error) {
 	return a, nil
 }
 
+var dbAppPrefix = []byte("app:")
+var dbDayPrefix = []byte("app:")
+var dbWeekPrefix = []byte("week:")
+
+
 func dbAppKey(appName string) []byte {
 	return []byte(fmt.Sprintf("app:%v", appName))
 }
-
-func dbAppPrefix() []byte {
-	return []byte("app:")
+func dbDayKey(date Date) []byte {
+	return []byte(fmt.Sprintf("day:%v", string(date)))
 }
-
-func dbActiveSTKey() []byte {
-	return []byte("active")
+func dbWeekKey(date Date) []byte {
+	return []byte(fmt.Sprintf("week:%v", string(date)))
 }
 
 func getDesktopCategory(appName string) ([]string, error) {

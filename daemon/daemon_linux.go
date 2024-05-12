@@ -4,6 +4,7 @@ import (
 	"LiScreMon/daemon/internal/database/repository"
 	monitoring "LiScreMon/daemon/internal/monitoring/linux"
 	"LiScreMon/daemon/internal/service"
+	"fmt"
 	"io"
 	"log"
 	"log/slog"
@@ -60,6 +61,25 @@ func DaemonServiceLinux() {
 	go func() {
 		<-signal1
 		close(signal1)
+
+		fmt.Println()
+		fmt.Println()
+
+		a, err := monitor.Db.GetWeek(repository.Date("2024-05-06"))
+		if err != nil {
+			fmt.Println("err777", err)
+		} else {
+			for _, val := range a.EachApp {
+				fmt.Println(val.AppName, val.Usage.Active)
+			}
+
+			fmt.Println("total is, ", a.WeekTotal.Active)
+
+			for _, val := range a.DayByDayTotal {
+				fmt.Printf("%+v\n, ", val)
+			}
+		}
+
 
 		xevent.Quit(monitor.X11Connection)
 		service.SocketConn.Close()

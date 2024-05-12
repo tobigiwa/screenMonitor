@@ -150,6 +150,7 @@ function drawWeekStatChar ( response )
                         },
                         label: function ( tooltipItem )
                         {
+                            // var value = 'Active Uptime: ' + tooltipItem.parsed.y.toFixed( 2 ) + 'Hrs';
                             var value = 'Active Uptime: ' + Number( tooltipItem.parsed.y.toFixed( 2 ) ) + 'Hrs';
                             return value;
                         },
