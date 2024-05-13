@@ -97,7 +97,7 @@ func treatMessage(c net.Conn) {
 			return
 
 		case "weekStat":
-			weekStat := ServiceInstance.weekStat(msg)
+			weekStat := ServiceInstance.getWeekStat(msg)
 			msg.WeekStatResponse = weekStat
 		}
 

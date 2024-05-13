@@ -1,9 +1,10 @@
 package repository
 
 import (
+	"cmp"
 	"errors"
 	"fmt"
-	"time"
+	"slices"
 
 	badger "github.com/dgraph-io/badger/v4"
 )
@@ -28,85 +29,14 @@ func (bs *BadgerDBStore) Close() error {
 	return bs.db.Close()
 }
 
-func (bs *BadgerDBStore) WriteUsage(data ScreenTime) error {
-	return bs.db.Update(func(txn *badger.Txn) error {
-
-		item, err := txn.Get(dbAppKey(data.AppName))
-
-		var (
-			newApp  bool
-			appInfo appInfo
-			valCopy []byte
-		)
-
-		if newApp = errors.Is(err, badger.ErrKeyNotFound); err != nil && !newApp {
-			return err
-		}
-
-		if newApp {
-			appInfo.AppName = data.AppName
-			appInfo.ScreenStat = make(dailyAppScreenTime)
-			if icon, err := GetWmIcon(data.WindowID); err == nil {
-				appInfo.Icon = icon
-				appInfo.IsIconSet = true
-			}
-			if categories, err := getDesktopCategory(data.AppName); err == nil {
-				appInfo.DesktopCategories = categories
-				appInfo.IsCategorySet = true
-			}
-
-			fmt.Printf("New appName:%v, time so far is: %v:%v\n\n", data.AppName, appInfo.IsCategorySet, appInfo.IsIconSet)
-		}
-
-		if err == nil && !newApp {
-			if valCopy, err = item.ValueCopy(nil); err != nil {
-				return err
-			}
-
-			if err = appInfo.deserialize(valCopy); err != nil {
-				return err
-			}
-
-			if data.AppName != appInfo.AppName {
-				return ErrAppKeyMismatch
-			}
-
-			if !appInfo.IsIconSet {
-				if icon, err := GetWmIcon(data.WindowID); err == nil {
-					appInfo.Icon = icon
-					appInfo.IsIconSet = true
-				}
-			}
-
-			if !appInfo.IsCategorySet {
-				if categories, err := getDesktopCategory(data.AppName); err == nil {
-					appInfo.DesktopCategories = categories
-					appInfo.IsCategorySet = true
-				}
-
-			}
-			fmt.Printf("Existing appName:%v, time so far is: %v:%v\n\n", data.AppName, appInfo.ScreenStat[Key()].Active, appInfo.ScreenStat[Key()].Open)
-		}
-
-		switch stat := appInfo.ScreenStat[Key()]; data.Type {
-		case Active:
-			stat.Active += data.Duration
-			stat.ActiveTimeData = append(stat.ActiveTimeData, data.Interval)
-			appInfo.ScreenStat[Key()] = stat
-		case Inactive:
-			stat.Inactive += data.Duration
-			appInfo.ScreenStat[Key()] = stat
-		case Open:
-			stat.Open += data.Duration
-			appInfo.ScreenStat[Key()] = stat
-		}
-
-		byteData, err := appInfo.serialize()
-		if err != nil {
-			return err
-		}
-		return txn.Set(dbAppKey(data.AppName), byteData)
+func (bs *BadgerDBStore) setNewEntryToDB(key, byteData []byte) error {
+	err := bs.db.Update(func(txn *badger.Txn) error {
+		e := badger.NewEntry(key, byteData)
+		err := txn.SetEntry(e)
+		return err
 	})
+
+	return err
 }
 
 func (bs *BadgerDBStore) DeleteKey(key string) error {
@@ -115,114 +45,256 @@ func (bs *BadgerDBStore) DeleteKey(key string) error {
 	})
 }
 
-func (bs *BadgerDBStore) GetWeeklyScreenStats(s ScreenType, dayWhat string) ([7]KeyValuePair, error) {
+func (bs *BadgerDBStore) Get(key []byte) ([]byte, error) {
 
-	var (
-		newKey bool
-		result [7]KeyValuePair
-	)
-	err := bs.db.Update(func(txn *badger.Txn) error {
-		item, err := txn.Get([]byte("daily"))
+	var valCopy []byte
 
-		if newKey = errors.Is(err, badger.ErrKeyNotFound); err != nil && !newKey {
-			return err
-		}
-
-		dailyST := make(dailyScreentimeAnalytics)
-		if newKey {
-			data, err := dailyST.serialize()
-			if err != nil {
-				return err
-			}
-
-			entry := badger.NewEntry([]byte("daily"), data)
-			err = txn.SetEntry(entry)
-			if err != nil {
-				return err
-			}
-
-			return nil
-		}
-
-		var valCopy []byte
-		if valCopy, err = item.ValueCopy(nil); err != nil {
-			return err
-		}
-		if err = dailyST.deserialize(valCopy); err != nil {
-			return err
-		}
-
-		wellFormattedDate, err := ParseKey(Date(dayWhat))
+	err := bs.db.View(func(txn *badger.Txn) error {
+		item, err := txn.Get(key)
 		if err != nil {
 			return err
 		}
 
-		statsForThatWeek := daysInThatWeek(wellFormattedDate)
-
-		for i := 0; i < len(statsForThatWeek); i++ {
-
-			thatDayInDateType := statsForThatWeek[i]
-			thatDayIntimeType, _ := ParseKey(thatDayInDateType)
-
-			today, _ := ParseKey(Date(time.Now().Format(timeFormat)))
-
-			res := KeyValuePair{}
-			if thatDayIntimeType.After(today.AddDate(0, 0, 1)) {
-				res.Key = string(thatDayInDateType)
-				res.Value = 0
-				result[i] = res
-			}
-
-			statsForThatDay, ok := dailyST[thatDayInDateType]
-			if !ok {
-				statsForThatDay, err = bs.getDailyStat(thatDayInDateType)
-				if err != nil {
-					continue
-				}
-
-				if today.After(thatDayIntimeType) {
-					dailyST[thatDayInDateType] = statsForThatDay
-					data, err := dailyST.serialize()
-					if err == nil {
-						txn.Set([]byte("daily"), data)
-					}
-				}
-			}
-			switch s {
-			case Active:
-				res.Key = string(thatDayInDateType)
-				res.Value = statsForThatDay.Stats.Active
-				result[i] = res
-			case Inactive:
-				res.Key = string(thatDayInDateType)
-				res.Value = statsForThatDay.Stats.Active
-				result[i] = res
-			case Open:
-				res.Key = string(thatDayInDateType)
-				res.Value = statsForThatDay.Stats.Active
-				result[i] = res
-			}
+		err = item.Value(func(val []byte) error {
+			valCopy = append([]byte{}, val...)
+			return nil
+		})
+		if err != nil {
+			return err
 		}
-
 		return nil
 	})
 
 	if err != nil {
-		return [7]KeyValuePair{}, err
+		return nil, err
 	}
-	if newKey {
-		return [7]KeyValuePair{}, errors.New("new key created")
+
+	return valCopy, nil
+}
+
+func (bs *BadgerDBStore) WriteUsage(data ScreenTime) error {
+	return bs.db.Update(func(txn *badger.Txn) error {
+		item, err := txn.Get(dbAppKey(data.AppName))
+
+		var (
+			newApp  bool
+			app     appInfo
+			valCopy []byte
+		)
+
+		if newApp = errors.Is(err, badger.ErrKeyNotFound); err != nil && !newApp {
+			return err
+		}
+
+		if newApp {
+			app.AppName = data.AppName
+			app.ScreenStat = make(dailyAppScreenTime)
+			if icon, err := GetWmIcon(data.WindowID); err == nil {
+				app.Icon = icon
+				app.IsIconSet = true
+			}
+			if categories, err := getDesktopCategory(data.AppName); err == nil {
+				app.DesktopCategories = categories
+				app.IsCategorySet = true
+			}
+
+			fmt.Printf("New appName:%v, time so far is: %v:%v\n\n", data.AppName, app.IsCategorySet, app.IsIconSet)
+		}
+
+		if err == nil && !newApp {
+			if valCopy, err = item.ValueCopy(nil); err != nil {
+				return err
+			}
+
+			if app, err = Decode[appInfo](valCopy); err != nil {
+				return err
+			}
+
+			if data.AppName != app.AppName {
+				return ErrAppKeyMismatch
+			}
+
+			if !app.IsIconSet {
+				if icon, err := GetWmIcon(data.WindowID); err == nil {
+					app.Icon = icon
+					app.IsIconSet = true
+				}
+			}
+
+			if !app.IsCategorySet {
+				if categories, err := getDesktopCategory(data.AppName); err == nil {
+					app.DesktopCategories = categories
+					app.IsCategorySet = true
+				}
+
+			}
+			fmt.Printf("Existing appName:%v, time so far is: %v:%v\n\n", data.AppName, app.ScreenStat[Key()].Active, app.ScreenStat[Key()].Open)
+		}
+
+		switch stat := app.ScreenStat[Key()]; data.Type {
+		case Active:
+			stat.Active += data.Duration
+			stat.ActiveTimeData = append(stat.ActiveTimeData, data.Interval)
+			app.ScreenStat[Key()] = stat
+		case Inactive:
+			stat.Inactive += data.Duration
+			app.ScreenStat[Key()] = stat
+		case Open:
+			stat.Open += data.Duration
+			app.ScreenStat[Key()] = stat
+		}
+
+		byteData, err := Encode(app)
+		if err != nil {
+			return err
+		}
+		return txn.Set(dbAppKey(data.AppName), byteData)
+	})
+}
+
+func (bs *BadgerDBStore) GetWeek(day string) (WeeklyStat, error) {
+
+	anyDayInTheWeek := Date(day)
+	date, _ := ParseKey(anyDayInTheWeek)
+	if IsFutureWeek(date) {
+		return ZeroValueWeeklyStat, ErrFutureWeek
 	}
+
+	saturdayOfThatWeek := SaturdayOfTheWeek(date)
+
+	byteData, err := bs.Get(dbWeekKey(Date(saturdayOfThatWeek)))
+	errKeyNotFound := errors.Is(err, badger.ErrKeyNotFound)
+
+	if err != nil && !errKeyNotFound {
+		return ZeroValueWeeklyStat, err
+	}
+
+	if errKeyNotFound {
+		return bs.getWeeklyAppStat(anyDayInTheWeek)
+	}
+
+	weekStat, err := Decode[WeeklyStat](byteData)
+	if err != nil {
+		return ZeroValueWeeklyStat, err
+	}
+	return weekStat, nil
+}
+
+func (bs *BadgerDBStore) getWeeklyAppStat(anyDayInTheWeek Date) (WeeklyStat, error) {
+
+	var (
+		result     WeeklyStat
+		weekTotal  stats
+		tmpStorage = make(map[string]stats, 20)
+	)
+
+	date, _ := ParseKey(anyDayInTheWeek)
+	allConcernedDays := daysInThatWeek(date)
+
+	err := bs.db.View(func(txn *badger.Txn) error {
+
+		for i := 0; i < len(allConcernedDays); i++ {
+			day := allConcernedDays[i]
+
+			dayStat, err := bs.GetDay(day)
+			if err != nil {
+				result.DayByDayTotal[i] = GenericKeyValue[Date, stats]{}
+				continue
+			}
+
+			// DayByDayTotal [7]stats
+			result.DayByDayTotal[i].Key = day
+			result.DayByDayTotal[i].Value = dayStat.DayTotal
+
+			// WeekTotal stats
+			weekTotal.Active += dayStat.DayTotal.Active
+			weekTotal.Inactive += dayStat.DayTotal.Inactive
+			weekTotal.Open += dayStat.DayTotal.Open
+
+			// EachApp []appStat
+			for j := 0; j < len(dayStat.EachApp); j++ {
+				eachAppName := dayStat.EachApp[j].AppName
+				eachAppStat := dayStat.EachApp[j].Usage
+
+				//get for that app
+				thatAppStat := tmpStorage[eachAppName]
+				//update it stat
+				thatAppStat.Active += eachAppStat.Active
+				thatAppStat.Inactive += eachAppStat.Inactive
+				thatAppStat.Open += eachAppStat.Open
+				//put it back
+				tmpStorage[eachAppName] = thatAppStat
+
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return ZeroValueWeeklyStat, err
+	}
+
+	size := len(tmpStorage)
+	eachAppSlice := make([]appStat, 0, size)
+	for app, stat := range tmpStorage {
+		eachAppSlice = append(eachAppSlice, appStat{app, stat})
+	}
+
+	slices.SortFunc(eachAppSlice, func(a, b appStat) int {
+		return cmp.Compare(b.Usage.Active, a.Usage.Active)
+	})
+
+	result.WeekTotal = weekTotal
+	result.EachApp = eachAppSlice
+
+	if IsPastWeek(date) {
+		byteData, _ := Encode(result)
+		saturdayOfThatWeek := allConcernedDays[6]
+		err := bs.setNewEntryToDB(dbWeekKey(saturdayOfThatWeek), byteData)
+		if err != nil {
+			fmt.Println("ERROR WRITING NEW WEEK ENTRY", saturdayOfThatWeek, "ERROR IS:", err)
+		} else {
+			fmt.Println("WRITING NEW WEEK ENTRY", saturdayOfThatWeek)
+		}
+	}
+
 	return result, nil
 }
 
-func (bs *BadgerDBStore) getDailyStat(day Date) (dailyActiveScreentime, error) {
+func (bs *BadgerDBStore) GetDay(date Date) (DailyStat, error) {
 
-	var res dailyActiveScreentime
+	if day, _ := ParseKey(date); day.After(formattedToDay()) {
+		return ZeroValueDailyStat, ErrFutureDay
+	}
+
+	byteData, err := bs.Get(dbDayKey(date))
+	errKeyNotFound := errors.Is(err, badger.ErrKeyNotFound)
+
+	if err != nil && !errKeyNotFound {
+		return ZeroValueDailyStat, err
+	}
+
+	if errKeyNotFound {
+		return bs.getDailyAppStat(date)
+	}
+
+	dayStat, err := Decode[DailyStat](byteData)
+	if err != nil {
+		return ZeroValueDailyStat, err
+	}
+	return dayStat, nil
+}
+
+func (bs *BadgerDBStore) getDailyAppStat(day Date) (DailyStat, error) {
+	var (
+		result       DailyStat
+		dayTotalData stats
+		arr          = make([]appStat, 0, 20)
+	)
+
 	err := bs.db.View(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
 		opts.PrefetchValues = true
-		opts.PrefetchSize = 10
+		opts.PrefetchSize = 100
 		it := txn.NewIterator(opts)
 		defer it.Close()
 
@@ -230,20 +302,32 @@ func (bs *BadgerDBStore) getDailyStat(day Date) (dailyActiveScreentime, error) {
 		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
 			err := it.Item().Value(func(v []byte) error {
 
-				var app appInfo
-				if err := app.deserialize(v); err != nil {
+				var (
+					app            appInfo
+					appStatArrData appStat
+					err            error
+				)
+
+				if app, err = Decode[appInfo](v); err != nil {
 					return err
 				}
 
 				thatDayStat := app.ScreenStat[day]
 
-				res.Stats.Active += thatDayStat.Active
-				res.Stats.Inactive += thatDayStat.Inactive
-				res.Stats.Open += thatDayStat.Open
+				// EachApp []appstat
+				appStatArrData.AppName = app.AppName
+				appStatArrData.Usage.Active = thatDayStat.Active
+				appStatArrData.Usage.Inactive = thatDayStat.Inactive
+				appStatArrData.Usage.Open = thatDayStat.Open
+				arr = append(arr, appStatArrData)
+
+				// DayTotall stats
+				dayTotalData.Active += thatDayStat.Active
+				dayTotalData.Inactive += thatDayStat.Inactive
+				dayTotalData.Open += thatDayStat.Open
 
 				return nil
 			})
-
 			if err != nil {
 				return err
 			}
@@ -251,10 +335,29 @@ func (bs *BadgerDBStore) getDailyStat(day Date) (dailyActiveScreentime, error) {
 		return nil
 	})
 	if err != nil {
-		return dailyActiveScreentime{}, err
+		return ZeroValueDailyStat, err
 	}
 
-	return res, nil
+	slices.SortFunc(arr, func(a, b appStat) int {
+		return cmp.Compare(b.Usage.Active, a.Usage.Active)
+	})
+
+	result.DayTotal.Active = dayTotalData.Active
+	result.DayTotal.Inactive = dayTotalData.Inactive
+	result.DayTotal.Open = dayTotalData.Open
+	result.EachApp = arr
+
+	if day != Date(formattedToDay().Format(timeFormat)) {
+		byteData, _ := Encode(result)
+		err := bs.setNewEntryToDB(dbDayKey(day), byteData)
+		if err != nil {
+			fmt.Println("ERROR WRITING NEW DAY ENTRY", day, "ERROR IS:", err)
+		} else {
+			fmt.Println("WRITING NEW DAY ENTRY", day)
+		}
+	}
+
+	return result, nil
 }
 
 // func (bs *BadgerDBStore) BatchWriteUsage(data []ScreenTime) error {
@@ -311,66 +414,4 @@ func (bs *BadgerDBStore) getDailyStat(day Date) (dailyActiveScreentime, error) {
 // 	}
 
 // 	return wb.Flush()
-// }
-
-// func (bs *BadgerDBStore) WriteUsage(data []ScreenTime) error {
-//     // Group data by app name.
-//     groupedData := make(map[string][]ScreenTime)
-//     for _, d := range data {
-//         groupedData[d.AppName] = append(groupedData[d.AppName], d)
-//     }
-
-//     wb := bs.db.NewWriteBatch()
-//     defer wb.Cancel()
-
-//     for appName, appData := range groupedData {
-//         item, err := bs.db.NewTransaction(false).Get([]byte(appName))
-//         var newApp bool
-//         if newApp = errors.Is(err, badger.ErrKeyNotFound); err != nil && !newApp {
-//             return err
-//         }
-
-//         var appInfo appInfo
-
-//         if newApp {
-//             fmt.Printf("new app :%v\n\n", appName)
-//             appInfo.AppName = appName
-//             appInfo.ActiveScreenStats = make(dailyAppScreenTime)
-//             appInfo.PassiveScreenStats = make(dailyAppScreenTime)
-//         }
-
-//         if err == nil {
-//             valCopy, err := item.ValueCopy(nil)
-//             if err != nil {
-//                 return err
-//             }
-//             if err := appInfo.deserialize(valCopy); err != nil {
-//                 return err
-//             }
-//             if appName != appInfo.AppName {
-//                 return ErrAppKeyMismatch
-//             }
-//             fmt.Printf("existing appName:%v, time so far is: %v:%v\n\n", appName, appInfo.ActiveScreenStats[Key()], appInfo.PassiveScreenStats[Key()])
-//         }
-
-//         // Sum screen time for this app.
-//         for _, d := range appData {
-//             if d.Type == Active {
-//                 appInfo.ActiveScreenStats[Key()] += d.Time
-//             } else {
-//                 appInfo.PassiveScreenStats[Key()] += d.Time
-//             }
-//         }
-
-//         ser, err := appInfo.serialize()
-//         if err != nil {
-//             return err
-//         }
-
-//         if err := wb.Set([]byte(appName), ser); err != nil {
-//             return err
-//         }
-//     }
-
-//     return wb.Flush()
 // }

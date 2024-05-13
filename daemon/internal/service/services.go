@@ -45,8 +45,8 @@ type Service struct {
 	store repository.IRepository
 }
 
-func (s *Service) weekStat(msg Message) WeekStatMessage {
-	data, err := s.store.GetWeeklyScreenStats(repository.Active, msg.StringDataRequest)
+func (s *Service) getWeekStat(msg Message) WeekStatMessage {
+	weekStat, err := s.store.GetWeek(msg.StringDataRequest)
 	if err != nil {
 		log.Println("error weekStat:", err)
 		return WeekStatMessage{
@@ -54,26 +54,35 @@ func (s *Service) weekStat(msg Message) WeekStatMessage {
 			Error:   err,
 		}
 	}
+	var (
+		keys         = [7]string{}
+		formattedDay = [7]string{}
+		values       = [7]float64{}
+	)
 
-	saturdayOftheWeek, _ := repository.ParseKey(repository.Date(data[6].Key))
+	for i := 0; i < 7; i++ {
+		keys[i] = string(weekStat.DayByDayTotal[i].Key)
+		values[i] = weekStat.DayByDayTotal[i].Value.Active
+
+		day, _ := repository.ParseKey(repository.Date(weekStat.DayByDayTotal[i].Key))
+		dayWithSuffix := addOrdinalSuffix(day.Day())
+		weekDay := strings.TrimSuffix(day.Weekday().String(), "day")
+		formattedDay[i] = fmt.Sprintf("%v. %v", weekDay, dayWithSuffix)
+	}
+
+	saturdayOftheWeek, _ := repository.ParseKey(repository.Date(weekStat.DayByDayTotal[6].Key))
 	year, month, _ := saturdayOftheWeek.Date()
 	stringMonth := month.String()
 
-	var weekStat WeekStatMessage
-	weekStat.Month = stringMonth
-	weekStat.Year = fmt.Sprint(year)
-
-	for i := 0; i < 7; i++ {
-		day, _ := repository.ParseKey(repository.Date(data[i].Key))
-		dayWithSuffix := addOrdinalSuffix(day.Day())
-		weekDay := strings.TrimSuffix(day.Weekday().String(), "day")
-		weekStat.Keys[i] = data[i].Key
-		weekStat.FormattedDay[i] = fmt.Sprintf("%v. %v", weekDay, dayWithSuffix)
-		weekStat.Values[i] = data[i].Value
+	return WeekStatMessage{
+		Keys:         keys,
+		FormattedDay: formattedDay,
+		Values:       values,
+		Month:        stringMonth,
+		Year:         fmt.Sprint(year),
 	}
-
-	return weekStat
 }
+
 
 func addOrdinalSuffix(n int) string {
 	switch n {
