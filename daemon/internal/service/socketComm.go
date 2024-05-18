@@ -101,7 +101,7 @@ func treatMessage(c net.Conn) {
 			msg.WeekStatResponse = weekStat
 		}
 
-		bytes, err := msg.encode()
+		bytes, err := repository.Encode(msg)
 		if err != nil {
 			log.Println("error encoding response:", err)
 			continue

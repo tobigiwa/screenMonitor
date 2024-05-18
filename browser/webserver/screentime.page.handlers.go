@@ -42,7 +42,10 @@ func (a *App) WeekStat(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query().Get("week")
 	endpoint := strings.TrimPrefix(r.URL.Path, "/")
 
-	var msg Message
+	var (
+		msg Message
+		err error
+	)
 
 	switch query {
 	case "thisweek":
@@ -138,42 +141,49 @@ func (a *App) WeekStat(w http.ResponseWriter, r *http.Request) {
 		cacheLastSaturday = lastSaturday
 	}
 
-	fmt.Println("would be consulting the deamonservice")
-	jsonResponse, err := a.writeToFrontend(msg)
+	// fmt.Println("would be consulting the deamonservice")
+	msg, err = a.writeAndReadWithDaemonService(msg)
 	if err != nil {
-		fmt.Println("error occurred in writeToFrontend", err)
+		fmt.Println("error occurred in writeAndReadWithDaemonService", err)
 		return
+	}
+	
+	fmt.Printf("\n\n%+v\n\n", msg)
+
+	templComp := prepareHtTMLResponse(msg)
+	err = templComp.Render(context.TODO(), w)
+	if err != nil {
+		fmt.Println("err with templ:", err)
 	}
 
 	// Cache
-	if query == "thisweek" {
-		weekStatCache[query] = jsonResponse
-	} else if query == "backward-arrow" || query == "forward-arrow" || query == "lastweek" {
-		weekStatCache[cacheLastSaturday] = jsonResponse
-	}
+	// if query == "thisweek" {
+	// 	weekStatCache[query] = jsonResponse
+	// } else if query == "backward-arrow" || query == "forward-arrow" || query == "lastweek" {
+	// 	weekStatCache[cacheLastSaturday] = jsonResponse
+	// }
 
-	w.Write(jsonResponse)
+	// w.Write(jsonResponse)
 }
 
-func (a *App) writeToFrontend(msg Message) ([]byte, error) {
+var emptyMessage = Message{}
+
+func (a *App) writeAndReadWithDaemonService(msg Message) (Message, error) {
 	bytes, err := msg.encode() // encode message in byte
 	if err != nil {
-		return nil, err
+		return emptyMessage, fmt.Errorf("encode %w", err)
 	}
 	if _, err = a.daemonConn.Write(bytes); err != nil { // write to socket
-		return nil, err
+		return emptyMessage, fmt.Errorf("write %w", err)
 	}
 
-	buf := make([]byte, 1024)
+	buf := make([]byte, 1_024)
 	if _, err = a.daemonConn.Read(buf); err != nil { // wait and read response from socket
-		return nil, err
+		return emptyMessage, fmt.Errorf("read %w", err)
 	}
 
-	if err = msg.decode(buf); err != nil { // decode response to Message struct
-		return nil, err
-	}
+	return Decode[Message](buf)
 
-	return msg.decodeToJson() // convert response to json
 }
 
 func returnLastSaturday(t time.Time) string {

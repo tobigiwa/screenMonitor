@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/gob"
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"net"
 	"os"
@@ -16,14 +17,32 @@ type Message struct {
 	WeekStatResponse   WeekStatMessage `json:"weekStatResponse"`
 }
 type WeekStatMessage struct {
-	Keys         [7]string  `json:"keys"`
-	FormattedDay [7]string  `json:"formattedDay"`
-	Values       [7]float64 `json:"values"`
-	Month        string     `json:"month"`
-	Year         string     `json:"year"`
-	IsError      bool       `json:"isError"`
-	Error        error      `json:"error"`
+	Keys            [7]string           `json:"keys"`
+	FormattedDay    [7]string           `json:"formattedDay"`
+	Values          [7]float64          `json:"values"`
+	TotalWeekUptime float64             `json:"totalWeekUptime"`
+	Month           string              `json:"month"`
+	Year            string              `json:"year"`
+	AppDetail       []applicationDetail `json:"appDetail"`
+	IsError         bool                `json:"isError"`
+	Error           error               `json:"error"`
 }
+
+type applicationDetail struct {
+	AppInfo AppIconAndCategory `json:"appInfo"`
+	Usage   float64            `json:"usage"`
+}
+
+type AppIconAndCategory struct {
+	AppName           string   `json:"appName"`
+	Icon              []byte   `json:"icon"`
+	IsIconSet         bool     `json:"isIconSet"`
+	Category          string   `json:"category"`
+	IsCategorySet     bool     `json:"isCategorySet"`
+	DesktopCategories []string `json:"desktopCategories"`
+}
+
+// type Category string
 
 func (m *Message) encode() ([]byte, error) {
 	buf := new(bytes.Buffer)
@@ -97,8 +116,7 @@ func (a *App) CheckDaemonService() error {
 	if _, err = a.daemonConn.Write(bytes); err != nil {
 		return err
 	}
-
-	buf := make([]byte, 512)
+	buf := make([]byte, 10240)
 	if _, err := a.daemonConn.Read(buf); err != nil {
 		return err
 	}
@@ -108,3 +126,26 @@ func (a *App) CheckDaemonService() error {
 
 	return nil
 }
+
+func Encode[T any](tyPe T) ([]byte, error) {
+	var r bytes.Buffer
+	encoded := gob.NewEncoder(&r)
+	if err := encoded.Encode(tyPe); err != nil {
+		return nil, fmt.Errorf("%v:%w", err, ErrSerilization)
+	}
+	return r.Bytes(), nil
+}
+
+func Decode[T any](data []byte) (T, error) {
+	var t, result T
+	decoded := gob.NewDecoder(bytes.NewReader(data))
+	if err := decoded.Decode(&result); err != nil {
+		return t, fmt.Errorf("%v:%w", err, ErrDeserilization)
+	}
+	return result, nil
+}
+
+var (
+	ErrDeserilization = fmt.Errorf("error deserializing data")
+	ErrSerilization   = fmt.Errorf("error serializing data")
+)

@@ -236,13 +236,10 @@ body {
 
         display: flex;
         align-items: center;
-        justify-content: center;
-        overflow: hidden;
-
-        #echart {
+        #echart, .item {
             width: 100% !important;
             height: auto !important;
-            background-color: var(--white-color);
+            background-color: rgb(255, 255, 255);
             border-radius: 5px;
         }
     }
@@ -292,8 +289,8 @@ body {
             background-color: var(--primary-color1);
         }
 
-        .left-controls-button,
-        .right-controls-button {
+        .left-controls__btn,
+        .right-controls__btn {
             border-radius: 5px;
             font-weight: bold;
             background-color: var(--primary-color2);

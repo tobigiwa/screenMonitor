@@ -198,7 +198,7 @@ func (bs *BadgerDBStore) getWeeklyAppStat(anyDayInTheWeek Date) (WeeklyStat, err
 
 			dayStat, err := bs.GetDay(day)
 			if err != nil {
-				result.DayByDayTotal[i] = GenericKeyValue[Date, stats]{}
+				result.DayByDayTotal[i] = GenericKeyValue[Date, stats]{Key: day, Value: stats{}}
 				continue
 			}
 
@@ -356,6 +356,48 @@ func (bs *BadgerDBStore) getDailyAppStat(day Date) (DailyStat, error) {
 			fmt.Println("WRITING NEW DAY ENTRY", day)
 		}
 	}
+
+	return result, nil
+}
+
+func (bs *BadgerDBStore) GetAppIconAndCategory(appNames []string) ([]AppIconAndCategory, error) {
+	result := make([]AppIconAndCategory, len(appNames))
+	bs.db.View(func(txn *badger.Txn) error {
+
+		for i := 0; i < len(appNames); i++ {
+
+			appName := appNames[i]
+			item, err := txn.Get(dbAppKey(appName))
+			if err != nil {
+				result[i] = AppIconAndCategory{AppName: appName}
+				continue
+			}
+			byteData, err := item.ValueCopy(nil)
+			if err != nil {
+				result[i] = AppIconAndCategory{AppName: appName}
+				continue
+			}
+			app, err := Decode[appInfo](byteData)
+			if err != nil {
+				result[i] = AppIconAndCategory{AppName: appName}
+				continue
+			}
+
+			a := AppIconAndCategory{AppName: app.AppName}
+			if app.IsIconSet {
+				a.Icon = app.Icon
+				a.IsIconSet = true
+			}
+			if app.IsCategorySet {
+				a.Category = string(app.Category)
+				a.IsCategorySet = true
+			} else {
+				a.DesktopCategories = app.DesktopCategories
+			}
+			result[i] = a
+		}
+		return nil
+	})
 
 	return result, nil
 }

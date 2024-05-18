@@ -1,18 +1,7 @@
 import lottie from 'lottie-web';
 import htmx from 'htmx.org';
-// import * as echarts from 'echarts';
 import Chart from 'chart.js/auto';
 
-
-// document.addEventListener( 'DOMContentLoaded', function ()
-// {
-//     var chart = document.getElementById( 'echart' );
-//     var myChart = echarts.init( chart );
-//     window.onresize = function ()
-//     {
-//         myChart.resize();
-//     };
-// } );
 
 let myChart;
 let currentSaturday;
@@ -21,8 +10,8 @@ document.addEventListener( 'DOMContentLoaded', function ()
 {
 
     loadAnimation();
-    onFullPageReload();
-    leftcontrolchartButtons();
+    // onFullPageReload();
+    // leftcontrolchartButtons();
 
 } );
 
@@ -72,6 +61,7 @@ function leftcontrolchartButtons ()
             drawWeekStatChar( response );
             setCurrentMonth( response.weekStatResponse.month );
             arrowButton();
+            htmx.trigger( "#highlight", 'highlight', );
         } );
     } );
 }
@@ -83,10 +73,17 @@ function drawWeekStatChar ( response )
         myChart.destroy();
     }
 
+
     let labels = response.weekStatResponse.formattedDay;
     let data = response.weekStatResponse.values;
-    let label = `from ${response.weekStatResponse.formattedDay[ 0 ].slice( 5, )} - ${response.weekStatResponse.formattedDay[ 6 ]} ${response.weekStatResponse.month}`;
+
+    var num = response.weekStatResponse.totalWeekUptime;
+    var Hrs = Math.floor( num );
+    var min = Math.round( ( num - Hrs ) * 60 );
+    let label = `from ${response.weekStatResponse.formattedDay[ 0 ].slice( 5, )} - ${response.weekStatResponse.formattedDay[ 6 ]} ${response.weekStatResponse.month}  [${Hrs}Hrs:${min}Min Total Uptime]`;
     currentSaturday = response.weekStatResponse.keys[ 6 ];
+
+ 
 
     myChart = new Chart( ctx, {
         type: 'bar',
@@ -150,8 +147,10 @@ function drawWeekStatChar ( response )
                         },
                         label: function ( tooltipItem )
                         {
-                            // var value = 'Active Uptime: ' + tooltipItem.parsed.y.toFixed( 2 ) + 'Hrs';
-                            var value = 'Active Uptime: ' + Number( tooltipItem.parsed.y.toFixed( 2 ) ) + 'Hrs';
+                            var num = tooltipItem.parsed.y;
+                            var Hrs = Math.floor( num );
+                            var min = Math.round( ( num - Hrs ) * 60 );
+                            var value = `Active Uptime:  ${Hrs}Hrs:${min}Min`;
                             return value;
                         },
                     }
@@ -160,6 +159,11 @@ function drawWeekStatChar ( response )
         }
     } );
 }
+
+document.body.addEventListener( "highlight", function ( event )
+{
+    alert( "we got it" );
+} );
 
 // function setCurrentMonth ( month )
 // {
@@ -243,3 +247,8 @@ document.addEventListener( 'keydown', function ( e )
         e.preventDefault();
     }
 } );
+
+   function vvv (num) {
+         var Hrs = Math.floor( num );
+        var min = Math.round( ( num - Hrs ) * 60 );
+    }

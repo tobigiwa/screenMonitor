@@ -50,7 +50,6 @@ func SaturdayOfTheWeek(t time.Time) string {
 }
 
 func daysInThatWeek(w time.Time) [7]Date {
-
 	var arr [7]Date
 	startOftheWeek := w.AddDate(0, 0, -int(w.Weekday()))
 	for i := 0; i < 7; i++ {
