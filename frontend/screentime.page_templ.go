@@ -12,8 +12,9 @@ import "bytes"
 
 import "time"
 import "html/template"
+import "fmt"
+import "pkg/types"
 
-// import "github.com/go-echarts/go-echarts/v2/charts"
 func ScreenTimePage() templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
@@ -71,7 +72,7 @@ func main() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = ChartWrapper("").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = chartWrapper("").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -79,7 +80,7 @@ func main() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = ChartHighlight().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = chartHighlight(nil).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -94,7 +95,7 @@ func main() templ.Component {
 	})
 }
 
-func ChartWrapper(chart template.HTML) templ.Component {
+func chartWrapper(chart template.HTML) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -126,7 +127,7 @@ func ChartWrapper(chart template.HTML) templ.Component {
 	})
 }
 
-func ChartHighlight() templ.Component {
+func chartHighlight(appDetails []types.ApplicationDetail) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -139,7 +140,71 @@ func ChartHighlight() templ.Component {
 			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"chart-highlight\" id=\"highlight\" hx-post=\"/your-endpoint-url\" hx-trigger=\"change from:#echart\"></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"chart-highlight\" hx-swap-obb=\"true\"><ul id=\"highlight\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		for i := 0; i < len(appDetails); i++ {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<li><div class=\"card\"><img src=\"\" alt=\"\" class=\"app-icon\"><div class=\"info\"><div class=\"appName\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var5 string
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(appDetails[i].AppInfo.AppName)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `screentime.page.templ`, Line: 54, Col: 59}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if appDetails[i].AppInfo.IsCategorySet {
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<button class=\"category\">Category: ")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var6 string
+				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(appDetails[i].AppInfo.Category)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `screentime.page.templ`, Line: 56, Col: 75}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			} else {
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<button class=\"category\">Selct application catergory</button>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><div class=\"appStat\">Weeks Usage: ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var7 string
+			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%v", appDetails[i].Usage))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `screentime.page.templ`, Line: 61, Col: 80}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("Hrs</div></div></li>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</ul></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -150,7 +215,7 @@ func ChartHighlight() templ.Component {
 	})
 }
 
-func WeekStatChartAndHighlight() templ.Component {
+func WeekStatChartAndHighlight(chart template.HTML, appDetails []types.ApplicationDetail) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -158,16 +223,16 @@ func WeekStatChartAndHighlight() templ.Component {
 			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var5 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var5 == nil {
-			templ_7745c5c3_Var5 = templ.NopComponent
+		templ_7745c5c3_Var8 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var8 == nil {
+			templ_7745c5c3_Var8 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = ChartHighlight().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = chartWrapper(chart).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = ChartHighlight().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = chartHighlight(appDetails).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -186,9 +251,9 @@ func chartControls() templ.Component {
 			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var6 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var6 == nil {
-			templ_7745c5c3_Var6 = templ.NopComponent
+		templ_7745c5c3_Var9 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var9 == nil {
+			templ_7745c5c3_Var9 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"chart-controls\"><div class=\"left-controls\"><div class=\"select-month\"><select name=\"month\" class=\"month\" hx-get=\"/weekStat?week=month\" hx-vals=\"js{month: this.value}\" hx-swap=\"none\" hx-indicator=\"#echart\"><option value=\"\" id=\"placeholder\" disabled selected>Last 3 Month</option> ")
@@ -200,12 +265,12 @@ func chartControls() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var7 string
-			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(v)
+			var templ_7745c5c3_Var10 string
+			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(v)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `screentime.page.templ`, Line: 61, Col: 38}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `screentime.page.templ`, Line: 81, Col: 38}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -213,12 +278,12 @@ func chartControls() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var8 string
-			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(v)
+			var templ_7745c5c3_Var11 string
+			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(v)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `screentime.page.templ`, Line: 61, Col: 44}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `screentime.page.templ`, Line: 81, Col: 44}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -227,7 +292,7 @@ func chartControls() templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</select></div><button class=\"left-controls__btn img backward-arrow\" hx-swap=\"none\" hx-indicator=\"#echart\"><img class=\"chart__controls--img\" src=\"assets/svg/angle-left-svgrepo-com.svg\" alt=\"\"></button> <button class=\"left-controls__btn text\" hx-get=\"/weekStat?week=lastweek\" hx-swap=\"none\" hx-indicator=\"#echart\">Last Week</button> <button class=\"left-controls__btn text\" id=\"thisWeekButton\" hx-get=\"/weekStat?week=thisweek\" hx-swap=\"innerHTML\" hx-target=\"#echart\">This Week</button> <button class=\"left-controls__btn img forward-arrow\" hx-swap=\"none\" hx-indicator=\"#echart\"><img class=\"chart__controls--img\" src=\"assets/svg/angle-right-svgrepo-com.svg\" alt=\"\"></button></div><div class=\"spacing\"></div><div class=\"right-controls\"><button class=\"right-controls__btn text\" href=\"#\">Asce.</button> <button class=\"right-controls__btn text\" href=\"#\">Desc.</button></div><script>\n\t\tdocument.addEventListener( 'DOMContentLoaded', function ()\n\t\t{\n\t\t\twindow.onload = function ()\n\t\t\t{\n\t\t\t\tvar thisWeekButton = document.querySelector( '#thisWeekButton' );\n\n\t\t\t\tif ( thisWeekButton ) {\n\t\t\t\t\tthisWeekButton.click();\n\t\t\t\t}\n\t\t\t};\n\n\t\t} );\n\t\t</script></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</select></div><button class=\"left-controls__btn img backward-arrow\" hx-swap=\"none\" hx-indicator=\"#echart\"><img class=\"chart__controls--img\" src=\"assets/svg/angle-left-svgrepo-com.svg\" alt=\"\"></button> <button class=\"left-controls__btn text\" hx-get=\"/weekStat?week=lastweek\" hx-swap=\"none\" hx-indicator=\"#echart\">Last Week</button> <button class=\"left-controls__btn text\" id=\"thisWeekButton\" hx-get=\"/weekStat?week=thisweek\" hx-select-oob=\"#echart:innerHTML,#highlight:innerHTML\">This Week</button> <button class=\"left-controls__btn img forward-arrow\" hx-swap=\"none\" hx-indicator=\"#echart\"><img class=\"chart__controls--img\" src=\"assets/svg/angle-right-svgrepo-com.svg\" alt=\"\"></button></div><div class=\"spacing\"></div><div class=\"right-controls\"><button class=\"right-controls__btn text\" href=\"#\">Asce.</button> <button class=\"right-controls__btn text\" href=\"#\">Desc.</button></div><script>\n\t\tdocument.addEventListener( 'DOMContentLoaded', function ()\n\t\t{\n\t\t\twindow.onload = function ()\n\t\t\t{\n\t\t\t\tvar thisWeekButton = document.querySelector( '#thisWeekButton' );\n\n\t\t\t\tif ( thisWeekButton ) {\n\t\t\t\t\tthisWeekButton.click();\n\t\t\t\t}\n\t\t\t};\n\n\t\t} );\n\t\t</script></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

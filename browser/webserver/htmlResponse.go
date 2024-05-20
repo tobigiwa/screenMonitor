@@ -1,12 +1,14 @@
 package webserver
 
 import (
+	"fmt"
+	"pkg/types"
 	views "views"
 
 	"github.com/a-h/templ"
 )
 
-func prepareHtTMLResponse(msg Message) templ.Component {
+func prepareHtTMLResponse(msg types.Message) templ.Component {
 	switch msg.Endpoint {
 	case "weekStat":
 		return prepareWeekStatHTMLResponse(msg.WeekStatResponse)
@@ -15,13 +17,19 @@ func prepareHtTMLResponse(msg Message) templ.Component {
 	return templ.NopComponent
 }
 
-func prepareWeekStatHTMLResponse(w WeekStatMessage) templ.Component {
-	return views.ChartWrapper(
-		weekStatBarChart(
-			barChartData{
-				xAxis:       w.FormattedDay,
-				yAxis:       w.Values,
-				month:       w.Month,
-				totalUptime: w.TotalWeekUptime,
-			}))
+func prepareWeekStatHTMLResponse(w types.WeekStatMessage) templ.Component {
+	for i, v := range w.AppDetail {
+		fmt.Println(i, v.AppInfo.AppName, v.Usage, v.AppInfo.IsIconSet)
+	}
+	return views.WeekStatChartAndHighlight(
+		weekStatBarChart(barChartData{
+			xAxis:       w.FormattedDay,
+			yAxis:       w.Values,
+			month:       w.Month,
+			year:        w.Year,
+			totalUptime: w.TotalWeekUptime,
+		}),
+		w.AppDetail,
+	)
+
 }

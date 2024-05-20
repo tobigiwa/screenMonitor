@@ -1,4 +1,4 @@
-package repository
+package database
 
 import (
 	"fmt"
@@ -85,13 +85,4 @@ type appInfo struct {
 	IsCategorySet     bool
 	DesktopCategories []string
 	ScreenStat        dailyAppScreenTime
-}
-
-type AppIconAndCategory struct {
-	AppName           string   `json:"appName"`
-	Icon              []byte   `json:"icon"`
-	IsIconSet         bool     `json:"isIconSet"`
-	Category          string   `json:"category"`
-	IsCategorySet     bool     `json:"isCategorySet"`
-	DesktopCategories []string `json:"desktopCategories"`
 }

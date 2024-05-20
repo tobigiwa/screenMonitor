@@ -4,6 +4,10 @@ go 1.22.1
 
 require github.com/BurntSushi/xgbutil v0.0.0-20190907113008-ad855c713046
 
+require pkg v0.0.0
+
+replace pkg v0.0.0 => ./pkg
+
 require (
 	github.com/BurntSushi/xgb v0.0.0-20210121224620-deaf085860bc
 	github.com/dgraph-io/badger/v4 v4.2.0

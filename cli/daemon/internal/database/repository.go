@@ -1,4 +1,6 @@
-package repository
+package database
+
+import "pkg/types"
 
 type IRepository interface {
 	WriteUsage(data ScreenTime) error
@@ -6,5 +8,5 @@ type IRepository interface {
 	DeleteKey(key string) error
 	GetDay(Date) (DailyStat, error)
 	GetWeek(string) (WeeklyStat, error)
-	GetAppIconAndCategory(appNames []string) ([]AppIconAndCategory, error)
+	GetAppIconAndCategory(appNames []string) ([]types.AppIconAndCategory, error)
 }

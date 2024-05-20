@@ -1,9 +1,9 @@
 package daemon
 
 import (
-	"LiScreMon/daemon/internal/database/repository"
-	monitoring "LiScreMon/daemon/internal/monitoring/linux"
-	"LiScreMon/daemon/internal/service"
+	db "LiScreMon/cli/daemon/internal/database"
+	monitoring "LiScreMon/cli/daemon/internal/monitoring/linux"
+	"LiScreMon/cli/daemon/internal/service"
 	"io"
 	"log"
 	"log/slog"
@@ -45,7 +45,7 @@ func DaemonServiceLinux() {
 	slog.SetDefault(logger)
 
 	// database
-	db, err := repository.NewBadgerDb(configDir + "/badgerDB/")
+	db, err := db.NewBadgerDb(configDir + "/badgerDB/")
 	if err != nil {
 		log.Fatal(err) // exit
 	}

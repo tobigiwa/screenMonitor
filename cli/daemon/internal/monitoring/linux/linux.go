@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"LiScreMon/daemon/internal/database/repository"
+	db "LiScreMon/cli/daemon/internal/database"
 
 	"github.com/BurntSushi/xgb/xproto"
 	"github.com/BurntSushi/xgbutil"
@@ -25,7 +25,7 @@ var (
 	x11Conn               *xgbutil.XUtil
 )
 
-func InitMonitoring(db *repository.BadgerDBStore) X11Monitor {
+func InitMonitoring(db *db.BadgerDBStore) X11Monitor {
 
 	var err error
 	// X server connection

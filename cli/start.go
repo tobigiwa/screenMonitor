@@ -4,7 +4,7 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cli
 
 import (
-	"LiScreMon/daemon"
+	"LiScreMon/cli/daemon"
 
 	"github.com/spf13/cobra"
 )

@@ -1,45 +1,22 @@
 package service
 
 import (
-	"LiScreMon/daemon/internal/database/repository"
+	db "LiScreMon/cli/daemon/internal/database"
 	"fmt"
-	"log"
 	"os"
+	"pkg/types"
 	"strings"
 )
 
-type Message struct {
-	Endpoint           string          `json:"endpoint"`
-	StringDataRequest  string          `json:"stringDataRequest"`
-	StringDataResponse string          `json:"stringDataResponse"`
-	WeekStatResponse   WeekStatMessage `json:"weekStatResponse"`
-}
-type WeekStatMessage struct {
-	Keys            [7]string           `json:"keys"`
-	FormattedDay    [7]string           `json:"formattedDay"`
-	Values          [7]float64          `json:"values"`
-	TotalWeekUptime float64             `json:"totalWeekUptime"`
-	Month           string              `json:"month"`
-	Year            string              `json:"year"`
-	AppDetail       []applicationDetail `json:"appDetail"`
-	IsError         bool                `json:"isError"`
-	Error           error               `json:"error"`
-}
-
-type applicationDetail struct {
-	AppInfo repository.AppIconAndCategory `json:"appInfo"`
-	Usage   float64                       `json:"usage"`
-}
-
 type Service struct {
-	store repository.IRepository
+	db db.IRepository
 }
 
-func (s *Service) getWeekStat(msg Message) WeekStatMessage {
-	weekStat, err := s.store.GetWeek(msg.StringDataRequest)
+func (s *Service) getWeekStat(msg types.Message) types.WeekStatMessage {
+	weekStat, err := s.db.GetWeek(msg.StringDataRequest)
 	if err != nil {
-		log.Println("error weekStat:", err)
-		return WeekStatMessage{
+		fmt.Println("error weekStat:", err)
+		return types.WeekStatMessage{
 			IsError: true,
 			Error:   err,
 		}
@@ -50,20 +27,20 @@ func (s *Service) getWeekStat(msg Message) WeekStatMessage {
 		values           = [7]float64{}
 		sizeOfApps       = len(weekStat.EachApp)
 		appNameInTheWeek = make([]string, 0, sizeOfApps)
-		appCard          = make([]applicationDetail, 0, sizeOfApps)
+		appCard          = make([]types.ApplicationDetail, 0, sizeOfApps)
 	)
 
 	for i := 0; i < 7; i++ {
 		keys[i] = string(weekStat.DayByDayTotal[i].Key)
 		values[i] = weekStat.DayByDayTotal[i].Value.Active
 
-		day, _ := repository.ParseKey(repository.Date(weekStat.DayByDayTotal[i].Key))
+		day, _ := db.ParseKey(db.Date(weekStat.DayByDayTotal[i].Key))
 		dayWithSuffix := addOrdinalSuffix(day.Day())
 		weekDay := strings.TrimSuffix(day.Weekday().String(), "day")
 		formattedDay[i] = fmt.Sprintf("%v. %v", weekDay, dayWithSuffix)
 	}
 
-	saturdayOftheWeek, _ := repository.ParseKey(repository.Date(weekStat.DayByDayTotal[6].Key))
+	saturdayOftheWeek, _ := db.ParseKey(db.Date(weekStat.DayByDayTotal[6].Key))
 	year, month, _ := saturdayOftheWeek.Date()
 	stringMonth := month.String()
 
@@ -71,22 +48,26 @@ func (s *Service) getWeekStat(msg Message) WeekStatMessage {
 		appNameInTheWeek = append(appNameInTheWeek, weekStat.EachApp[i].AppName)
 	}
 
-	appsInfo, err := s.store.GetAppIconAndCategory(appNameInTheWeek)
+	appsInfo, err := s.db.GetAppIconAndCategory(appNameInTheWeek)
 	if err != nil {
 		fmt.Println("err with GetAppIconAndCategory:", err)
+		return types.WeekStatMessage{
+			IsError: true,
+			Error:   err,
+		}
 	}
 	for i := 0; i < sizeOfApps; i++ {
-		appCard = append(appCard, applicationDetail{AppInfo: appsInfo[i], Usage: weekStat.EachApp[i].Usage.Active})
+		appCard = append(appCard, types.ApplicationDetail{AppInfo: appsInfo[i], Usage: weekStat.EachApp[i].Usage.Active})
 	}
 
-	return WeekStatMessage{
+	return types.WeekStatMessage{
 		Keys:            keys,
 		FormattedDay:    formattedDay,
 		Values:          values,
 		TotalWeekUptime: weekStat.WeekTotal.Active,
 		Month:           stringMonth,
 		Year:            fmt.Sprint(year),
-		// AppDetail:       appCard,
+		AppDetail:       appCard,
 	}
 }
 

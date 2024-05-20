@@ -6,9 +6,13 @@ import (
 	"log"
 	"log/slog"
 	"net/http"
+	"pkg/helper"
+	"pkg/types"
 	"strings"
 	"time"
 	views "views"
+
+	"github.com/a-h/templ"
 )
 
 type ScreenType string
@@ -22,12 +26,12 @@ const (
 
 type WeekStatDataCache struct {
 	Day  string
-	Data Message
+	Data types.Message
 }
 
 var (
 	lastRequest       = time.Now()
-	weekStatCache     = make(map[string][]byte, 20)
+	weekStatCache     = make(map[string]templ.Component, 20)
 	cacheLastSaturday string
 )
 
@@ -43,32 +47,35 @@ func (a *App) WeekStat(w http.ResponseWriter, r *http.Request) {
 	endpoint := strings.TrimPrefix(r.URL.Path, "/")
 
 	var (
-		msg Message
+		msg types.Message
 		err error
 	)
 
 	switch query {
 	case "thisweek":
-		if jsonResponse, ok := weekStatCache["thisweek"]; ok && time.Since(lastRequest) <= 10*time.Minute {
-			w.Write(jsonResponse)
+		if templComp, ok := weekStatCache["thisweek"]; ok && time.Since(lastRequest) <= 10*time.Minute {
+			if err = templComp.Render(context.TODO(), w); err != nil {
+				fmt.Println("error writing templ response", err)
+				return
+			}
 			return
 		}
 
 		lastRequest = time.Now()
 		today := time.Now().Format(timeFormat)
-		msg = Message{
+		msg = types.Message{
 			Endpoint:          endpoint,
 			StringDataRequest: today,
 		}
 
 	case "lastweek":
 		lastSaturday := returnLastSaturday(time.Now())
-		if jsonResponse, ok := weekStatCache[lastSaturday]; ok {
-			w.Write(jsonResponse)
+		if templComp, ok := weekStatCache[lastSaturday]; ok {
+			templComp.Render(context.TODO(), w)
 			return
 		}
 
-		msg = Message{
+		msg = types.Message{
 			Endpoint:          endpoint,
 			StringDataRequest: lastSaturday,
 		}
@@ -94,7 +101,7 @@ func (a *App) WeekStat(w http.ResponseWriter, r *http.Request) {
 
 		if query == "backward-arrow" {
 			lastSaturday = returnLastSaturday(t)
-			msg = Message{
+			msg = types.Message{
 				Endpoint:          endpoint,
 				StringDataRequest: lastSaturday,
 			}
@@ -102,18 +109,18 @@ func (a *App) WeekStat(w http.ResponseWriter, r *http.Request) {
 
 		if query == "forward-arrow" {
 			if futureDate(t) {
-				w.Write(weekStatCache["thisweek"])
+				weekStatCache["thisweek"].Render(context.TODO(), w)
 				return
 			}
 			lastSaturday = returnNextSaturday(t)
-			msg = Message{
+			msg = types.Message{
 				Endpoint:          endpoint,
 				StringDataRequest: lastSaturday,
 			}
 		}
 
-		if jsonResponse, ok := weekStatCache[lastSaturday]; ok {
-			w.Write(jsonResponse)
+		if templComp, ok := weekStatCache[lastSaturday]; ok {
+			templComp.Render(context.TODO(), w)
 			return
 		}
 
@@ -128,12 +135,12 @@ func (a *App) WeekStat(w http.ResponseWriter, r *http.Request) {
 			log.Fatal("invalid input")
 		}
 
-		if jsonResponse, ok := weekStatCache[lastSaturday]; ok {
-			w.Write(jsonResponse)
+		if templComp, ok := weekStatCache[lastSaturday]; ok {
+			templComp.Render(context.TODO(), w)
 			return
 		}
 
-		msg = Message{
+		msg = types.Message{
 			Endpoint:          endpoint,
 			StringDataRequest: lastSaturday,
 		}
@@ -141,48 +148,46 @@ func (a *App) WeekStat(w http.ResponseWriter, r *http.Request) {
 		cacheLastSaturday = lastSaturday
 	}
 
-	// fmt.Println("would be consulting the deamonservice")
+	fmt.Println("would be consulting the deamonservice")
+
 	msg, err = a.writeAndReadWithDaemonService(msg)
 	if err != nil {
 		fmt.Println("error occurred in writeAndReadWithDaemonService", err)
 		return
 	}
-	
-	fmt.Printf("\n\n%+v\n\n", msg)
+
+	// fmt.Printf("\n\n%+v\n\n", msg)
 
 	templComp := prepareHtTMLResponse(msg)
 	err = templComp.Render(context.TODO(), w)
 	if err != nil {
 		fmt.Println("err with templ:", err)
 	}
-
 	// Cache
 	// if query == "thisweek" {
-	// 	weekStatCache[query] = jsonResponse
+	// 	weekStatCache[query] = templComp
 	// } else if query == "backward-arrow" || query == "forward-arrow" || query == "lastweek" {
-	// 	weekStatCache[cacheLastSaturday] = jsonResponse
+	// 	weekStatCache[cacheLastSaturday] = templComp
 	// }
 
-	// w.Write(jsonResponse)
+	templComp.Render(context.TODO(), w)
 }
 
-var emptyMessage = Message{}
-
-func (a *App) writeAndReadWithDaemonService(msg Message) (Message, error) {
-	bytes, err := msg.encode() // encode message in byte
+func (a *App) writeAndReadWithDaemonService(msg types.Message) (types.Message, error) {
+	bytes, err := helper.Encode(msg) // encode message in byte
 	if err != nil {
-		return emptyMessage, fmt.Errorf("encode %w", err)
+		return types.NoMessage, fmt.Errorf("encode %w", err)
 	}
 	if _, err = a.daemonConn.Write(bytes); err != nil { // write to socket
-		return emptyMessage, fmt.Errorf("write %w", err)
+		return types.NoMessage, fmt.Errorf("write %w", err)
 	}
 
-	buf := make([]byte, 1_024)
+	buf := make([]byte, 1_000_024)
 	if _, err = a.daemonConn.Read(buf); err != nil { // wait and read response from socket
-		return emptyMessage, fmt.Errorf("read %w", err)
+		return types.NoMessage, fmt.Errorf("read %w", err)
 	}
 
-	return Decode[Message](buf)
+	return helper.Decode[types.Message](buf)
 
 }
 

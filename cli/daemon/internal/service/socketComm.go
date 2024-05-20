@@ -1,7 +1,7 @@
 package service
 
 import (
-	"LiScreMon/daemon/internal/database/repository"
+	db "LiScreMon/cli/daemon/internal/database"
 	"encoding/gob"
 	"errors"
 	"fmt"
@@ -9,6 +9,8 @@ import (
 	"log"
 	"net"
 	"os"
+	"pkg/helper"
+	"pkg/types"
 	"syscall"
 )
 
@@ -17,8 +19,8 @@ var (
 	SocketConn      *net.UnixListener
 )
 
-func StartService(socketDir string, db *repository.BadgerDBStore) {
-	ServiceInstance.store = db
+func StartService(socketDir string, db *db.BadgerDBStore) {
+	ServiceInstance.db = db
 	SocketConn = domainSocket(socketDir)
 	handleConnection(SocketConn)
 }
@@ -73,12 +75,12 @@ func handleConnection(listener *net.UnixListener) {
 func treatMessage(c net.Conn) {
 	for {
 		var (
-			msg Message
+			msg types.Message
 			err error
 		)
 
 		if err = gob.NewDecoder(c).Decode(&msg); err != nil {
-			log.Println("error reading message:", err)
+			fmt.Println("error reading message:", err)
 			if errors.Is(err, io.EOF) {
 				fmt.Println("client connection closed")
 				c.Close()
@@ -89,7 +91,7 @@ func treatMessage(c net.Conn) {
 
 		switch msg.Endpoint {
 		case "startConnection":
-			msg = Message{StringDataResponse: `hELLo.., this is the DaemonService speaking, your connection is established.`}
+			msg = types.Message{StringDataResponse: `hELLo.., this is the DaemonService speaking, your connection is established.`}
 
 		case "closeConnection":
 			fmt.Println("we got a close connection message")
@@ -101,14 +103,14 @@ func treatMessage(c net.Conn) {
 			msg.WeekStatResponse = weekStat
 		}
 
-		bytes, err := repository.Encode(msg)
+		bytes, err := helper.Encode(msg)
 		if err != nil {
-			log.Println("error encoding response:", err)
+			fmt.Println("error encoding response:", err)
 			continue
 		}
 		_, err = c.Write(bytes)
 		if err != nil {
-			log.Println("error encoding response:", err)
+			fmt.Println("error encoding response:", err)
 			continue
 		}
 	}

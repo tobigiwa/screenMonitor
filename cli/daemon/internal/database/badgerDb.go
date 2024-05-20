@@ -1,10 +1,13 @@
-package repository
+package database
 
 import (
 	"cmp"
 	"errors"
 	"fmt"
 	"slices"
+
+	"pkg/helper"
+	"pkg/types"
 
 	badger "github.com/dgraph-io/badger/v4"
 )
@@ -106,7 +109,7 @@ func (bs *BadgerDBStore) WriteUsage(data ScreenTime) error {
 				return err
 			}
 
-			if app, err = Decode[appInfo](valCopy); err != nil {
+			if app, err = helper.Decode[appInfo](valCopy); err != nil {
 				return err
 			}
 
@@ -144,7 +147,7 @@ func (bs *BadgerDBStore) WriteUsage(data ScreenTime) error {
 			app.ScreenStat[Key()] = stat
 		}
 
-		byteData, err := Encode(app)
+		byteData, err := helper.Encode(app)
 		if err != nil {
 			return err
 		}
@@ -173,7 +176,7 @@ func (bs *BadgerDBStore) GetWeek(day string) (WeeklyStat, error) {
 		return bs.getWeeklyAppStat(anyDayInTheWeek)
 	}
 
-	weekStat, err := Decode[WeeklyStat](byteData)
+	weekStat, err := helper.Decode[WeeklyStat](byteData)
 	if err != nil {
 		return ZeroValueWeeklyStat, err
 	}
@@ -247,7 +250,7 @@ func (bs *BadgerDBStore) getWeeklyAppStat(anyDayInTheWeek Date) (WeeklyStat, err
 	result.EachApp = eachAppSlice
 
 	if IsPastWeek(date) {
-		byteData, _ := Encode(result)
+		byteData, _ := helper.Encode(result)
 		saturdayOfThatWeek := allConcernedDays[6]
 		err := bs.setNewEntryToDB(dbWeekKey(saturdayOfThatWeek), byteData)
 		if err != nil {
@@ -277,7 +280,7 @@ func (bs *BadgerDBStore) GetDay(date Date) (DailyStat, error) {
 		return bs.getDailyAppStat(date)
 	}
 
-	dayStat, err := Decode[DailyStat](byteData)
+	dayStat, err := helper.Decode[DailyStat](byteData)
 	if err != nil {
 		return ZeroValueDailyStat, err
 	}
@@ -308,7 +311,7 @@ func (bs *BadgerDBStore) getDailyAppStat(day Date) (DailyStat, error) {
 					err            error
 				)
 
-				if app, err = Decode[appInfo](v); err != nil {
+				if app, err = helper.Decode[appInfo](v); err != nil {
 					return err
 				}
 
@@ -348,7 +351,7 @@ func (bs *BadgerDBStore) getDailyAppStat(day Date) (DailyStat, error) {
 	result.EachApp = arr
 
 	if day != Date(formattedToDay().Format(timeFormat)) {
-		byteData, _ := Encode(result)
+		byteData, _ := helper.Encode(result)
 		err := bs.setNewEntryToDB(dbDayKey(day), byteData)
 		if err != nil {
 			fmt.Println("ERROR WRITING NEW DAY ENTRY", day, "ERROR IS:", err)
@@ -360,8 +363,8 @@ func (bs *BadgerDBStore) getDailyAppStat(day Date) (DailyStat, error) {
 	return result, nil
 }
 
-func (bs *BadgerDBStore) GetAppIconAndCategory(appNames []string) ([]AppIconAndCategory, error) {
-	result := make([]AppIconAndCategory, len(appNames))
+func (bs *BadgerDBStore) GetAppIconAndCategory(appNames []string) ([]types.AppIconAndCategory, error) {
+	result := make([]types.AppIconAndCategory, len(appNames))
 	bs.db.View(func(txn *badger.Txn) error {
 
 		for i := 0; i < len(appNames); i++ {
@@ -369,21 +372,21 @@ func (bs *BadgerDBStore) GetAppIconAndCategory(appNames []string) ([]AppIconAndC
 			appName := appNames[i]
 			item, err := txn.Get(dbAppKey(appName))
 			if err != nil {
-				result[i] = AppIconAndCategory{AppName: appName}
+				result[i] = types.AppIconAndCategory{AppName: appName}
 				continue
 			}
 			byteData, err := item.ValueCopy(nil)
 			if err != nil {
-				result[i] = AppIconAndCategory{AppName: appName}
+				result[i] = types.AppIconAndCategory{AppName: appName}
 				continue
 			}
-			app, err := Decode[appInfo](byteData)
+			app, err := helper.Decode[appInfo](byteData)
 			if err != nil {
-				result[i] = AppIconAndCategory{AppName: appName}
+				result[i] = types.AppIconAndCategory{AppName: appName}
 				continue
 			}
 
-			a := AppIconAndCategory{AppName: app.AppName}
+			a := types.AppIconAndCategory{AppName: app.AppName}
 			if app.IsIconSet {
 				a.Icon = app.Icon
 				a.IsIconSet = true

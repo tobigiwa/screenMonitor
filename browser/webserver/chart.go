@@ -39,6 +39,7 @@ type barChartData struct {
 	xAxis       [7]string
 	yAxis       [7]float64
 	month       string
+	year        string
 	totalUptime float64
 }
 
@@ -70,21 +71,29 @@ func weekStatBarChart(data barChartData) template.HTML {
 			},
 			Left: "center",
 		}),
+		charts.WithYAxisOpts(opts.YAxis{
+			Name:         "in Hours",
+			Type:         "value",
+			NameLocation: "end",
+			NameGap:      5,
+			Scale:        true,
+		}),
 		charts.WithLegendOpts(opts.Legend{
-			Type: "plain",
-		},
-		),
+			Left:   "left",
+			Orient: "vertical",
+		}),
 		charts.WithTooltipOpts(opts.Tooltip{
-			Show:           true,
-			Trigger:        "axis",
-			TriggerOn:      "mousemove",
-			AxisPointer:    &opts.AxisPointer{},
-			Formatter:      "Date: {b} <br/> {a0}: {c0} Hrs",
-			ValueFormatter: ""},
-		),
+			Show:      true,
+			Trigger:   "axis",
+			TriggerOn: "mousemove",
+			AxisPointer: &opts.AxisPointer{
+				Type: "cross",
+			},
+			Formatter: fmt.Sprintf("{b} %s, %s. <br/> {a}: {c}Hrs", data.month, data.year),
+		}),
 	)
 	bar.SetXAxis(data.xAxis).
-		AddSeries("Daily Uptime", generateBarItems(data.yAxis, data.xAxis))
+		AddSeries("Uptime", generateBarItems(data.yAxis, data.xAxis)).SetSeriesOptions()
 	return renderToHtml(bar)
 }
 

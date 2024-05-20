@@ -2,7 +2,7 @@
 // idiomatic Go code, the package should not have ay x11 related
 // shit, just ontop that another X connection.
 // This is shitty code right here, Please help!!!.
-package repository
+package database
 
 import (
 	"bytes"
@@ -64,6 +64,6 @@ func wmIcon(icon ewmh.WmIcon) ([]byte, error) {
 	if err := png.Encode(buf, img); err != nil {
 		return nil, err
 	}
-	
+
 	return buf.Bytes(), nil
 }

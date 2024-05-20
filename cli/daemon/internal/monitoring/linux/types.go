@@ -1,7 +1,7 @@
 package monitoring
 
 import (
-	store "LiScreMon/daemon/internal/database/repository"
+	db "LiScreMon/cli/daemon/internal/database"
 	"sync"
 	"time"
 
@@ -20,5 +20,5 @@ type DoNotCopy [0]sync.Mutex
 
 type X11Monitor struct {
 	X11Connection *xgbutil.XUtil
-	Db            store.IRepository
+	Db            db.IRepository
 }

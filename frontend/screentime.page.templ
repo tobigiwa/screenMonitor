@@ -2,8 +2,9 @@ package frontend
 
 import "time"
 import "html/template"
+import "fmt"
+import "pkg/types"
 
-// import "github.com/go-echarts/go-echarts/v2/charts"
 templ ScreenTimePage() {
 	<!DOCTYPE html>
 	<html lang="en">
@@ -28,13 +29,13 @@ templ ScreenTimePage() {
 templ main() {
 	<div class="main">
 		@Header()
-		@ChartWrapper("")
+		@chartWrapper("")
 		@chartControls()
-		@ChartHighlight()
+		@chartHighlight(nil)
 	</div>
 }
 
-templ ChartWrapper(chart template.HTML) {
+templ chartWrapper(chart template.HTML) {
 	<div class="chart-wrapper">
 		<div id="echart" hx-swap-oob="true">
 			@templ.Raw(chart)
@@ -42,13 +43,32 @@ templ ChartWrapper(chart template.HTML) {
 	</div>
 }
 
-templ ChartHighlight() {
-	<div class="chart-highlight" id="highlight" hx-post="/your-endpoint-url" hx-trigger="change from:#echart"></div>
+templ chartHighlight(appDetails []types.ApplicationDetail) {
+	<div class="chart-highlight" hx-swap-obb="true">
+		<ul id="highlight">
+			for i:=0; i < len(appDetails); i++ {
+				<li>
+					<div class="card">
+						<img src="" alt="" class="app-icon"/>
+						<div class="info">
+							<div class="appName">{ appDetails[i].AppInfo.AppName }</div>
+							if appDetails[i].AppInfo.IsCategorySet {
+								<button class="category">Category: { appDetails[i].AppInfo.Category }</button>
+							} else {
+								<button class="category">Selct application catergory</button>
+							}
+						</div>
+						<div class="appStat">Weeks Usage: { fmt.Sprintf("%v", appDetails[i].Usage) }Hrs</div>
+					</div>
+				</li>
+			}
+		</ul>
+	</div>
 }
 
-templ WeekStatChartAndHighlight() {	
-	@ChartHighlight()
-	@ChartHighlight()
+templ WeekStatChartAndHighlight(chart template.HTML, appDetails []types.ApplicationDetail) {
+	@chartWrapper(chart)
+	@chartHighlight(appDetails)
 }
 
 templ chartControls() {
@@ -70,7 +90,7 @@ templ chartControls() {
 				/>
 			</button>
 			<button class="left-controls__btn text" hx-get="/weekStat?week=lastweek" hx-swap="none" hx-indicator="#echart">Last Week</button>
-			<button class="left-controls__btn text" id="thisWeekButton" hx-get="/weekStat?week=thisweek" hx-swap="innerHTML" hx-target="#echart">This Week</button>
+			<button class="left-controls__btn text" id="thisWeekButton" hx-get="/weekStat?week=thisweek" hx-select-oob="#echart:innerHTML,#highlight:innerHTML">This Week</button>
 			<button class="left-controls__btn img forward-arrow" hx-swap="none" hx-indicator="#echart">
 				<img
 					class="chart__controls--img"
