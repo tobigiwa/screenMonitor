@@ -7,6 +7,6 @@ var (
 )
 
 var (
-	ErrDeserilization = fmt.Errorf("error deserializing data")
-	ErrSerilization   = fmt.Errorf("error serializing data")
+	ErrDeserialization = fmt.Errorf("error deserializing data")
+	ErrSerialization   = fmt.Errorf("error serializing data")
 )

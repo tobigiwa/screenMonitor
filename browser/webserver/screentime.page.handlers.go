@@ -6,7 +6,7 @@ import (
 	"log"
 	"log/slog"
 	"net/http"
-	"pkg/helper"
+	helperFuncs "pkg/helper"
 	"pkg/types"
 	"strings"
 	"time"
@@ -174,7 +174,7 @@ func (a *App) WeekStat(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) writeAndReadWithDaemonService(msg types.Message) (types.Message, error) {
-	bytes, err := helper.Encode(msg) // encode message in byte
+	bytes, err := helperFuncs.Encode(msg) // encode message in byte
 	if err != nil {
 		return types.NoMessage, fmt.Errorf("encode %w", err)
 	}
@@ -187,7 +187,7 @@ func (a *App) writeAndReadWithDaemonService(msg types.Message) (types.Message, e
 		return types.NoMessage, fmt.Errorf("read %w", err)
 	}
 
-	return helper.Decode[types.Message](buf)
+	return helperFuncs.Decode[types.Message](buf)
 
 }
 

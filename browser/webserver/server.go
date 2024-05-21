@@ -4,7 +4,7 @@ import (
 	"log/slog"
 	"net"
 	"os"
-	"pkg/helper"
+	helperFuncs "pkg/helper"
 	"pkg/types"
 )
 
@@ -53,7 +53,7 @@ func (a *App) CheckDaemonService() (types.Message, error) {
 		Endpoint:          "startConnection",
 		StringDataRequest: "I wish this project prospered.",
 	}
-	bytes, err := helper.Encode(msg)
+	bytes, err := helperFuncs.Encode(msg)
 	if err != nil {
 		return types.NoMessage, err
 	}
@@ -64,5 +64,5 @@ func (a *App) CheckDaemonService() (types.Message, error) {
 	if _, err := a.daemonConn.Read(buf); err != nil {
 		return types.NoMessage, err
 	}
-	return helper.Decode[types.Message](buf)
+	return helperFuncs.Decode[types.Message](buf)
 }

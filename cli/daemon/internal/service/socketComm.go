@@ -2,14 +2,14 @@ package service
 
 import (
 	db "LiScreMon/cli/daemon/internal/database"
-	"encoding/gob"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"log"
 	"net"
 	"os"
-	"pkg/helper"
+	helperFuncs "pkg/helper"
 	"pkg/types"
 	"syscall"
 )
@@ -79,7 +79,7 @@ func treatMessage(c net.Conn) {
 			err error
 		)
 
-		if err = gob.NewDecoder(c).Decode(&msg); err != nil {
+		if err = json.NewDecoder(c).Decode(&msg); err != nil {
 			fmt.Println("error reading message:", err)
 			if errors.Is(err, io.EOF) {
 				fmt.Println("client connection closed")
@@ -103,7 +103,7 @@ func treatMessage(c net.Conn) {
 			msg.WeekStatResponse = weekStat
 		}
 
-		bytes, err := helper.Encode(msg)
+		bytes, err := helperFuncs.Encode(msg)
 		if err != nil {
 			fmt.Println("error encoding response:", err)
 			continue

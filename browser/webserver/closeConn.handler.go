@@ -3,7 +3,7 @@ package webserver
 import (
 	"context"
 	"log/slog"
-	"pkg/helper"
+	helperFuncs "pkg/helper"
 	"pkg/types"
 )
 
@@ -13,7 +13,7 @@ func (a *App) CloseDaemonConnection() error {
 		Endpoint: "closeConnection",
 	}
 
-	bytes, err := helper.Encode(msg)
+	bytes, err := helperFuncs.Encode(msg)
 	if err != nil {
 		a.logger.Log(context.TODO(), slog.LevelError, err.Error())
 		return err

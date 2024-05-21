@@ -34,55 +34,55 @@ type Category string
 // date underneath is a
 /* string of a time.Time format. "2006-01-02" */
 type Date string
-type dailyAppScreenTime map[Date]stats
+type dailyAppScreenTime map[Date]Stats
+
+type AppInfo struct {
+	AppName           string             `json:"appName"`
+	Icon              []byte             `json:"icon"`
+	IsIconSet         bool               `json:"isIconSet"`
+	Category          Category           `json:"category"`
+	IsCategorySet     bool               `json:"isCategorySet"`
+	DesktopCategories []string           `json:"desktopCategories"`
+	ScreenStat        dailyAppScreenTime `json:"screenStat"`
+}
 
 type TimeInterval struct {
-	Start time.Time
-	End   time.Time
-}
-type stats struct {
-	Active         float64
-	Open           float64
-	Inactive       float64
-	ActiveTimeData []TimeInterval
+	Start time.Time `json:"start"`
+	End   time.Time `json:"end"`
 }
 
-// ScreenTime represents the time spent on a particular app.
 type ScreenTime struct {
-	WindowID xproto.Window
-	AppName  string
-	Type     ScreenType
-	Duration float64
-	Interval TimeInterval
+	WindowID xproto.Window `json:"windowID"`
+	AppName  string        `json:"appName"`
+	Type     ScreenType    `json:"type"`
+	Duration float64       `json:"duration"`
+	Interval TimeInterval  `json:"interval"`
 }
 
-type appStat struct {
-	AppName string
-	Usage   stats
+type Stats struct {
+	Active         float64        `json:"active"`
+	Open           float64        `json:"open"`
+	Inactive       float64        `json:"inactive"`
+	ActiveTimeData []TimeInterval `json:"activeTimeData"`
 }
 
-type DailyStat struct {
-	EachApp  []appStat
-	DayTotal stats
+type AppStat struct {
+	AppName string `json:"appName"`
+	Usage   Stats  `json:"usage"`
 }
 
 type GenericKeyValue[K, V any] struct {
-	Key   K
-	Value V
+	Key   K `json:"key"`
+	Value V `json:"value"`
+}
+
+type DailyStat struct {
+	EachApp  []AppStat `json:"eachApp"`
+	DayTotal Stats     `json:"dayTotal"`
 }
 
 type WeeklyStat struct {
-	EachApp       []appStat
-	WeekTotal     stats
-	DayByDayTotal [7]GenericKeyValue[Date, stats]
-}
-
-type appInfo struct {
-	AppName           string
-	Icon              []byte
-	IsIconSet         bool
-	Category          Category
-	IsCategorySet     bool
-	DesktopCategories []string
-	ScreenStat        dailyAppScreenTime
+	EachApp       []AppStat                       `json:"eachApp"`
+	WeekTotal     Stats                           `json:"weekTotal"`
+	DayByDayTotal [7]GenericKeyValue[Date, Stats] `json:"dayByDayTotal"`
 }
