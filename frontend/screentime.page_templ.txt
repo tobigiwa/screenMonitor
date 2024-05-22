@@ -1,0 +1,25 @@
+<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><link rel=\"stylesheet\" href=\"/assets/styles/screentime.css\"><script src=\"assets/htmx.min.js\"></script><script src=\"assets/echarts.min.js\"></script><title>ScreenTimePage</title></head><body><div class=\"page\">
+</div></body></html>
+<div class=\"main\">
+</div>
+<div class=\"chart-wrapper\"><div id=\"echart\" hx-swap-oob=\"true\">
+</div></div>
+<div class=\"chart-highlight\" hx-swap-obb=\"true\"><ul id=\"highlight\">
+<li class=\"card\">
+ <img src=\"
+\" alt=\"
+\" class=\"app-icon\">
+<img src=\"/assets/image/noAppImage.jpg\" alt=\"noImage\" class=\"app-icon\">
+<div class=\"info\"><div class=\"appName\" style=\"font-size:large;font-weight:bold;\">
+</div>
+<button class=\"category\">Category: 
+</button>
+<button class=\"category\">Selct application catergory</button>
+</div><div class=\"appStat\" style=\"font-style:italic;\">Weeks Usage: 
+Hrs</div></li>
+</ul></div>
+<div class=\"chart-controls\"><div class=\"left-controls\"><div class=\"select-month\"><select name=\"month\" class=\"month\" hx-get=\"/weekStat?week=month\" hx-vals=\"js{month: this.value}\" hx-swap=\"none\" hx-indicator=\"#echart\"><option value=\"\" id=\"placeholder\" disabled selected>Last 3 Month</option> 
+<option class=\"option\" value=\"
+\">
+</option>
+</select></div><button class=\"left-controls__btn img backward-arrow\" hx-swap=\"none\" hx-indicator=\"#echart\"><img class=\"chart__controls--img\" src=\"assets/svg/angle-left-svgrepo-com.svg\" alt=\"\"></button> <button class=\"left-controls__btn text\" hx-get=\"/weekStat?week=lastweek\" hx-swap=\"none\" hx-indicator=\"#echart\">Last Week</button> <button class=\"left-controls__btn text\" id=\"thisWeekButton\" hx-get=\"/weekStat?week=thisweek\" hx-swap=\"none\" hx-select-oob=\"#echart:innerHTML,#highlight:innerHTML\">This Week</button> <button class=\"left-controls__btn img forward-arrow\" hx-swap=\"none\" hx-indicator=\"#echart\"><img class=\"chart__controls--img\" src=\"assets/svg/angle-right-svgrepo-com.svg\" alt=\"\"></button></div><div class=\"spacing\"></div><div class=\"right-controls\"><button class=\"right-controls__btn text\" href=\"#\">Asce.</button> <button class=\"right-controls__btn text\" href=\"#\">Desc.</button></div><script>\n\t\tdocument.addEventListener( 'DOMContentLoaded', function ()\n\t\t{\n\t\t\twindow.onload = function ()\n\t\t\t{\n\t\t\t\tvar thisWeekButton = document.querySelector( '#thisWeekButton' );\n\n\t\t\t\tif ( thisWeekButton ) {\n\t\t\t\t\tthisWeekButton.click();\n\t\t\t\t}\n\t\t\t};\n\n\t\t} );\n\t\t</script></div>

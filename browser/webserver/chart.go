@@ -6,7 +6,7 @@ import (
 	"html/template"
 	"io"
 	"log"
-	"math"
+	helperFuncs "pkg/helper"
 
 	"github.com/go-echarts/go-echarts/v2/charts"
 	"github.com/go-echarts/go-echarts/v2/opts"
@@ -51,8 +51,6 @@ func weekStatBarChart(data barChartData) template.HTML {
 	))
 	bar.Renderer = newchartRenderer(bar, bar.Validate)
 
-	hrs, min := hrsAndMinute(data.totalUptime)
-
 	bar.SetGlobalOptions(
 		charts.WithTitleOpts(opts.Title{
 			Title: "Weekly Screentime",
@@ -62,7 +60,7 @@ func weekStatBarChart(data barChartData) template.HTML {
 				FontSize:   100,
 				FontFamily: "system-ui",
 			},
-			Subtitle: fmt.Sprintf("from %s - %s %s. Total Uptime of %dHr:%dMin", data.xAxis[0], data.xAxis[6], data.month, hrs, min),
+			Subtitle: fmt.Sprintf("from %s - %s %s. Total Uptime of %s", data.xAxis[0], data.xAxis[6], data.month, helperFuncs.UsageTimeInHrsMin(data.totalUptime)),
 			SubtitleStyle: &opts.TextStyle{
 				Color:      "black",
 				FontStyle:  "bold",
@@ -114,10 +112,6 @@ var barColorsBackGround [7]string = [7]string{
 	"rgba(54, 162, 235, 0.5)",
 	"rgba(153, 102, 255, 0.5)",
 	"rgba(201, 203, 207, 0.5)",
-}
-
-func hrsAndMinute(hr float64) (int, int) {
-	return int(hr), int(math.Round((hr - float64(int(hr))) * 60))
 }
 
 func generateBarItems(yAxis [7]float64, xAxis [7]string) []opts.BarData {

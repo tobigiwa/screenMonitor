@@ -1,6 +1,11 @@
 package webserver
 
 import (
+	"bytes"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
 	"log/slog"
 	"net"
 	"os"
@@ -53,16 +58,38 @@ func (a *App) CheckDaemonService() (types.Message, error) {
 		Endpoint:          "startConnection",
 		StringDataRequest: "I wish this project prospered.",
 	}
-	bytes, err := helperFuncs.Encode(msg)
+	return a.writeAndReadWithDaemonService(msg)
+}
+
+func (a *App) writeAndReadWithDaemonService(msg types.Message) (types.Message, error) {
+	bytesData, err := helperFuncs.Encode(msg) // encode message in byte
 	if err != nil {
-		return types.NoMessage, err
+		return types.NoMessage, fmt.Errorf("encode %w", err)
 	}
-	if _, err = a.daemonConn.Write(bytes); err != nil {
-		return types.NoMessage, err
+	if _, err = a.daemonConn.Write(bytesData); err != nil { // write to socket
+		return types.NoMessage, fmt.Errorf("write %w", err)
 	}
-	buf := make([]byte, 10240)
-	if _, err := a.daemonConn.Read(buf); err != nil {
-		return types.NoMessage, err
+
+	var dataBuf bytes.Buffer
+	tempBuf := make([]byte, 100_000) //100kb
+	n := 0
+
+	for {
+		if n, err = a.daemonConn.Read(tempBuf); err != nil { // read response from socket
+			if errors.Is(err, io.EOF) {
+				break
+			}
+			return types.NoMessage, fmt.Errorf("read error from socket %w", err)
+		}
+
+		if n > 0 {
+			dataBuf.Write(tempBuf[:n])
+		}
+
+		if json.Valid(dataBuf.Bytes()) { // Implement this function based on your protocol
+			break
+		}
 	}
-	return helperFuncs.Decode[types.Message](buf)
+
+	return helperFuncs.Decode[types.Message](dataBuf.Bytes())
 }

@@ -2,7 +2,6 @@ package service
 
 import (
 	db "LiScreMon/cli/daemon/internal/database"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -77,9 +76,11 @@ func treatMessage(c net.Conn) {
 		var (
 			msg types.Message
 			err error
+			n   int
 		)
 
-		if err = json.NewDecoder(c).Decode(&msg); err != nil {
+		buf := make([]byte, 10_000) //10kb
+		if n, err = c.Read(buf); err != nil {
 			fmt.Println("error reading message:", err)
 			if errors.Is(err, io.EOF) {
 				fmt.Println("client connection closed")
@@ -89,9 +90,15 @@ func treatMessage(c net.Conn) {
 			continue
 		}
 
+		if msg, err = helperFuncs.Decode[types.Message](buf[:n]); err != nil {
+			fmt.Println("error decoding socket message", err)
+			c.Close()
+			return
+		}
+
 		switch msg.Endpoint {
 		case "startConnection":
-			msg = types.Message{StringDataResponse: `hELLo.., this is the DaemonService speaking, your connection is established.`}
+			msg = types.Message{StringDataResponse: "hELLo.., this is the DaemonService speaking, your connection is established."}
 
 		case "closeConnection":
 			fmt.Println("we got a close connection message")
@@ -108,10 +115,11 @@ func treatMessage(c net.Conn) {
 			fmt.Println("error encoding response:", err)
 			continue
 		}
-		_, err = c.Write(bytes)
+		n, err = c.Write(bytes)
 		if err != nil {
 			fmt.Println("error encoding response:", err)
 			continue
 		}
+		fmt.Println("bytes written", n, "encoded byte", len(bytes))
 	}
 }

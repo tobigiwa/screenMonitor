@@ -23,7 +23,7 @@ func Menu() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"menu\">")
+		templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 1)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -35,7 +35,7 @@ func Menu() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div>")
+		templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 2)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -59,7 +59,7 @@ func animation() templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"hold-animation\"><div class=\"wrap-animation\"><div class=\"animation\" id=\"lottie-animation\"></div></div><div class=\"quote-animation\"><p>'If You Can't Measure It, You Can't Manage It'</p></div></div>")
+		templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 3)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -83,7 +83,7 @@ func menuItems() templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"menu-items\"><nav><ul><li class=\"wide\"><a href=\"#\" class=\"links\" tabindex=\"0\"><img src=\"assets/svg/no_1.svg\" class=\"icon\">Screentime</a></li><li class=\"wide\"><a href=\"#\" class=\"links wide\" tabindex=\"0\"><img src=\"assets/svg/no_3.svg\" class=\"icon\">Analytics</a></li><li class=\"wide\"><a href=\"#\" class=\"links wide\" tabindex=\"0\"><img src=\"assets/svg/no_4.svg\" class=\"icon\" style=\"vertical-align: top;\"><div class=\"long-text\" style=\"display: inline-block;\">Alerts<br>& Remainder</div></a></li><li class=\"wide\"><a href=\"#\" class=\"links wide\" tabindex=\"0\"><img src=\"assets/svg/no_2.svg\" class=\"icon\">ToDo</a></li><li class=\"hidden\"><a href=\"#\" class=\"links\" tabindex=\"0\"><img src=\"assets/svg/no_5_settings.svg\" class=\"icon\">Settings</a></li><li class=\"hidden\"><a href=\"#\" class=\"links\" tabindex=\"0\"><img src=\"assets/svg/no_6_logout.svg\" class=\"icon\">Logout</a></li><li class=\"narrow\" title=\"Screentime\"><a href=\"#\" class=\"links\" tabindex=\"0\"><img src=\"assets/svg/no_1.svg\" class=\"icon\"></a></li><li class=\"narrow\" title=\"Analytics\"><a href=\"#\" class=\"links\" tabindex=\"0\"><img src=\"assets/svg/no_3.svg\" class=\"icon\"></a></li><li class=\"narrow\" title=\"Alerts &amp; Remainder\"><a href=\"#\" class=\"links\" tabindex=\"0\"><img src=\"assets/svg/no_4.svg\" class=\"icon\"></a></li><li class=\"narrow\" title=\"ToDo  \"><a href=\"#\" class=\"links\" tabindex=\"0\"><img src=\"assets/svg/no_2.svg\" class=\"icon\"></a></li><li class=\"narrow\" title=\"Settings\"><a href=\"#\" class=\"links\" tabindex=\"0\"><img src=\"assets/svg/no_5_settings.svg\" class=\"icon\"></a></li><li class=\"narrow\" title=\"Logout\"><a href=\"#\" class=\"links\" tabindex=\"0\"><img src=\"assets/svg/no_6_logout.svg\" class=\"icon\"></a></li></ul></nav></div>")
+		templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 4)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

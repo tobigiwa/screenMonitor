@@ -6,7 +6,6 @@ import (
 	"log"
 	"log/slog"
 	"net/http"
-	helperFuncs "pkg/helper"
 	"pkg/types"
 	"strings"
 	"time"
@@ -148,7 +147,7 @@ func (a *App) WeekStat(w http.ResponseWriter, r *http.Request) {
 		cacheLastSaturday = lastSaturday
 	}
 
-	fmt.Println("would be consulting the deamonservice")
+	// fmt.Println("would be consulting the deamonservice")
 
 	msg, err = a.writeAndReadWithDaemonService(msg)
 	if err != nil {
@@ -173,23 +172,7 @@ func (a *App) WeekStat(w http.ResponseWriter, r *http.Request) {
 	templComp.Render(context.TODO(), w)
 }
 
-func (a *App) writeAndReadWithDaemonService(msg types.Message) (types.Message, error) {
-	bytes, err := helperFuncs.Encode(msg) // encode message in byte
-	if err != nil {
-		return types.NoMessage, fmt.Errorf("encode %w", err)
-	}
-	if _, err = a.daemonConn.Write(bytes); err != nil { // write to socket
-		return types.NoMessage, fmt.Errorf("write %w", err)
-	}
 
-	buf := make([]byte, 1_000_024)
-	if _, err = a.daemonConn.Read(buf); err != nil { // wait and read response from socket
-		return types.NoMessage, fmt.Errorf("read %w", err)
-	}
-
-	return helperFuncs.Decode[types.Message](buf)
-
-}
 
 func returnLastSaturday(t time.Time) string {
 

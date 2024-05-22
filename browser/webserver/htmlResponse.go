@@ -1,7 +1,6 @@
 package webserver
 
 import (
-	"fmt"
 	"pkg/types"
 	views "views"
 
@@ -18,9 +17,6 @@ func prepareHtTMLResponse(msg types.Message) templ.Component {
 }
 
 func prepareWeekStatHTMLResponse(w types.WeekStatMessage) templ.Component {
-	for i, v := range w.AppDetail {
-		fmt.Println(i, v.AppInfo.AppName, v.Usage, v.AppInfo.IsIconSet)
-	}
 	return views.WeekStatChartAndHighlight(
 		weekStatBarChart(barChartData{
 			xAxis:       w.FormattedDay,
@@ -31,5 +27,4 @@ func prepareWeekStatHTMLResponse(w types.WeekStatMessage) templ.Component {
 		}),
 		w.AppDetail,
 	)
-
 }

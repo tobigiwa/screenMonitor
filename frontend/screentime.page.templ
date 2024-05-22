@@ -1,9 +1,8 @@
 package frontend
 
-import "time"
 import "html/template"
-import "fmt"
 import "pkg/types"
+import helperFuncs "pkg/helper"
 
 templ ScreenTimePage() {
 	<!DOCTYPE html>
@@ -47,19 +46,22 @@ templ chartHighlight(appDetails []types.ApplicationDetail) {
 	<div class="chart-highlight" hx-swap-obb="true">
 		<ul id="highlight">
 			for i:=0; i < len(appDetails); i++ {
-				<li>
-					<div class="card">
-						<img src="" alt="" class="app-icon"/>
-						<div class="info">
-							<div class="appName">{ appDetails[i].AppInfo.AppName }</div>
-							if appDetails[i].AppInfo.IsCategorySet {
-								<button class="category">Category: { appDetails[i].AppInfo.Category }</button>
-							} else {
-								<button class="category">Selct application catergory</button>
-							}
-						</div>
-						<div class="appStat">Weeks Usage: { fmt.Sprintf("%v", appDetails[i].Usage) }Hrs</div>
+				<li class="card">
+					if appDetails[i].AppInfo.IsIconSet {
+						{ writeImageToFile(appDetails[i].AppInfo.Icon, appDetails[i].AppInfo.AppName) }
+						<img src={ "/tmp/" + appDetails[i].AppInfo.AppName + ".png" } alt={ appDetails[i].AppInfo.AppName } class="app-icon"/>
+					} else {
+						<img src="/assets/image/noAppImage.jpg" alt="noImage" class="app-icon"/>
+					}
+					<div class="info">
+						<div class="appName" style="font-size:large;font-weight:bold;">{ appDetails[i].AppInfo.AppName }</div>
+						if appDetails[i].AppInfo.IsCategorySet {
+							<button class="category">Category: { appDetails[i].AppInfo.Category }</button>
+						} else {
+							<button class="category">Selct application catergory</button>
+						}
 					</div>
+					<div class="appStat" style="font-style:italic;">Weeks Usage: { helperFuncs.UsageTimeInHrsMin(appDetails[i].Usage) }Hrs</div>
 				</li>
 			}
 		</ul>
@@ -90,7 +92,7 @@ templ chartControls() {
 				/>
 			</button>
 			<button class="left-controls__btn text" hx-get="/weekStat?week=lastweek" hx-swap="none" hx-indicator="#echart">Last Week</button>
-			<button class="left-controls__btn text" id="thisWeekButton" hx-get="/weekStat?week=thisweek" hx-select-oob="#echart:innerHTML,#highlight:innerHTML">This Week</button>
+			<button class="left-controls__btn text" id="thisWeekButton" hx-get="/weekStat?week=thisweek" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:innerHTML">This Week</button>
 			<button class="left-controls__btn img forward-arrow" hx-swap="none" hx-indicator="#echart">
 				<img
 					class="chart__controls--img"
@@ -119,14 +121,4 @@ templ chartControls() {
 		} );
 		</script>
 	</div>
-}
-
-func monthDropDownSelectArray() [3]string {
-	today := time.Now()
-	past4Month := [3]string{}
-	for i := 0; i < 3; i++ {
-		m := today.AddDate(0, -(i + 1), 0)
-		past4Month[i] = m.Month().String()
-	}
-	return past4Month
 }

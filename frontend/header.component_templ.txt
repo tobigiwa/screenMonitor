@@ -1,0 +1,2 @@
+<div class=\"header\"><pre id=\"ascii-art\">
+</pre><a href=\"#\"><img src=\"assets/svg/no_5_settings.svg\" alt=\"\" class=\"icon header-btn\"></a> <a href=\"#\"><img src=\"assets/svg/no_6_logout.svg\" alt=\"\" class=\"icon header-btn\"></a></div>

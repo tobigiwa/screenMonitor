@@ -3,6 +3,7 @@ package helper
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"pkg/types"
 )
 
@@ -21,4 +22,13 @@ func Decode[T any](data []byte) (T, error) {
 		return result, fmt.Errorf("%v:%w", err, types.ErrDeserialization)
 	}
 	return result, nil
+}
+
+func HrsAndMinute(hr float64) (int, int) {
+	return int(hr), int(math.Round((hr - float64(int(hr))) * 60))
+}
+
+func UsageTimeInHrsMin(f float64) string {
+	hrs, min := HrsAndMinute(f)
+	return fmt.Sprintf("%dHrs:%dMin", hrs, min)
 }
