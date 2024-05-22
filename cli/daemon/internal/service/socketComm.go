@@ -1,14 +1,15 @@
 package service
 
 import (
-	"LiScreMon/daemon/internal/database/repository"
-	"encoding/gob"
+	db "LiScreMon/cli/daemon/internal/database"
 	"errors"
 	"fmt"
 	"io"
 	"log"
 	"net"
 	"os"
+	helperFuncs "pkg/helper"
+	"pkg/types"
 	"syscall"
 )
 
@@ -17,8 +18,8 @@ var (
 	SocketConn      *net.UnixListener
 )
 
-func StartService(socketDir string, db *repository.BadgerDBStore) {
-	ServiceInstance.store = db
+func StartService(socketDir string, db *db.BadgerDBStore) {
+	ServiceInstance.db = db
 	SocketConn = domainSocket(socketDir)
 	handleConnection(SocketConn)
 }
@@ -73,12 +74,14 @@ func handleConnection(listener *net.UnixListener) {
 func treatMessage(c net.Conn) {
 	for {
 		var (
-			msg Message
+			msg types.Message
 			err error
+			n   int
 		)
 
-		if err = gob.NewDecoder(c).Decode(&msg); err != nil {
-			log.Println("error reading message:", err)
+		buf := make([]byte, 10_000) //10kb
+		if n, err = c.Read(buf); err != nil {
+			fmt.Println("error reading message:", err)
 			if errors.Is(err, io.EOF) {
 				fmt.Println("client connection closed")
 				c.Close()
@@ -87,9 +90,15 @@ func treatMessage(c net.Conn) {
 			continue
 		}
 
+		if msg, err = helperFuncs.Decode[types.Message](buf[:n]); err != nil {
+			fmt.Println("error decoding socket message", err)
+			c.Close()
+			return
+		}
+
 		switch msg.Endpoint {
 		case "startConnection":
-			msg = Message{StringDataResponse: `hELLo.., this is the DaemonService speaking, your connection is established.`}
+			msg = types.Message{StringDataResponse: "hELLo.., this is the DaemonService speaking, your connection is established."}
 
 		case "closeConnection":
 			fmt.Println("we got a close connection message")
@@ -97,19 +106,20 @@ func treatMessage(c net.Conn) {
 			return
 
 		case "weekStat":
-			weekStat := ServiceInstance.weekStat(msg)
+			weekStat := ServiceInstance.getWeekStat(msg)
 			msg.WeekStatResponse = weekStat
 		}
 
-		bytes, err := msg.encode()
+		bytes, err := helperFuncs.Encode(msg)
 		if err != nil {
-			log.Println("error encoding response:", err)
+			fmt.Println("error encoding response:", err)
 			continue
 		}
-		_, err = c.Write(bytes)
+		n, err = c.Write(bytes)
 		if err != nil {
-			log.Println("error encoding response:", err)
+			fmt.Println("error encoding response:", err)
 			continue
 		}
+		fmt.Println("bytes written", n, "encoded byte", len(bytes))
 	}
 }

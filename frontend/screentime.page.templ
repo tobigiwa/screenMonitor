@@ -1,8 +1,9 @@
 package frontend
 
-import "time"
+import "html/template"
+import "pkg/types"
+import helperFuncs "pkg/helper"
 
-// import "github.com/go-echarts/go-echarts/v2/charts"
 templ ScreenTimePage() {
 	<!DOCTYPE html>
 	<html lang="en">
@@ -10,7 +11,9 @@ templ ScreenTimePage() {
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			<link rel="stylesheet" href="/assets/styles/screentime.css"/>
-			<script src="assets/js/out.js"></script>
+			// <script src="assets/js/out.js"></script>
+			<script src="assets/htmx.min.js"></script>
+			<script src="assets/echarts.min.js"></script>
 			<title>ScreenTimePage</title>
 		</head>
 		<body>
@@ -25,52 +28,72 @@ templ ScreenTimePage() {
 templ main() {
 	<div class="main">
 		@Header()
-		// @ChartWrapper(createBarChart())
-		@ChartWrapper()
+		@chartWrapper("")
 		@chartControls()
-		@chartHighlight()
+		@chartHighlight(nil)
 	</div>
 }
 
-//
-// templ ChartWrapper(chart *charts.Bar) {
-// 	<div class="chart-wrapper">
-// 		<div id="echart">
-// 			@ConvertChartToTemplComponent(chart)
-// 		</div>
-// 	</div>
-// }
-templ ChartWrapper() {
+templ chartWrapper(chart template.HTML) {
 	<div class="chart-wrapper">
-		<canvas id="echart"></canvas>
+		<div id="echart" hx-swap-oob="true">
+			@templ.Raw(chart)
+		</div>
 	</div>
 }
 
-templ chartHighlight() {
-	<div class="chart-highlight"></div>
+templ chartHighlight(appDetails []types.ApplicationDetail) {
+	<div class="chart-highlight" hx-swap-obb="true">
+		<ul id="highlight">
+			for i:=0; i < len(appDetails); i++ {
+				<li class="card">
+					if appDetails[i].AppInfo.IsIconSet {
+						{ writeImageToFile(appDetails[i].AppInfo.Icon, appDetails[i].AppInfo.AppName) }
+						<img src={ "/tmp/" + appDetails[i].AppInfo.AppName + ".png" } alt={ appDetails[i].AppInfo.AppName } class="app-icon"/>
+					} else {
+						<img src="/assets/image/noAppImage.jpg" alt="noImage" class="app-icon"/>
+					}
+					<div class="info">
+						<div class="appName" style="font-size:large;font-weight:bold;">{ appDetails[i].AppInfo.AppName }</div>
+						if appDetails[i].AppInfo.IsCategorySet {
+							<button class="category">Category: { appDetails[i].AppInfo.Category }</button>
+						} else {
+							<button class="category">Selct application catergory</button>
+						}
+					</div>
+					<div class="appStat" style="font-style:italic;">Weeks Usage: { helperFuncs.UsageTimeInHrsMin(appDetails[i].Usage) }Hrs</div>
+				</li>
+			}
+		</ul>
+	</div>
+}
+
+templ WeekStatChartAndHighlight(chart template.HTML, appDetails []types.ApplicationDetail) {
+	@chartWrapper(chart)
+	@chartHighlight(appDetails)
 }
 
 templ chartControls() {
 	<div class="chart-controls">
 		<div class="left-controls">
-		<div class="select-month">
-				<select name="Month" id="">
+			<div class="select-month">
+				<select name="month" class="month" hx-get="/weekStat?week=month" hx-vals="js{month: this.value}" hx-swap="none" hx-indicator="#echart">
+					<option value="" id="placeholder" disabled selected>Last 3 Month</option>
 					for _, v := range monthDropDownSelectArray() {
-						<option value={ v }>{ v }</option>
+						<option class="option" value={ v }>{ v }</option>
 					}
 				</select>
-				// <span class="custom-arrow"></span>
 			</div>
-			<button class="left-controls-button img backward-arrow">
+			<button class="left-controls__btn img backward-arrow" hx-swap="none" hx-indicator="#echart">
 				<img
 					class="chart__controls--img"
 					src="assets/svg/angle-left-svgrepo-com.svg"
 					alt=""
 				/>
 			</button>
-			<button class="left-controls-button text" hx-get="/weekStat?week=lastweek" hx-swap="none">Last Week</button>
-			<button class="left-controls-button text" id="thisWeekButton" hx-get="/weekStat?week=thisweek" hx-swap="none">This Week</button>
-			<button class="left-controls-button img forward-arrow">
+			<button class="left-controls__btn text" hx-get="/weekStat?week=lastweek" hx-swap="none" hx-indicator="#echart">Last Week</button>
+			<button class="left-controls__btn text" id="thisWeekButton" hx-get="/weekStat?week=thisweek" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:innerHTML">This Week</button>
+			<button class="left-controls__btn img forward-arrow" hx-swap="none" hx-indicator="#echart">
 				<img
 					class="chart__controls--img"
 					src="assets/svg/angle-right-svgrepo-com.svg"
@@ -80,18 +103,22 @@ templ chartControls() {
 		</div>
 		<div class="spacing"></div>
 		<div class="right-controls">
-			<button class="right-controls-button text" href="#">Asc.</button>
-			<button class="right-controls-button text" href="#">Desc.</button>
+			<button class="right-controls__btn text" href="#">Asce.</button>
+			<button class="right-controls__btn text" href="#">Desc.</button>
 		</div>
-	</div>
-}
+		<script>
+		document.addEventListener( 'DOMContentLoaded', function ()
+		{
+			window.onload = function ()
+			{
+				var thisWeekButton = document.querySelector( '#thisWeekButton' );
 
-func monthDropDownSelectArray() [4]string {
-	today := time.Now()
-	past4Month := [4]string{}
-	for i := 0; i <= 3; i++ {
-		m := today.AddDate(0, -i, 0)
-		past4Month[i] = m.Month().String()
-	}
-	return past4Month
+				if ( thisWeekButton ) {
+					thisWeekButton.click();
+				}
+			};
+
+		} );
+		</script>
+	</div>
 }

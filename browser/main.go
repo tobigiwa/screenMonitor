@@ -32,9 +32,9 @@ func main() {
 		log.Fatalln("error creating app:", err)
 	}
 
-	err = app.CheckDaemonService()
+	_, err = app.CheckDaemonService()
 	if err != nil {
-		log.Fatalln("error connectig to daemon service:", err)
+		log.Fatalln("error connecting to daemon service:", err)
 	}
 
 	server := &http.Server{

@@ -2,48 +2,16 @@ package webserver
 
 import (
 	"bytes"
-	"encoding/gob"
 	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
 	"log/slog"
 	"net"
 	"os"
+	helperFuncs "pkg/helper"
+	"pkg/types"
 )
-
-type Message struct {
-	Endpoint           string          `json:"endpoint"`
-	StringDataRequest  string          `json:"stringDataRequest"`
-	StringDataResponse string          `json:"stringDataResponse"`
-	WeekStatResponse   WeekStatMessage `json:"weekStatResponse"`
-}
-type WeekStatMessage struct {
-	Keys         [7]string  `json:"keys"`
-	FormattedDay [7]string  `json:"formattedDay"`
-	Values       [7]float64 `json:"values"`
-	Month        string     `json:"month"`
-	Year         string     `json:"year"`
-	IsError      bool       `json:"isError"`
-	Error        error      `json:"error"`
-}
-
-func (m *Message) encode() ([]byte, error) {
-	buf := new(bytes.Buffer)
-	if err := gob.NewEncoder(buf).Encode(m); err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
-}
-
-func (m *Message) decode(data []byte) error {
-	buf := bytes.NewBuffer(data)
-	if err := gob.NewDecoder(buf).Decode(m); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *Message) decodeToJson() ([]byte, error) {
-	return json.Marshal(m)
-}
 
 type App struct {
 	logger     *slog.Logger
@@ -85,25 +53,43 @@ func listenToDaemonService() (net.Conn, error) {
 	return conn, nil
 }
 
-func (a *App) CheckDaemonService() error {
-	msg := Message{
+func (a *App) CheckDaemonService() (types.Message, error) {
+	msg := types.Message{
 		Endpoint:          "startConnection",
 		StringDataRequest: "I wish this project prospered.",
 	}
-	bytes, err := msg.encode()
+	return a.writeAndReadWithDaemonService(msg)
+}
+
+func (a *App) writeAndReadWithDaemonService(msg types.Message) (types.Message, error) {
+	bytesData, err := helperFuncs.Encode(msg) // encode message in byte
 	if err != nil {
-		return err
+		return types.NoMessage, fmt.Errorf("encode %w", err)
 	}
-	if _, err = a.daemonConn.Write(bytes); err != nil {
-		return err
+	if _, err = a.daemonConn.Write(bytesData); err != nil { // write to socket
+		return types.NoMessage, fmt.Errorf("write %w", err)
 	}
 
-	buf := make([]byte, 512)
-	if _, err := a.daemonConn.Read(buf); err != nil {
-		return err
+	var dataBuf bytes.Buffer
+	tempBuf := make([]byte, 100_000) //100kb
+	n := 0
+
+	for {
+		if n, err = a.daemonConn.Read(tempBuf); err != nil { // read response from socket
+			if errors.Is(err, io.EOF) {
+				break
+			}
+			return types.NoMessage, fmt.Errorf("read error from socket %w", err)
+		}
+
+		if n > 0 {
+			dataBuf.Write(tempBuf[:n])
+		}
+
+		if json.Valid(dataBuf.Bytes()) { // Implement this function based on your protocol
+			break
+		}
 	}
-	if err = msg.decode(buf); err != nil {
-		return err
-	}
-	return nil
+
+	return helperFuncs.Decode[types.Message](dataBuf.Bytes())
 }

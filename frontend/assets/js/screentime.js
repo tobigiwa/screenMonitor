@@ -1,18 +1,7 @@
 import lottie from 'lottie-web';
 import htmx from 'htmx.org';
-// import * as echarts from 'echarts';
 import Chart from 'chart.js/auto';
 
-
-// document.addEventListener( 'DOMContentLoaded', function ()
-// {
-//     var chart = document.getElementById( 'echart' );
-//     var myChart = echarts.init( chart );
-//     window.onresize = function ()
-//     {
-//         myChart.resize();
-//     };
-// } );
 
 let myChart;
 let currentSaturday;
@@ -20,41 +9,20 @@ let currentSaturday;
 document.addEventListener( 'DOMContentLoaded', function ()
 {
 
-    loadAnimation();
-    onFullPageReload();
-    leftcontrolchartButtons();
+    // onFullPageReload();
+    // leftcontrolchartButtons();
 
 } );
 
-function loadAnimation ()
-{
-    lottie.loadAnimation( {
-        container: document.getElementById( 'lottie-animation' ),
-        renderer: 'svg',
-        loop: true,
-        autoplay: true,
-        path: "assets/animation/Animation - 1712666371830.json"
-    } );
-}
 
-function onFullPageReload ()
-{
-    window.onload = function ()
-    {
-        var thisWeekButton = document.querySelector( '#thisWeekButton' );
 
-        if ( thisWeekButton ) {
-            thisWeekButton.click();
-        }
-    };
-}
 
 function leftcontrolchartButtons ()
 {
-    var chartControlButtons = document.querySelectorAll( '.left-controls-button' );
-    chartControlButtons.forEach( function ( button )
+    var chartControl = document.querySelectorAll( '.left-controls-button, .month' );
+    chartControl.forEach( function ( control )
     {
-        button.addEventListener( 'htmx:afterRequest', function ( event )
+        control.addEventListener( 'htmx:afterRequest', function ( event )
         {
             if ( !event.detail.successful ) {
                 console.log( "request not successful" );
@@ -70,86 +38,51 @@ function leftcontrolchartButtons ()
                 return;
             }
             drawWeekStatChar( response );
+            setCurrentMonth( response.weekStatResponse.month );
             arrowButton();
+            htmx.trigger( "#highlight", 'highlight', );
         } );
     } );
 }
 
-function drawWeekStatChar ( response )
+
+
+
+function setCurrentMonth ( month )
 {
-    const ctx = document.getElementById( 'echart' );
-    if ( myChart ) {
-        myChart.destroy();
+    let selectElement = document.querySelector( '.month' );
+    let selectOptions = selectElement.options;
+
+    for ( let option of selectOptions ) {
+        option.style.fontSize = "initial";
+        option.style.fontStyle = "normal";
     }
 
-    let labels = response.weekStatResponse.formattedDay;
-    let data = response.weekStatResponse.values;
-    currentSaturday = response.weekStatResponse.keys[ 6 ];
+    let monthInDropdown = Array.from( selectOptions ).some( option => option.value == month );
 
-    myChart = new Chart( ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [ {
-                label: 'Days of the week',
-                data: data,
-                borderWidth: 1,
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                borderColor: 'rgba(255, 99, 132, 1)',
-            } ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    } );
+    if ( monthInDropdown ) {
+        selectElement.value = month;
+    } else {
+        let placeholderOption = selectElement.querySelector( '#placeholder' );
+        placeholderOption.style.fontSize = "smaller";
+        placeholderOption.style.fontStyle = "italic";
+        selectElement.value = "";
+    }
 }
 
 function arrowButton ()
 {
-    console.log( "in arrowButton", currentSaturday );
 
     let backwardButton = document.querySelector( '.backward-arrow' );
     let endPointA = '/weekStat?week=backward-arrow&saturday=' + currentSaturday;
 
     backwardButton.setAttribute( 'hx-get', endPointA );
-    backwardButton.setAttribute( 'hx-swap', 'none' );
     htmx.process( backwardButton );
 
     let forwardButton = document.querySelector( '.forward-arrow' );
     let endPointB = '/weekStat?week=forward-arrow&saturday=' + currentSaturday;
 
     forwardButton.setAttribute( 'hx-get', endPointB );
-    forwardButton.setAttribute( 'hx-swap', 'none' );
     htmx.process( forwardButton );
 }
 
-document.addEventListener( 'keydown', function ( e )
-{
-    const focusedElement = document.activeElement;
-    if ( !focusedElement.classList.contains( 'links' ) ) {
-        return;
-    }
-
-    let toFocus = null;
-    switch ( e.key ) {
-        case 'ArrowDown':
-            toFocus = focusedElement.parentElement.nextElementSibling;
-            if ( toFocus ) toFocus = toFocus.querySelector( '.links' );
-            break;
-        case 'ArrowUp':
-            toFocus = focusedElement.parentElement.previousElementSibling;
-            if ( toFocus ) toFocus = toFocus.querySelector( '.links' );
-            break;
-    }
-
-    if ( toFocus ) {
-        toFocus.focus();
-        e.preventDefault();
-    }
-} );
