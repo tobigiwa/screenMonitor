@@ -57,6 +57,24 @@ func daysInThatWeek(w time.Time) [7]Date {
 	return arr
 }
 
+func AllTheDaysInMonth(year, month string) ([]Date, error) {
+	t, err := time.Parse("2006 January", year+" "+month)
+	if err != nil {
+		return nil, fmt.Errorf("parse %w", err)
+	}
+
+	fmt.Println(t.Day(), t.Month(), t.Year())
+	lastDayOfTheGivenMonth := time.Date(t.Year(), t.Month()+1, 0, 0, 0, 0, 0, t.Location()).Day()
+
+	dates := make([]Date, 0, lastDayOfTheGivenMonth)
+
+	for day := 1; day <= lastDayOfTheGivenMonth; day++ {
+		dates = append(dates, Date(time.Date(t.Year(), t.Month(), day, 0, 0, 0, 0, t.Location()).Format(timeFormat)))
+	}
+
+	return dates, nil
+}
+
 func getDesktopCategory(appName string) ([]string, error) {
 
 	if OperatingSytem := runtime.GOOS; OperatingSytem == "linux" {
