@@ -23,7 +23,7 @@ func Menu() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 1)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"menu\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -35,7 +35,7 @@ func Menu() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 2)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -59,7 +59,7 @@ func animation() templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 3)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"hold-animation\"><div class=\"wrap-animation\"><div class=\"animation\" id=\"lottie-animation\"></div></div><div class=\"quote-animation\"><p>'If You Can't Measure It, You Can't Manage It'</p></div><script src=\"assets/lottie.min.js\"></script><script>\n\t\tdocument.addEventListener( 'DOMContentLoaded', function ()\n\t\t{\n\t\t\tlottie.loadAnimation( {\n\t\t\t\tcontainer: document.getElementById( 'lottie-animation' ),\n\t\t\t\trenderer: 'svg',\n\t\t\t\tloop: true,\n\t\t\t\tautoplay: true,\n\t\t\t\tpath: \"assets/animation/Animation - 1712666371830.json\"\n\t\t\t} );\n\t\t} );\n\n\t\t</script></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -83,7 +83,7 @@ func menuItems() templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templ.WriteWatchModeString(templ_7745c5c3_Buffer, 4)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"menu-items\"><nav><ul><li class=\"wide\"><a href=\"#\" class=\"links\" tabindex=\"0\"><img src=\"assets/svg/no_1.svg\" class=\"icon\">Screentime</a></li><li class=\"wide\"><a href=\"#\" class=\"links wide\" tabindex=\"0\"><img src=\"assets/svg/no_3.svg\" class=\"icon\">Analytics</a></li><li class=\"wide\"><a href=\"#\" class=\"links wide\" tabindex=\"0\"><img src=\"assets/svg/no_4.svg\" class=\"icon\" style=\"vertical-align: top;\"><div class=\"long-text\" style=\"display: inline-block;\">Alerts<br>& Remainder</div></a></li><li class=\"wide\"><a href=\"#\" class=\"links wide\" tabindex=\"0\"><img src=\"assets/svg/no_2.svg\" class=\"icon\">ToDo</a></li><li class=\"hidden\"><a href=\"#\" class=\"links\" tabindex=\"0\"><img src=\"assets/svg/no_5_settings.svg\" class=\"icon\">Settings</a></li><li class=\"hidden\"><a href=\"#\" class=\"links\" tabindex=\"0\"><img src=\"assets/svg/no_6_logout.svg\" class=\"icon\">Logout</a></li><li class=\"narrow\" title=\"Screentime\"><a href=\"#\" class=\"links\" tabindex=\"0\"><img src=\"assets/svg/no_1.svg\" class=\"icon\"></a></li><li class=\"narrow\" title=\"Analytics\"><a href=\"#\" class=\"links\" tabindex=\"0\"><img src=\"assets/svg/no_3.svg\" class=\"icon\"></a></li><li class=\"narrow\" title=\"Alerts &amp; Remainder\"><a href=\"#\" class=\"links\" tabindex=\"0\"><img src=\"assets/svg/no_4.svg\" class=\"icon\"></a></li><li class=\"narrow\" title=\"ToDo  \"><a href=\"#\" class=\"links\" tabindex=\"0\"><img src=\"assets/svg/no_2.svg\" class=\"icon\"></a></li><li class=\"narrow\" title=\"Settings\"><a href=\"#\" class=\"links\" tabindex=\"0\"><img src=\"assets/svg/no_5_settings.svg\" class=\"icon\"></a></li><li class=\"narrow\" title=\"Logout\"><a href=\"#\" class=\"links\" tabindex=\"0\"><img src=\"assets/svg/no_6_logout.svg\" class=\"icon\"></a></li></ul></nav><script>\n\t\tdocument.addEventListener( 'keydown', function ( e )\n\t\t{\n\t\t\tconst focusedElement = document.activeElement;\n\t\t\tif ( !focusedElement.classList.contains( 'links' ) ) {\n\t\t\t\treturn;\n\t\t\t}\n\n\t\t\tlet toFocus = null;\n\t\t\tswitch ( e.key ) {\n\t\t\t\tcase 'ArrowDown':\n\t\t\t\t\ttoFocus = focusedElement.parentElement.nextElementSibling;\n\t\t\t\t\tif ( toFocus ) toFocus = toFocus.querySelector( '.links' );\n\t\t\t\t\tbreak;\n\t\t\t\tcase 'ArrowUp':\n\t\t\t\t\ttoFocus = focusedElement.parentElement.previousElementSibling;\n\t\t\t\t\tif ( toFocus ) toFocus = toFocus.querySelector( '.links' );\n\t\t\t\t\tbreak;\n\t\t\t}\n\n\t\t\tif ( toFocus ) {\n\t\t\t\ttoFocus.focus();\n\t\t\t\te.preventDefault();\n\t\t\t}\n\t\t} );\n\t\t</script></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
