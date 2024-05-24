@@ -1,6 +1,4 @@
-import lottie from 'lottie-web';
 import htmx from 'htmx.org';
-import Chart from 'chart.js/auto';
 
 
 let myChart;

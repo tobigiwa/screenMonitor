@@ -163,16 +163,14 @@ func (a *App) WeekStat(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("err with templ:", err)
 	}
 	// Cache
-	// if query == "thisweek" {
-	// 	weekStatCache[query] = templComp
-	// } else if query == "backward-arrow" || query == "forward-arrow" || query == "lastweek" {
-	// 	weekStatCache[cacheLastSaturday] = templComp
-	// }
+	if query == "thisweek" {
+		weekStatCache[query] = templComp
+	} else if query == "backward-arrow" || query == "forward-arrow" || query == "lastweek" {
+		weekStatCache[cacheLastSaturday] = templComp
+	}
 
 	templComp.Render(context.TODO(), w)
 }
-
-
 
 func returnLastSaturday(t time.Time) string {
 
