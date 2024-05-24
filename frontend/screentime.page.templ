@@ -46,7 +46,7 @@ templ chartHighlight(appDetails []types.ApplicationDetail) {
 	<div class="chart-highlight" hx-swap-obb="true">
 		<ul id="highlight">
 			for i:=0; i < len(appDetails); i++ {
-				<li class="card" tabindex="1">
+				<li class="card" tabindex="10">
 					if appDetails[i].AppInfo.IsIconSet {
 						{ writeImageToFile(appDetails[i].AppInfo.Icon, appDetails[i].AppInfo.AppName) }
 						<img src={ "/tmp/" + appDetails[i].AppInfo.AppName + ".png" } alt={ appDetails[i].AppInfo.AppName } class="app-icon"/>
