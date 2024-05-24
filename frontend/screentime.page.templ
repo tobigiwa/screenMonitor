@@ -109,16 +109,36 @@ templ chartControls() {
 		<script>
 		document.addEventListener( 'DOMContentLoaded', function ()
 		{
-			window.onload = function ()
-			{
-				var thisWeekButton = document.querySelector( '#thisWeekButton' );
+			const thisWeekButton = document.querySelector( '#thisWeekButton' );
 
-				if ( thisWeekButton ) {
-					thisWeekButton.click();
+			if ( thisWeekButton ) {
+				thisWeekButton.click();
+			}	
+
+			const overview = document.getElementById('highlight');
+			const listings = overview.children;
+			let activeOverview = 0;
+			overview.addEventListener('keydown', (e) => {
+				switch ( e.key ) {
+					case 'ArrowDown':
+						listings[activeOverview]?.classList.remove('active');
+						activeOverview = (activeOverview + 1) % listings.length;
+						listings[activeOverview]?.classList.add('active');
+						break;
+					case 'ArrowUp':
+						listings[activeOverview]?.classList.remove('active');
+						activeOverview = (activeOverview + listings.length - 1) % listings.length;
+						listings[activeOverview]?.classList.add('active');
+						break;
 				}
-			};
 
-		} );
+				if ( toFocus ) {
+					toFocus.focus();
+					e.preventDefault();
+				}
+			});
+		});
+
 		</script>
 	</div>
 }

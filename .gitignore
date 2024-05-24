@@ -6,3 +6,5 @@ frontend/node_modules/
 frontend/assets/js/out*
 tmp/
 browser/tmp/
+*templ.go
+*templ.txt

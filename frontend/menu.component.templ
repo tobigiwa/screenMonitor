@@ -151,10 +151,12 @@ templ menuItems() {
 			let toFocus = null;
 			switch ( e.key ) {
 				case 'ArrowDown':
+					console.log('Arrow Down');
 					toFocus = focusedElement.parentElement.nextElementSibling;
 					if ( toFocus ) toFocus = toFocus.querySelector( '.links' );
 					break;
 				case 'ArrowUp':
+					console.log('Arrow Up');
 					toFocus = focusedElement.parentElement.previousElementSibling;
 					if ( toFocus ) toFocus = toFocus.querySelector( '.links' );
 					break;
