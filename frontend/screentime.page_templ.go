@@ -145,6 +145,7 @@ func chartHighlight(appDetails []types.ApplicationDetail) templ.Component {
 		}
 		for i := 0; i < len(appDetails); i++ {
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<li class=\"card\" tabindex=\"1\">")
+
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

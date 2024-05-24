@@ -9,11 +9,7 @@ func Key() Date {
 	return Date(fmt.Sprint(time.Now().Format(timeFormat)))
 }
 func ParseKey(key Date) (time.Time, error) {
-	a, err := time.Parse(timeFormat, string(key))
-	if err != nil {
-		return time.Time{}, err
-	}
-	return a, nil
+	return time.Parse(timeFormat, string(key))
 }
 
 var (
