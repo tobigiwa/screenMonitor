@@ -358,7 +358,7 @@ body {
             
                 }
 
-            .card:hover, .card:focus {
+            .active {
                 outline: none;
                 background-color: var(--primary-color1);
             }
