@@ -26,7 +26,8 @@ body {
     /* grid-template-columns: 15rem 1fr; */
 
     @media (max-width: 700px) {
-        grid-template-columns: 0.5fr 1fr;
+        /* display: grid; */
+        /* grid-template-columns: 0.5fr 1fr; */
     }
 
     @media (max-width: 550px) {
@@ -145,6 +146,9 @@ body {
     }
 
     @media (max-width: 700px) {
+        
+        flex: 1;
+        
         .hidden {
             display: inherit;
 
@@ -332,6 +336,7 @@ body {
                     justify-content: flex-start;
                     align-items: center;
                     background-color: #303030;
+                    outline: none;
 
 
                     color: var(--white-color);
@@ -354,17 +359,38 @@ body {
                     .appStat {
                         margin-left: auto;
                     }
-            
+
+                    &:focus {
+                        color: var(--black-color);
+                        background-color: var(--primary-color1);
+                        transition: background-color 0.2s ease-in;
+                        transform: scale(0.9);
+                    }
+
+                    &:not(:focus) {
+                        transition: background-color 0.2s ease-out;
+                    }
+
+                    &:hover {
+                        background-color: rgba(0, 0, 0, 0.2);
+                        transform: scale(0.95);
+                    }
+
+                    &:hover:focus {
+                        background-color: var(--primary-color1);
+                    }
+
                 }
 
             .active {
-                outline: none;
-                background-color: var(--primary-color1);
+                background-color: #aaeeeb;
             }
         }
     }
 
     @media (max-width: 700px) {
+        flex: 3;
+
         .header-btn {
             display: none;
         }

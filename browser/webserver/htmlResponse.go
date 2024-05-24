@@ -10,13 +10,17 @@ import (
 func prepareHtTMLResponse(msg types.Message) templ.Component {
 	switch msg.Endpoint {
 	case "weekStat":
-		return prepareWeekStatHTMLResponse(msg.WeekStatResponse)
+		return weekStatResponse(msg.WeekStatResponse)
+	case "appStat":
+		return templ.NopComponent
 	}
 
 	return templ.NopComponent
 }
 
-func prepareWeekStatHTMLResponse(w types.WeekStatMessage) templ.Component {
+
+
+func weekStatResponse(w types.WeekStatMessage) templ.Component {
 	return views.WeekStatChartAndHighlight(
 		weekStatBarChart(barChartData{
 			xAxis:       w.FormattedDay,
@@ -28,3 +32,5 @@ func prepareWeekStatHTMLResponse(w types.WeekStatMessage) templ.Component {
 		w.AppDetail,
 	)
 }
+
+func appStatResponse() templ.Component

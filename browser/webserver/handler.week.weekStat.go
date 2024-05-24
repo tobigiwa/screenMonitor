@@ -4,23 +4,16 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"log/slog"
 	"net/http"
 	"pkg/types"
 	"strings"
 	"time"
-	views "views"
 
 	"github.com/a-h/templ"
 )
 
-type ScreenType string
-
 const (
-	Active     ScreenType = "active"
-	Inactive   ScreenType = "inactive"
-	Open       ScreenType = "open"
-	timeFormat string     = "2006-01-02"
+	timeFormat string = "2006-01-02"
 )
 
 type WeekStatDataCache struct {
@@ -33,14 +26,8 @@ var (
 	weekStatCache     = make(map[string]templ.Component, 20)
 	cacheLastSaturday string
 )
-
-func (a *App) ScreenTimePageHandler(w http.ResponseWriter, r *http.Request) {
-	if err := views.ScreenTimePage().Render(context.TODO(), w); err != nil {
-		a.logger.Log(context.TODO(), slog.LevelError, err.Error())
-		return
-	}
-}
-func (a *App) WeekStat(w http.ResponseWriter, r *http.Request) {
+ 
+func (a *App) WeekStatHandler(w http.ResponseWriter, r *http.Request) {
 
 	query := r.URL.Query().Get("week")
 	endpoint := strings.TrimPrefix(r.URL.Path, "/")
@@ -155,13 +142,12 @@ func (a *App) WeekStat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// fmt.Printf("\n\n%+v\n\n", msg)
-
 	templComp := prepareHtTMLResponse(msg)
 	err = templComp.Render(context.TODO(), w)
 	if err != nil {
 		fmt.Println("err with templ:", err)
 	}
+
 	// Cache
 	if query == "thisweek" {
 		weekStatCache[query] = templComp

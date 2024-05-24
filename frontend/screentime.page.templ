@@ -28,13 +28,13 @@ templ ScreenTimePage() {
 templ main() {
 	<div class="main">
 		@Header()
-		@chartWrapper("")
+		@ChartWrapper("")
 		@chartControls()
 		@chartHighlight(nil)
 	</div>
 }
 
-templ chartWrapper(chart template.HTML) {
+templ ChartWrapper(chart template.HTML) {
 	<div class="chart-wrapper">
 		<div id="echart" hx-swap-oob="true">
 			@templ.Raw(chart)
@@ -46,7 +46,7 @@ templ chartHighlight(appDetails []types.ApplicationDetail) {
 	<div class="chart-highlight" hx-swap-obb="true">
 		<ul id="highlight">
 			for i:=0; i < len(appDetails); i++ {
-				<li class="card" tabindex="10">
+				<li class="card" tabindex="10" hx-get={ "/appStat?range=week?appName=" + appDetails[i].AppInfo.AppName } hx-swap="none" hx-select-oob="#echart:innerHTML">
 					if appDetails[i].AppInfo.IsIconSet {
 						{ writeImageToFile(appDetails[i].AppInfo.Icon, appDetails[i].AppInfo.AppName) }
 						<img src={ "/tmp/" + appDetails[i].AppInfo.AppName + ".png" } alt={ appDetails[i].AppInfo.AppName } class="app-icon"/>
@@ -69,7 +69,7 @@ templ chartHighlight(appDetails []types.ApplicationDetail) {
 }
 
 templ WeekStatChartAndHighlight(chart template.HTML, appDetails []types.ApplicationDetail) {
-	@chartWrapper(chart)
+	@ChartWrapper(chart)
 	@chartHighlight(appDetails)
 }
 
