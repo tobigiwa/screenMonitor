@@ -121,14 +121,18 @@ templ chartControls() {
 			overview.addEventListener('keydown', (e) => {
 				switch ( e.key ) {
 					case 'ArrowDown':
-						listings[activeOverview]?.classList.remove('active');
-						activeOverview = (activeOverview + 1) % listings.length;
-						listings[activeOverview]?.classList.add('active');
+						if(activeOverview < listings.length - 1) {
+							listings[activeOverview]?.classList.remove('active');
+							activeOverview++;
+							listings[activeOverview]?.classList.add('active');
+						}
 						break;
 					case 'ArrowUp':
-						listings[activeOverview]?.classList.remove('active');
-						activeOverview = (activeOverview + listings.length - 1) % listings.length;
-						listings[activeOverview]?.classList.add('active');
+						if(activeOverview > 0) {
+							listings[activeOverview]?.classList.remove('active');
+							--activeOverview;
+							listings[activeOverview]?.classList.add('active');
+						}
 						break;
 				}
 
