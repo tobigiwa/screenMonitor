@@ -30,7 +30,7 @@ templ main() {
 		@Header()
 		@ChartWrapper("")
 		@chartControls()
-		@chartHighlight(nil)
+		@chartHighlight(nil, 0)
 	</div>
 }
 
@@ -42,11 +42,11 @@ templ ChartWrapper(chart template.HTML) {
 	</div>
 }
 
-templ chartHighlight(appDetails []types.ApplicationDetail) {
+templ chartHighlight(appDetails []types.ApplicationDetail, totalWeekUsage float64) {
 	<div class="chart-highlight" hx-swap-obb="true">
 		<ul id="highlight">
 			for i:=0; i < len(appDetails); i++ {
-				<li class="card" tabindex="10" hx-get={ "/appStat?range=week?appName=" + appDetails[i].AppInfo.AppName } hx-swap="none" hx-select-oob="#echart:innerHTML">
+				<li class="card" tabindex="10" hx-get={ string(templ.URL("/appStat?range=week&appName=" + appDetails[i].AppInfo.AppName)) } hx-swap="none" hx-select-oob="#echart:innerHTML">
 					if appDetails[i].AppInfo.IsIconSet {
 						{ writeImageToFile(appDetails[i].AppInfo.Icon, appDetails[i].AppInfo.AppName) }
 						<img src={ "/tmp/" + appDetails[i].AppInfo.AppName + ".png" } alt={ appDetails[i].AppInfo.AppName } class="app-icon"/>
@@ -61,16 +61,16 @@ templ chartHighlight(appDetails []types.ApplicationDetail) {
 							<button class="category">Selct application catergory</button>
 						}
 					</div>
-					<div class="appStat" style="font-style:italic;">Weeks Usage: { helperFuncs.UsageTimeInHrsMin(appDetails[i].Usage) }Hrs</div>
+					<div class="appStat" style="font-style:italic;">{ helperFuncs.PercentagesString(appDetails[i].Usage, totalWeekUsage) } of weeks usage: { helperFuncs.UsageTimeInHrsMin(appDetails[i].Usage) }Hrs</div>
 				</li>
 			}
 		</ul>
 	</div>
 }
 
-templ WeekStatChartAndHighlight(chart template.HTML, appDetails []types.ApplicationDetail) {
+templ WeekStatChartAndHighlight(chart template.HTML, totalWeekUsage float64, appDetails []types.ApplicationDetail) {
 	@ChartWrapper(chart)
-	@chartHighlight(appDetails)
+	@chartHighlight(appDetails, totalWeekUsage)
 }
 
 templ chartControls() {

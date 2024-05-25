@@ -5,12 +5,13 @@ import (
 	"errors"
 	"fmt"
 	helperFuncs "pkg/helper"
+	"pkg/types"
 	"slices"
 
 	badger "github.com/dgraph-io/badger/v4"
 )
 
-func (bs *BadgerDBStore) GetDay(date Date) (DailyStat, error) {
+func (bs *BadgerDBStore) GetDay(date types.Date) (DailyStat, error) {
 
 	if day, _ := ParseKey(date); day.After(formattedToDay()) {
 		return ZeroValueDailyStat, ErrFutureDay
@@ -34,10 +35,10 @@ func (bs *BadgerDBStore) GetDay(date Date) (DailyStat, error) {
 	return dayStat, nil
 }
 
-func (bs *BadgerDBStore) getDailyAppStat(day Date) (DailyStat, error) {
+func (bs *BadgerDBStore) getDailyAppStat(day types.Date) (DailyStat, error) {
 	var (
 		result       DailyStat
-		dayTotalData Stats
+		dayTotalData types.Stats
 		arr          = make([]AppStat, 0, 20)
 	)
 
@@ -97,7 +98,7 @@ func (bs *BadgerDBStore) getDailyAppStat(day Date) (DailyStat, error) {
 	result.DayTotal.Open = dayTotalData.Open
 	result.EachApp = arr
 
-	if day != Date(formattedToDay().Format(timeFormat)) {
+	if day != types.Date(formattedToDay().Format(types.TimeFormat)) {
 		byteData, _ := helperFuncs.Encode(result)
 		err := bs.setNewEntryToDB(dbDayKey(day), byteData)
 		if err != nil {

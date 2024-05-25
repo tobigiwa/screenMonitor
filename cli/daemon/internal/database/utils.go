@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"pkg/types"
 	"runtime"
 	"slices"
 	"strings"
@@ -13,7 +14,7 @@ import (
 )
 
 func formattedToDay() time.Time {
-	t, _ := ParseKey(Date(time.Now().Format(timeFormat)))
+	t, _ := ParseKey(types.Date(time.Now().Format(types.TimeFormat)))
 	return t
 }
 
@@ -45,19 +46,19 @@ func IsPastWeek(t time.Time) bool {
 
 func SaturdayOfTheWeek(t time.Time) string {
 	daysUntilSaturday := 6 - int(t.Weekday())
-	return t.AddDate(0, 0, daysUntilSaturday).Format(timeFormat)
+	return t.AddDate(0, 0, daysUntilSaturday).Format(types.TimeFormat)
 }
 
-func daysInThatWeek(w time.Time) [7]Date {
-	var arr [7]Date
+func daysInThatWeek(w time.Time) [7]types.Date {
+	var arr [7]types.Date
 	startOftheWeek := w.AddDate(0, 0, -int(w.Weekday()))
 	for i := 0; i < 7; i++ {
-		arr[i] = Date(fmt.Sprint(startOftheWeek.AddDate(0, 0, i).Format(timeFormat)))
+		arr[i] = types.Date(fmt.Sprint(startOftheWeek.AddDate(0, 0, i).Format(types.TimeFormat)))
 	}
 	return arr
 }
 
-func AllTheDaysInMonth(year, month string) ([]Date, error) {
+func AllTheDaysInMonth(year, month string) ([]types.Date, error) {
 	t, err := time.Parse("2006 January", year+" "+month)
 	if err != nil {
 		return nil, fmt.Errorf("parse %w", err)
@@ -66,10 +67,10 @@ func AllTheDaysInMonth(year, month string) ([]Date, error) {
 	fmt.Println(t.Day(), t.Month(), t.Year())
 	lastDayOfTheGivenMonth := time.Date(t.Year(), t.Month()+1, 0, 0, 0, 0, 0, t.Location()).Day()
 
-	dates := make([]Date, 0, lastDayOfTheGivenMonth)
+	dates := make([]types.Date, 0, lastDayOfTheGivenMonth)
 
 	for day := 1; day <= lastDayOfTheGivenMonth; day++ {
-		dates = append(dates, Date(time.Date(t.Year(), t.Month(), day, 0, 0, 0, 0, t.Location()).Format(timeFormat)))
+		dates = append(dates, types.Date(time.Date(t.Year(), t.Month(), day, 0, 0, 0, 0, t.Location()).Format(types.TimeFormat)))
 	}
 
 	return dates, nil

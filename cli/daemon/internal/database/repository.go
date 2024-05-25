@@ -3,10 +3,13 @@ package database
 import "pkg/types"
 
 type IRepository interface {
-	WriteUsage(data ScreenTime) error
+	WriteUsage(types.ScreenTime) error
 	Close() error
-	DeleteKey(key string) error
-	GetDay(Date) (DailyStat, error)
+	DeleteKey(string) error
+	GetDay(types.Date) (DailyStat, error)
 	GetWeek(string) (WeeklyStat, error)
-	GetAppIconAndCategory(appNames []string) ([]types.AppIconAndCategory, error)
+	AppWeeklyStat(appName string, anyDayInTheWeek types.Date) (types.AppRangeStat, error)
+	AppMonthlyStat(appName, month, year string) (types.AppRangeStat, error)
+	AppDateRangeStat(appName string, start, end types.Date) (types.AppRangeStat, error)
+	GetAppIconAndCategory([]string) ([]types.AppIconAndCategory, error)
 }

@@ -4,16 +4,15 @@ go 1.22.1
 
 require github.com/BurntSushi/xgbutil v0.0.0-20190907113008-ad855c713046
 
-require pkg v0.0.0
-
-replace pkg v0.0.0 => ./pkg
-
 require (
 	github.com/BurntSushi/xgb v0.0.0-20210121224620-deaf085860bc
 	github.com/dgraph-io/badger/v4 v4.2.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.8.0
+	pkg v0.0.0
 )
+
+replace pkg v0.0.0 => ./pkg
 
 require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect

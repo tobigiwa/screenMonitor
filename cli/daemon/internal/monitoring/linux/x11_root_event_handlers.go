@@ -3,9 +3,8 @@ package monitoring
 import (
 	"fmt"
 	"log"
+	"pkg/types"
 	"time"
-
-	db "LiScreMon/cli/daemon/internal/database"
 
 	"github.com/BurntSushi/xgb/xproto"
 	"github.com/BurntSushi/xgbutil"
@@ -46,12 +45,12 @@ func (x11 *X11Monitor) rootPropertyNotifyHandler(x11Conn *xgbutil.XUtil, ev xeve
 					formerActiveWindow.WindowName, _ = getWindowClassName(x11Conn, currActiveWindow) // NET_ACTIVE_WINDOW SHOULD ALWAYS HAVE A NAME, if not, that is lost metric.
 				}
 
-				s := db.ScreenTime{
+				s := types.ScreenTime{
 					WindowID: formerActiveWindow.WindowID,
 					AppName:  formerActiveWindow.WindowName,
-					Type:     db.Active,
+					Type:     types.Active,
 					Duration: time.Since(formerActiveWindow.TimeStamp).Hours(),
-					Interval: db.TimeInterval{Start: formerActiveWindow.TimeStamp, End: time.Now()},
+					Interval: types.TimeInterval{Start: formerActiveWindow.TimeStamp, End: time.Now()},
 				}
 
 				fmt.Printf("New active window ID =====> %v:%v\ntime elapsed for last window %v:%v was %vsecs\n",

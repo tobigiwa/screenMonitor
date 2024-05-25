@@ -97,8 +97,9 @@ func treatMessage(c net.Conn) {
 		}
 
 		switch msg.Endpoint {
+
 		case "startConnection":
-			msg = types.Message{StringDataResponse: "hELLo.., this is the DaemonService speaking, your connection is established."}
+			msg = types.Message{StatusCheck: "hELLo.., this is the DaemonService speaking, your connection is established."}
 
 		case "closeConnection":
 			fmt.Println("we got a close connection message")
@@ -106,8 +107,10 @@ func treatMessage(c net.Conn) {
 			return
 
 		case "weekStat":
-			weekStat := ServiceInstance.getWeekStat(msg)
-			msg.WeekStatResponse = weekStat
+			msg.WeekStatResponse = ServiceInstance.getWeekStat(msg)
+
+		case "appStat":
+			msg.AppStatResponse = ServiceInstance.getAppStat(msg)
 		}
 
 		bytes, err := helperFuncs.Encode(msg)
@@ -115,11 +118,14 @@ func treatMessage(c net.Conn) {
 			fmt.Println("error encoding response:", err)
 			continue
 		}
+
 		n, err = c.Write(bytes)
 		if err != nil {
-			fmt.Println("error encoding response:", err)
+			fmt.Println("error writing response:", err)
 			continue
 		}
-		fmt.Println("bytes written", n, "encoded byte", len(bytes))
+		if n != len(bytes) {
+			fmt.Println("bytes written", n, "encoded byte", len(bytes))
+		}
 	}
 }

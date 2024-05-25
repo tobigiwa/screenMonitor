@@ -2,14 +2,15 @@ package database
 
 import (
 	"fmt"
+	"pkg/types"
 	"time"
 )
 
-func Key() Date {
-	return Date(fmt.Sprint(time.Now().Format(timeFormat)))
+func Key() types.Date {
+	return types.Date(fmt.Sprint(time.Now().Format(types.TimeFormat)))
 }
-func ParseKey(key Date) (time.Time, error) {
-	return time.Parse(timeFormat, string(key))
+func ParseKey(key types.Date) (time.Time, error) {
+	return time.Parse(types.TimeFormat, string(key))
 }
 
 var (
@@ -21,9 +22,9 @@ var (
 func dbAppKey(appName string) []byte {
 	return []byte(fmt.Sprintf("app:%v", appName))
 }
-func dbDayKey(date Date) []byte {
+func dbDayKey(date types.Date) []byte {
 	return []byte(fmt.Sprintf("day:%v", string(date)))
 }
-func dbWeekKey(date Date) []byte {
+func dbWeekKey(date types.Date) []byte {
 	return []byte(fmt.Sprintf("week:%v", string(date)))
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	helperFuncs "pkg/helper"
+	"pkg/types"
 
 	badger "github.com/dgraph-io/badger/v4"
 )
@@ -72,7 +73,7 @@ func (bs *BadgerDBStore) Get(key []byte) ([]byte, error) {
 	return valCopy, nil
 }
 
-func (bs *BadgerDBStore) WriteUsage(data ScreenTime) error {
+func (bs *BadgerDBStore) WriteUsage(data types.ScreenTime) error {
 	return bs.db.Update(func(txn *badger.Txn) error {
 		item, err := txn.Get(dbAppKey(data.AppName))
 
@@ -132,14 +133,14 @@ func (bs *BadgerDBStore) WriteUsage(data ScreenTime) error {
 		}
 
 		switch stat := app.ScreenStat[Key()]; data.Type {
-		case Active:
+		case types.Active:
 			stat.Active += data.Duration
 			stat.ActiveTimeData = append(stat.ActiveTimeData, data.Interval)
 			app.ScreenStat[Key()] = stat
-		case Inactive:
+		case types.Inactive:
 			stat.Inactive += data.Duration
 			app.ScreenStat[Key()] = stat
-		case Open:
+		case types.Open:
 			stat.Open += data.Duration
 			app.ScreenStat[Key()] = stat
 		}

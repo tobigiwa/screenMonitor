@@ -12,10 +12,6 @@ import (
 	"github.com/a-h/templ"
 )
 
-const (
-	timeFormat string = "2006-01-02"
-)
-
 type WeekStatDataCache struct {
 	Day  string
 	Data types.Message
@@ -26,7 +22,7 @@ var (
 	weekStatCache     = make(map[string]templ.Component, 20)
 	cacheLastSaturday string
 )
- 
+
 func (a *App) WeekStatHandler(w http.ResponseWriter, r *http.Request) {
 
 	query := r.URL.Query().Get("week")
@@ -48,10 +44,10 @@ func (a *App) WeekStatHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		lastRequest = time.Now()
-		today := time.Now().Format(timeFormat)
+		today := time.Now().Format(types.TimeFormat)
 		msg = types.Message{
-			Endpoint:          endpoint,
-			StringDataRequest: today,
+			Endpoint:        endpoint,
+			WeekStatRequest: today,
 		}
 
 	case "lastweek":
@@ -62,8 +58,8 @@ func (a *App) WeekStatHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		msg = types.Message{
-			Endpoint:          endpoint,
-			StringDataRequest: lastSaturday,
+			Endpoint:        endpoint,
+			WeekStatRequest: lastSaturday,
 		}
 
 		cacheLastSaturday = lastSaturday
@@ -81,15 +77,15 @@ func (a *App) WeekStatHandler(w http.ResponseWriter, r *http.Request) {
 			log.Fatal(err)
 		}
 
-		if t, err = time.Parse(timeFormat, q); err != nil {
+		if t, err = time.Parse(types.TimeFormat, q); err != nil {
 			log.Fatal(err)
 		}
 
 		if query == "backward-arrow" {
 			lastSaturday = returnLastSaturday(t)
 			msg = types.Message{
-				Endpoint:          endpoint,
-				StringDataRequest: lastSaturday,
+				Endpoint:        endpoint,
+				WeekStatRequest: lastSaturday,
 			}
 		}
 
@@ -100,8 +96,8 @@ func (a *App) WeekStatHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			lastSaturday = returnNextSaturday(t)
 			msg = types.Message{
-				Endpoint:          endpoint,
-				StringDataRequest: lastSaturday,
+				Endpoint:        endpoint,
+				WeekStatRequest: lastSaturday,
 			}
 		}
 
@@ -127,8 +123,8 @@ func (a *App) WeekStatHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		msg = types.Message{
-			Endpoint:          endpoint,
-			StringDataRequest: lastSaturday,
+			Endpoint:        endpoint,
+			WeekStatRequest: lastSaturday,
 		}
 
 		cacheLastSaturday = lastSaturday
@@ -149,11 +145,11 @@ func (a *App) WeekStatHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Cache
-	if query == "thisweek" {
-		weekStatCache[query] = templComp
-	} else if query == "backward-arrow" || query == "forward-arrow" || query == "lastweek" {
-		weekStatCache[cacheLastSaturday] = templComp
-	}
+	// if query == "thisweek" {
+	// 	weekStatCache[query] = templComp
+	// } else if query == "backward-arrow" || query == "forward-arrow" || query == "lastweek" {
+	// 	weekStatCache[cacheLastSaturday] = templComp
+	// }
 
 	templComp.Render(context.TODO(), w)
 }
@@ -161,15 +157,15 @@ func (a *App) WeekStatHandler(w http.ResponseWriter, r *http.Request) {
 func returnLastSaturday(t time.Time) string {
 
 	if t.Weekday() == time.Saturday {
-		return t.AddDate(0, 0, -7).Format(timeFormat)
+		return t.AddDate(0, 0, -7).Format(types.TimeFormat)
 	}
 
 	daysSinceSaturday := int(t.Weekday()+1) % 7
-	return t.AddDate(0, 0, -daysSinceSaturday).Format(timeFormat)
+	return t.AddDate(0, 0, -daysSinceSaturday).Format(types.TimeFormat)
 }
 
 func returnNextSaturday(t time.Time) string {
-	return t.AddDate(0, 0, 7).Format(timeFormat)
+	return t.AddDate(0, 0, 7).Format(types.TimeFormat)
 }
 
 func futureDate(t time.Time) bool {
@@ -194,5 +190,5 @@ func lastSaturdayOfTheMonth(month string) string {
 			break
 		}
 	}
-	return s.Format(timeFormat)
+	return s.Format(types.TimeFormat)
 }

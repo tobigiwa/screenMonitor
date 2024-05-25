@@ -55,8 +55,8 @@ func listenToDaemonService() (net.Conn, error) {
 
 func (a *App) CheckDaemonService() (types.Message, error) {
 	msg := types.Message{
-		Endpoint:          "startConnection",
-		StringDataRequest: "I wish this project prospered.",
+		Endpoint:    "startConnection",
+		StatusCheck: "I wish this project prospered.",
 	}
 	return a.writeAndReadWithDaemonService(msg)
 }

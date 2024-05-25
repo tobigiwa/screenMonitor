@@ -51,40 +51,40 @@ func (bs *BadgerDBStore) GetAppIconAndCategory(appNames []string) ([]types.AppIc
 	return result, nil
 }
 
-func (bs *BadgerDBStore) AppWeeklyStat(appName string, anyDayInTheWeek Date) (AppRangeStat, error) {
+func (bs *BadgerDBStore) AppWeeklyStat(appName string, anyDayInTheWeek types.Date) (types.AppRangeStat, error) {
 	date, _ := ParseKey(anyDayInTheWeek)
 	days := daysInThatWeek(date)
 	return bs.appRangeStat(appName, days[:])
 }
 
-func (bs *BadgerDBStore) AppMonthlyStat(appName, month, year string) (AppRangeStat, error) {
+func (bs *BadgerDBStore) AppMonthlyStat(appName, month, year string) (types.AppRangeStat, error) {
 	dates, err := AllTheDaysInMonth(year, month)
 	if err != nil {
-		return AppRangeStat{}, err
+		return types.AppRangeStat{}, err
 	}
 	return bs.appRangeStat(appName, dates)
 }
 
-func (bs *BadgerDBStore) AppDateRangeStat(appName string, start, end Date) (AppRangeStat, error) {
+func (bs *BadgerDBStore) AppDateRangeStat(appName string, start, end types.Date) (types.AppRangeStat, error) {
 	startDate, _ := ParseKey(start)
 	endDate, _ := ParseKey(end)
 
 	if !endDate.After(startDate) {
-		return AppRangeStat{}, errors.New("end date is not after start date")
+		return types.AppRangeStat{}, errors.New("end date is not after start date")
 	}
 
-	dates := make([]Date, 0, 31)
+	dates := make([]types.Date, 0, 31)
 	for d := startDate; !d.After(endDate); d = d.AddDate(0, 0, 1) {
-		dates = append(dates, Date(d.Format(timeFormat)))
+		dates = append(dates, types.Date(d.Format(types.TimeFormat)))
 	}
 
 	return bs.appRangeStat(appName, slices.Clip(dates))
 }
 
-func (bs *BadgerDBStore) appRangeStat(appName string, dateRange []Date) (AppRangeStat, error) {
+func (bs *BadgerDBStore) appRangeStat(appName string, dateRange []types.Date) (types.AppRangeStat, error) {
 
 	var (
-		result AppRangeStat
+		result types.AppRangeStat
 		app    AppInfo
 		err    error
 	)
@@ -105,14 +105,14 @@ func (bs *BadgerDBStore) appRangeStat(appName string, dateRange []Date) (AppRang
 		}
 		return nil
 	}); err != nil {
-		return AppRangeStat{}, err
+		return types.AppRangeStat{}, err
 	}
 
-	var stat Stats
-	arr := make([]GenericKeyValue[Date, Stats], len(dateRange))
+	var stat types.Stats
+	arr := make([]types.GenericKeyValue[types.Date, types.Stats], len(dateRange))
 	for i := 0; i < len(dateRange); i++ {
 		dayStat := app.ScreenStat[dateRange[i]]
-		arr = append(arr, GenericKeyValue[Date, Stats]{Key: dateRange[i], Value: dayStat})
+		arr[i] = types.GenericKeyValue[types.Date, types.Stats]{Key: dateRange[i], Value: dayStat}
 
 		stat.Active += dayStat.Active
 		stat.Inactive += dayStat.Inactive
@@ -126,10 +126,4 @@ func (bs *BadgerDBStore) appRangeStat(appName string, dateRange []Date) (AppRang
 	result.DaysRange = arr
 	result.TotalRange = stat
 	return result, nil
-}
-
-type AppRangeStat struct {
-	AppInfo    types.AppIconAndCategory       `json:"appInfo"`
-	DaysRange  []GenericKeyValue[Date, Stats] `json:"daysRange"`
-	TotalRange Stats                          `json:"totalRange"`
 }
