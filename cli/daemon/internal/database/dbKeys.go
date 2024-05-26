@@ -15,7 +15,7 @@ func ParseKey(key types.Date) (time.Time, error) {
 
 var (
 	dbAppPrefix  = []byte("app:")
-	dbDayPrefix  = []byte("app:")
+	dbDayPrefix  = []byte("day:")
 	dbWeekPrefix = []byte("week:")
 )
 

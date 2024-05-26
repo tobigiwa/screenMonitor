@@ -21,7 +21,7 @@ func (s *Service) getWeekStat(msg types.Message) types.WeekStatMessage {
 	if weekStat, err = s.db.GetWeek(msg.WeekStatRequest); err != nil {
 		return types.WeekStatMessage{
 			IsError: true,
-			Error:   fmt.Errorf("error weekStat:w", err)}
+			Error:   fmt.Errorf("error weekStat: %w", err)}
 	}
 
 	var (

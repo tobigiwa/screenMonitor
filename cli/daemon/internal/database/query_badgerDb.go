@@ -1,6 +1,7 @@
 package database
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 
@@ -40,9 +41,9 @@ func (bs *BadgerDBStore) setNewEntryToDB(key, byteData []byte) error {
 	return err
 }
 
-func (bs *BadgerDBStore) DeleteKey(key string) error {
+func (bs *BadgerDBStore) DeleteKey(key []byte) error {
 	return bs.db.Update(func(txn *badger.Txn) error {
-		return txn.Delete([]byte(key))
+		return txn.Delete(key)
 	})
 }
 
@@ -71,6 +72,44 @@ func (bs *BadgerDBStore) Get(key []byte) ([]byte, error) {
 	}
 
 	return valCopy, nil
+}
+
+func (bs *BadgerDBStore) DeleteBucket(dbPrefix string) error {
+
+	var prefix []byte
+	switch dbPrefix {
+	case "day":
+		prefix = dbDayPrefix
+	case "week":
+		prefix = dbWeekPrefix
+	case "app":
+		prefix = dbAppPrefix
+	}
+
+	err := bs.db.View(func(txn *badger.Txn) error {
+		opts := badger.DefaultIteratorOptions
+		opts.PrefetchValues = false //key-only iterations, several other magnitudes faster the docs says
+		it := txn.NewIterator(opts)
+		defer it.Close()
+
+		for it.Rewind(); it.Valid(); it.Next() {
+			item := it.Item()
+			key := item.Key()
+			if bytes.HasPrefix(key, prefix) {
+				if err := bs.DeleteKey(key); err != nil {
+					fmt.Println("error deleting key", string(key))
+					continue
+				}
+				fmt.Println("successfully deleted key:", string(key))
+			}
+		}
+
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (bs *BadgerDBStore) WriteUsage(data types.ScreenTime) error {

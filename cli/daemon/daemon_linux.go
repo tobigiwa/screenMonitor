@@ -61,9 +61,9 @@ func DaemonServiceLinux() {
 		<-signal1
 		close(signal1)
 
-		// d, _ := monitor.Db.GetAppIconAndCategory([]string{"Code", "Tilix"})
-		// for _, v := range d {
-		// 	writeImageToFile(v.Icon, v.AppName)
+		// for _, v := range [3]string{"app", "day", "week"} {
+		// 	fmt.Println("at", v)
+		// 	monitor.Db.DeleteBucket(v)
 		// }
 
 		xevent.Quit(monitor.X11Connection)
@@ -76,18 +76,3 @@ func DaemonServiceLinux() {
 	// Start the event loop.
 	xevent.Main(monitor.X11Connection)
 }
-
-// func writeImageToFile(imageData []byte, filename string) error {
-// 	file, err := os.Create("/tmp/" + filename + ".png")
-// 	if err != nil {
-// 		return err
-// 	}
-// 	defer file.Close()
-
-// 	_, err = file.Write(imageData)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	return nil
-// }

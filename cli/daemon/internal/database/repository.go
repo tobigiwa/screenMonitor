@@ -5,7 +5,8 @@ import "pkg/types"
 type IRepository interface {
 	WriteUsage(types.ScreenTime) error
 	Close() error
-	DeleteKey(string) error
+	DeleteKey([]byte) error
+	DeleteBucket(dbPrefix string) error
 	GetDay(types.Date) (DailyStat, error)
 	GetWeek(string) (WeeklyStat, error)
 	AppWeeklyStat(appName string, anyDayInTheWeek types.Date) (types.AppRangeStat, error)

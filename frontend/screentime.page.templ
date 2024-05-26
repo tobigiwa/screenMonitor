@@ -3,6 +3,7 @@ package frontend
 import "html/template"
 import "pkg/types"
 import helperFuncs "pkg/helper"
+// import "fmt"
 
 templ ScreenTimePage() {
 	<!DOCTYPE html>
@@ -44,6 +45,9 @@ templ ChartWrapper(chart template.HTML) {
 
 templ chartHighlight(appDetails []types.ApplicationDetail, totalWeekUsage float64) {
 	<div class="chart-highlight" hx-swap-obb="true">
+		// 	if len(appDetails) == 0 {
+		// 		<div>NO USAGE { fmt.Sprint(appDetails) }</div>
+		// 	} else {
 		<ul id="highlight">
 			for i:=0; i < len(appDetails); i++ {
 				<li class="card" tabindex="10" hx-get={ string(templ.URL("/appStat?range=week&appName=" + appDetails[i].AppInfo.AppName)) } hx-swap="none" hx-select-oob="#echart:innerHTML">
@@ -61,10 +65,15 @@ templ chartHighlight(appDetails []types.ApplicationDetail, totalWeekUsage float6
 							<button class="category">Selct application catergory</button>
 						}
 					</div>
-					<div class="appStat" style="font-style:italic;">{ helperFuncs.PercentagesString(appDetails[i].Usage, totalWeekUsage) } of weeks usage: { helperFuncs.UsageTimeInHrsMin(appDetails[i].Usage) }Hrs</div>
+					if percentageUse := helperFuncs.PercentagesString(appDetails[i].Usage, totalWeekUsage); percentageUse == "NaN" {
+						<div class="appStat" style="font-style:italic;">0% of weeks usage</div>
+					} else {
+						<div class="appStat" style="font-style:italic;">{ percentageUse } of weeks usage: { helperFuncs.UsageTimeInHrsMin(appDetails[i].Usage) }</div>
+					}
 				</li>
 			}
 		</ul>
+		// }
 	</div>
 }
 
@@ -77,23 +86,23 @@ templ chartControls() {
 	<div class="chart-controls">
 		<div class="left-controls">
 			<div class="select-month">
-				<select name="month" class="month" hx-get="/weekStat?week=month" hx-vals="js{month: this.value}" hx-swap="none" hx-indicator="#echart">
+				<select name="month" class="month" hx-get="/weekStat?week=month" hx-vals="js{month: this.value}" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:innerHTML">
 					<option value="" id="placeholder" disabled selected>Last 3 Month</option>
 					for _, v := range monthDropDownSelectArray() {
 						<option class="option" value={ v }>{ v }</option>
 					}
 				</select>
 			</div>
-			<button class="left-controls__btn img backward-arrow" hx-swap="none" hx-indicator="#echart">
+			<button class="left-controls__btn img backward-arrow" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:innerHTML">
 				<img
 					class="chart__controls--img"
 					src="assets/svg/angle-left-svgrepo-com.svg"
 					alt=""
 				/>
 			</button>
-			<button class="left-controls__btn text" hx-get="/weekStat?week=lastweek" hx-swap="none" hx-indicator="#echart">Last Week</button>
+			<button class="left-controls__btn text" hx-get="/weekStat?week=lastweek" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:innerHTML">Last Week</button>
 			<button class="left-controls__btn text" id="thisWeekButton" hx-get="/weekStat?week=thisweek" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:innerHTML">This Week</button>
-			<button class="left-controls__btn img forward-arrow" hx-swap="none" hx-indicator="#echart">
+			<button class="left-controls__btn img forward-arrow" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:innerHTML">
 				<img
 					class="chart__controls--img"
 					src="assets/svg/angle-right-svgrepo-com.svg"

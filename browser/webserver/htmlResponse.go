@@ -25,6 +25,7 @@ func weekStatResponse(w types.WeekStatMessage) templ.Component {
 	if len(w.FormattedDay) != len(w.Values) {
 		log.Fatal(fmt.Errorf("length of YAxis and XAxis must be equal, instead YAxis - %d and XAxis - %d", len(w.Values), len(w.FormattedDay)))
 	}
+
 	return views.WeekStatChartAndHighlight(
 		chart.WeekStatBarChart(chart.BarChartData{
 			XAxis:       w.FormattedDay[:],

@@ -63,19 +63,20 @@ func (bs *BadgerDBStore) getDailyAppStat(day types.Date) (DailyStat, error) {
 					return err
 				}
 
-				thatDayStat := app.ScreenStat[day]
+				thatDayStat, ok := app.ScreenStat[day]
+				if ok { // if the app has that day
+					// EachApp []appstat
+					appStatArrData.AppName = app.AppName
+					appStatArrData.Usage.Active = thatDayStat.Active
+					appStatArrData.Usage.Inactive = thatDayStat.Inactive
+					appStatArrData.Usage.Open = thatDayStat.Open
+					arr = append(arr, appStatArrData)
 
-				// EachApp []appstat
-				appStatArrData.AppName = app.AppName
-				appStatArrData.Usage.Active = thatDayStat.Active
-				appStatArrData.Usage.Inactive = thatDayStat.Inactive
-				appStatArrData.Usage.Open = thatDayStat.Open
-				arr = append(arr, appStatArrData)
-
-				// DayTotall stats
-				dayTotalData.Active += thatDayStat.Active
-				dayTotalData.Inactive += thatDayStat.Inactive
-				dayTotalData.Open += thatDayStat.Open
+					// DayTotall stats
+					dayTotalData.Active += thatDayStat.Active
+					dayTotalData.Inactive += thatDayStat.Inactive
+					dayTotalData.Open += thatDayStat.Open
+				}
 
 				return nil
 			})

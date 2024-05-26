@@ -71,5 +71,9 @@ func percent(part, total float64) float64 {
 }
 
 func PercentagesString(part, total float64) string {
-	return fmt.Sprintf("%.0f%%", percent(part, total))
+	p := percent(part, total)
+	if math.IsNaN(p) {
+		return "NaN"
+	}
+	return fmt.Sprintf("%.0f%%", p)
 }
