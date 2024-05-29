@@ -1,7 +1,7 @@
 package main
 
 import (
-	"browser/webserver"
+	webserver "browser/server"
 	"context"
 	"errors"
 	"fmt"

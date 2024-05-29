@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "esbuild ./assets/js/screentime.js --minify --sourcemap --bundle --outfile=./assets/js/out.js"
+    "build": "esbuild ./assets/javascript/script.js --minify --sourcemap --bundle --outfile=./assets/javascript/script.out.js"
   },
   "keywords": [],
   "author": "",
@@ -14,8 +14,6 @@
     "esbuild": "0.21.0"
   },
   "dependencies": {
-    "echarts": "^5.5.0",
-    "htmx.org": "^1.9.12",
-    "lottie-web": "^5.12.2"
+    "echarts": "^5.5.0"
   }
 }

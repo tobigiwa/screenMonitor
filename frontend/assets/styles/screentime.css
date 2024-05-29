@@ -182,7 +182,7 @@ body {
 .main {
     background-color: var(--primary-color2);
     width: 100%;
-    display: flex;
+    /* display: flex; */
     flex-direction: column;
     .header {
         height: 10%;
@@ -236,7 +236,7 @@ body {
             border-radius: 5px;
         }
         .item {
-            height: 34%;     
+            height: 44%;     
         }
     }
 
@@ -301,8 +301,9 @@ body {
     }
 
     .chart-highlight {
-        flex: 1;
-        /* height: max-content; */
+        /* flex: 1; */
+        /* flex-basis: 45%; */
+        height: 40%;
 
         background-color: #353535;
         border-radius: 2%;

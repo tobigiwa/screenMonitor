@@ -1,2 +1,2 @@
 run:
-	@go run . start
+	@go run . stop && go run . start

@@ -5,7 +5,7 @@ import (
 	"log"
 	"pkg/chart"
 	"pkg/types"
-	views "views"
+	views "views/components"
 
 	"github.com/a-h/templ"
 )

@@ -113,7 +113,6 @@ func (bs *BadgerDBStore) appRangeStat(appName string, dateRange []types.Date) (t
 	for i := 0; i < len(dateRange); i++ {
 		dayStat := app.ScreenStat[dateRange[i]]
 		arr[i] = types.GenericKeyValue[types.Date, types.Stats]{Key: dateRange[i], Value: dayStat}
-
 		stat.Active += dayStat.Active
 		stat.Inactive += dayStat.Inactive
 		stat.Open += dayStat.Open

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["script.js"],
+  "sourcesContent": ["\n\ndocument.addEventListener( 'htmx:afterSwap', function (evt)\n{\n\n} );\n\n\n\n\n"],
+  "mappings": "MAEA,SAAS,iBAAkB,iBAAkB,SAAUA,EACvD,CAEA,CAAE",
+  "names": ["evt"]
+}

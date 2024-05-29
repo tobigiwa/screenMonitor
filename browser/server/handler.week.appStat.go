@@ -30,7 +30,7 @@ func (a *App) AppStatHandler(w http.ResponseWriter, r *http.Request) {
 	switch queryRange {
 	case "week":
 		msg.AppStatRequest.StatRange = queryRange
-		msg.AppStatRequest.Start = types.Date("2024-05-25")
+		msg.AppStatRequest.Start = types.Date("2024-05-26")
 	case "month":
 		msg.AppStatRequest.StatRange = queryRange
 		msg.AppStatRequest.Month = ""

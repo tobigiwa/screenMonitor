@@ -61,7 +61,7 @@ func DaemonServiceLinux() {
 		<-signal1
 		close(signal1)
 
-		// for _, v := range [3]string{"app", "day", "week"} {
+		// for _, v := range [2]string{"day", "week"} {
 		// 	fmt.Println("at", v)
 		// 	monitor.Db.DeleteBucket(v)
 		// }

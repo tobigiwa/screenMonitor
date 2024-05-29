@@ -12,10 +12,11 @@ import (
 func AppStatBarChart(data BarChartData) template.HTML {
 	bar := charts.NewBar()
 
+	bar.Renderer = newchartRenderer(bar, bar.Validate)
+
 	bar.SetGlobalOptions(charts.WithInitializationOpts(
 		opts.Initialization{AssetsHost: "/assets/"},
 	))
-	bar.Renderer = newchartRenderer(bar, bar.Validate)
 
 	bar.SetGlobalOptions(
 		charts.WithTitleOpts(opts.Title{
@@ -35,28 +36,23 @@ func AppStatBarChart(data BarChartData) template.HTML {
 			},
 			Left: "center",
 		}),
-		charts.WithYAxisOpts(opts.YAxis{
-			Name:         "in Hours",
-			Type:         "value",
-			NameLocation: "end",
-			NameGap:      5,
-			Scale:        true,
-		}),
 		charts.WithLegendOpts(opts.Legend{
 			Left:   "left",
 			Orient: "vertical",
 		}),
 		charts.WithTooltipOpts(opts.Tooltip{
-			Show:      true,
+			Show:      opts.Bool(true),
 			Trigger:   "axis",
 			TriggerOn: "mousemove",
 			AxisPointer: &opts.AxisPointer{
 				Type: "cross",
 			},
-			Formatter: fmt.Sprintf("{b} %s, %s. <br/> {a}: {c}Hrs", data.Month, data.Year),
+			// Formatter: fmt.Sprintf("{b} %s, %s. <br/> {a}: {c}Hrs", data.Month, data.Year),
+			// Formatter: ,
 		}),
 	)
 	bar.SetXAxis(data.XAxis).
 		AddSeries(fmt.Sprintf("%sUptime", data.AppName+" "), generateBarItems(data.YAxis, data.XAxis)).SetSeriesOptions()
+
 	return renderToHtml(bar)
 }

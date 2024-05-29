@@ -1,12 +1,14 @@
 package chart
 
 import (
+	"bytes"
 	"fmt"
 	"html/template"
 	helperFuncs "pkg/helper"
 
 	"github.com/go-echarts/go-echarts/v2/charts"
 	"github.com/go-echarts/go-echarts/v2/opts"
+	"github.com/go-echarts/go-echarts/v2/render"
 )
 
 func WeekStatBarChart(data BarChartData) template.HTML {
@@ -15,6 +17,7 @@ func WeekStatBarChart(data BarChartData) template.HTML {
 	bar.SetGlobalOptions(charts.WithInitializationOpts(
 		opts.Initialization{AssetsHost: "/assets/"},
 	))
+
 	bar.Renderer = newchartRenderer(bar, bar.Validate)
 
 	bar.SetGlobalOptions(
@@ -35,48 +38,54 @@ func WeekStatBarChart(data BarChartData) template.HTML {
 			},
 			Left: "center",
 		}),
-		charts.WithYAxisOpts(opts.YAxis{
-			Name:         "in Hours",
-			Type:         "value",
-			NameLocation: "end",
-			NameGap:      5,
-			Scale:        true,
-		}),
 		charts.WithLegendOpts(opts.Legend{
-			Left:   "left",
+			Left:   "0%",
 			Orient: "vertical",
+			Bottom: "50%",
 		}),
 		charts.WithTooltipOpts(opts.Tooltip{
-			Show:      true,
+			Show:      opts.Bool(true),
 			Trigger:   "axis",
 			TriggerOn: "mousemove",
 			AxisPointer: &opts.AxisPointer{
 				Type: "cross",
 			},
-			Formatter: fmt.Sprintf("{b} %s, %s. <br/> {a}: {c}Hrs", data.Month, data.Year),
 		}),
 	)
 	bar.SetXAxis(data.XAxis).
-		AddSeries("Uptime", generateBarItems(data.YAxis, data.XAxis)).SetSeriesOptions()
+		AddSeries("Uptime in Hours", generateBarItems(data.YAxis, data.XAxis)).SetSeriesOptions()
 	return renderToHtml(bar)
 }
 
-func generateBarItems(YAxis []float64, xAxis []string) []opts.BarData {
-	items := make([]opts.BarData, 0, 7)
-	for i := 0; i < 7; i++ {
-		items = append(items, opts.BarData{
-			Name:  xAxis[i],
-			Value: YAxis[i],
-			Label: &opts.Label{
-				Color:     "auto",
-				FontStyle: "bold",
-			},
-			ItemStyle: &opts.ItemStyle{
-				Color:       barChartColors[i],
-				BorderColor: barChartColorsBackGround[i],
-			},
-			Tooltip: &opts.Tooltip{},
-		})
+func renderToHtml2(chart render.Renderer) template.HTML {
+	var buf bytes.Buffer
+	chartSnippet := chart.RenderSnippet()
+
+	tmpl := "{{.Element  }} {{.Script }} {{.Option}}"
+	t := template.New("snippet")
+	t, err := t.Parse(tmpl)
+	if err != nil {
+		panic(fmt.Errorf("crash from renderToHtml2:t.Parse error: %w", err))
 	}
-	return items
+
+	// fmt.Printf("chartSnippet\n%+v\n\n", chartSnippet)
+
+	data := struct {
+		Element template.HTML
+		Script  template.HTML
+		Option  template.HTML
+	}{
+		Element: template.HTML(baseTpl),
+		Script:  template.HTML(chartSnippet.Script),
+		Option:  template.HTML(chartSnippet.Option),
+	}
+
+	err = t.Execute(&buf, data)
+	if err != nil {
+		panic(fmt.Errorf("crash from renderToHtml2:t.Execute error: %w", err))
+	}
+
+	// fmt.Println(buf.String())
+
+	return template.HTML(buf.String())
 }

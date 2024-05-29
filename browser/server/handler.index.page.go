@@ -4,7 +4,7 @@ import (
 	"context"
 	"log/slog"
 	"net/http"
-	views "views"
+	views "views/components"
 )
 
 func (a *App) IndexPageHandler(w http.ResponseWriter, r *http.Request) {
