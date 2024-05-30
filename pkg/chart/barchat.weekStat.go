@@ -25,23 +25,21 @@ func WeekStatBarChart(data BarChartData) template.HTML {
 			Title: "Weekly Screentime",
 			TitleStyle: &opts.TextStyle{
 				Color:      "black",
-				FontStyle:  "bold",
-				FontSize:   100,
+				FontWeight: "bolder",
+				FontSize:   20,
 				FontFamily: "system-ui",
 			},
 			Subtitle: fmt.Sprintf("from %s - %s %s. Total Uptime of %s", data.XAxis[0], data.XAxis[6], data.Month, helperFuncs.UsageTimeInHrsMin(data.TotalUptime)),
 			SubtitleStyle: &opts.TextStyle{
 				Color:      "black",
-				FontStyle:  "bold",
-				FontSize:   13,
+				FontWeight: "bold",
+				FontSize:   14,
 				FontFamily: "system-ui",
 			},
 			Left: "center",
 		}),
 		charts.WithLegendOpts(opts.Legend{
-			Left:   "0%",
-			Orient: "vertical",
-			Bottom: "50%",
+			Show: opts.Bool(false),
 		}),
 		charts.WithTooltipOpts(opts.Tooltip{
 			Show:      opts.Bool(true),
@@ -50,10 +48,11 @@ func WeekStatBarChart(data BarChartData) template.HTML {
 			AxisPointer: &opts.AxisPointer{
 				Type: "cross",
 			},
+			// Formatter: opts.FuncOpts(TooltipFormatter),
 		}),
 	)
 	bar.SetXAxis(data.XAxis).
-		AddSeries("Uptime in Hours", generateBarItems(data.YAxis, data.XAxis)).SetSeriesOptions()
+		AddSeries("Daily uptime", generateBarItems(data.YAxis, data.XAxis)).SetSeriesOptions()
 	return renderToHtml(bar)
 }
 
@@ -89,3 +88,12 @@ func renderToHtml2(chart render.Renderer) template.HTML {
 
 	return template.HTML(buf.String())
 }
+
+var TooltipFormatter = `
+function(params) {
+	var params = params.value
+	var hours = Math.floor(value);
+	var minutes = Math.round((value - hours) * 60);
+	var v = hours + 'Hrs:' + minutes + 'Mins' 
+	return {b}:<br />{a}: ${v};
+}`

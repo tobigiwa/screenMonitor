@@ -30,28 +30,6 @@ const baseTpl = `
 	window.addEventListener('resize', function() {
 		goecharts_{{ .ChartID | safeJS }}.resize();
 	});
-</script>
-`
-
-const baseTpl2 = `
-<div class="container">
-    <div class="item" id="{{ .ChartID }}" style="height:{{ .Initialization.Height }};"></div>
-</div>
-{{- range .JSAssets.Values }}
-   <script src="{{ . }}"></script>
-{{- end }}
-<script type="text/javascript">
-    "use strict";
-    let goecharts_{{ .ChartID | safeJS }} = echarts.init(document.getElementById('{{ .ChartID | safeJS }}'), "{{ .Theme }}");
-    let option_{{ .ChartID | safeJS }} = {{ .JSON }};
-    goecharts_{{ .ChartID | safeJS }}.setOption(option_{{ .ChartID | safeJS }});
-    {{- range .JSFunctions.Fns }}
-    {{ . | safeJS }}
-    {{- end }}
-
-	window.addEventListener('resize', function() {
-		goecharts_{{ .ChartID | safeJS }}.resize();
-	});
 
 	goecharts_{{ .ChartID | safeJS }}.setOption(%s);
 </script>`
@@ -63,23 +41,50 @@ const firstOption = `{
 		textStyle: {
 			color: '#000000'
 		},
+		// formatter: function(params) {
+		// 	var params = params.value
+		// 	var hours = Math.floor(value);
+		// 	var minutes = Math.round((value - hours) * 60);
+		// 	var v = hours + 'Hrs:' + minutes + 'Mins' 
+		// 	return '{b}:<br />{a}: ${v}';
+		// }
 		valueFormatter: function(value) {
 			var hours = Math.floor(value);
 			var minutes = Math.round((value - hours) * 60);
 			return hours + 'Hrs:' + minutes + 'Mins';
 				}
 		},
+		xAxis: {
+			name: 'Days',
+			axisLabel: {
+				fontSize: 10,
+				align: 'middle',
+				fontWeight: 'bold',
+			},
+			nameTextStyle: {
+				color: '#000000',
+				fontWeight: 'bolder',
+				fontSize: 10,
+			}
+		},
 		yAxis: {
 			type: 'value',
+			axisLine: {
+				symbol: 'arrow',
+				LineStyle: {
+					type: 'dashed'
+				}
+			},
 			axisLabel: {
-				fontSize: 15,
+				fontSize: 10,
 				align: 'middle',
-				fontWeight: 'bolder'
+				fontWeight: 'bold',
+				formatter: '{value}Hr'
 			}
 		}
 	}`
 
-var tplOne string = fmt.Sprintf(baseTpl2, firstOption)
+var tplOne string = fmt.Sprintf(baseTpl, firstOption)
 
 func (r *chartRenderer) Render(w io.Writer) error {
 	const tplName = "chart"
