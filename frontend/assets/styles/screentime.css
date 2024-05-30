@@ -88,7 +88,7 @@ a {
 
     .wrap-animation {
         background-color: var(--black-color);
-        width: 70%;
+        width: 80%;
         border-radius: 10%;
 
         #lottie-animation {

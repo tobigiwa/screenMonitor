@@ -2,156 +2,18 @@ package frontend
 
 import "html/template"
 import "pkg/types"
-import helperFuncs "pkg/helper"
 
-// import "fmt"
-templ ScreenTimePage() {
-	<!DOCTYPE html>
-	<html lang="en">
-		<head>
-			<meta charset="UTF-8"/>
-			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-			<link rel="stylesheet" href="/assets/styles/screentime.css"/>
-			// <script src="assets/javascript/charts.out.js"></script>
-			<script src="assets/libraries/htmx.min.js"></script>
-			<script src="assets/libraries/echarts.min.js"></script>
-			<title>ScreenTimePage</title>
-		</head>
-		<body>
-			<div class="page">
-				@Menu()
-				@main()
-			</div>
-		</body>
-	</html>
-}
-
-templ main() {
-	<div class="main">
-		@Header()
-		@ChartWrapper("")
-		@chartControls()
-		@chartHighlight(nil, 0)
-	</div>
-}
-
-templ ChartWrapper(chart template.HTML) {
-	<div class="chart-wrapper">
-		<div id="echart" hx-swap-oob="true">
-			@templ.Raw(chart)
+templ WeekStatTempl(chart template.HTML, totalWeekUsage float64, appDetails []types.ApplicationDetail) {
+	@chartWrapper(chart)
+	if len(appDetails) == 0 || appDetails == nil {
+		<div class="chart-highlight" id="highlight" style="min-height: calc(100vh - 37rem);" hx-swap-obb="true">
+			<div style="text-align:center;color:white;">There seems to be no uage this week 😢</div>
 		</div>
-	</div>
+	} else {
+		@chartHighlight(appDetails, totalWeekUsage)
+	}
 }
 
-templ chartHighlight(appDetails []types.ApplicationDetail, totalWeekUsage float64) {
-	<div class="chart-highlight" hx-swap-obb="true">
-		// 	if len(appDetails) == 0 {
-		// 		<div>NO USAGE { fmt.Sprint(appDetails) }</div>
-		// 	} else {
-		<ul id="highlight">
-			for i:=0; i < len(appDetails); i++ {
-				<li class="card" tabindex="10" hx-get={ string(templ.URL("/appStat?range=week&appName=" + appDetails[i].AppInfo.AppName)) } hx-swap="none" hx-select-oob="#echart:innerHTML">
-					if appDetails[i].AppInfo.IsIconSet {
-						{ writeImageToFile(appDetails[i].AppInfo.Icon, appDetails[i].AppInfo.AppName) }
-						<img src={ "/tmp/" + appDetails[i].AppInfo.AppName + ".png" } alt={ appDetails[i].AppInfo.AppName } class="app-icon"/>
-					} else {
-						<img src="/assets/image/noAppImage.jpg" alt="noImage" class="app-icon"/>
-					}
-					<div class="info">
-						<div class="appName" style="font-size:large;font-weight:bold;">{ appDetails[i].AppInfo.AppName }</div>
-						if appDetails[i].AppInfo.IsCategorySet {
-							<button class="category">Category: { appDetails[i].AppInfo.Category }</button>
-						} else {
-							<button class="category">Selct application catergory</button>
-						}
-					</div>
-					if percentageUse := helperFuncs.PercentagesString(appDetails[i].Usage, totalWeekUsage); percentageUse == "NaN" {
-						<div class="appStat" style="font-style:italic;">0% of weeks usage</div>
-					} else {
-						<div class="appStat" style="font-style:italic;">{ percentageUse } of weeks usage: { helperFuncs.UsageTimeInHrsMin(appDetails[i].Usage) }</div>
-					}
-				</li>
-			}
-		</ul>
-		// }
-	</div>
-}
-
-templ WeekStatChartAndHighlight(chart template.HTML, totalWeekUsage float64, appDetails []types.ApplicationDetail) {
-	@ChartWrapper(chart)
-	@chartHighlight(appDetails, totalWeekUsage)
-}
-
-templ chartControls() {
-	<div class="chart-controls">
-		<div class="left-controls">
-			<div class="select-month">
-				<select name="month" class="month" hx-get="/weekStat?week=month" hx-vals="js{month: this.value}" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:innerHTML">
-					<option value="" id="placeholder" disabled selected>Last 3 Month</option>
-					for _, v := range monthDropDownSelectArray(3) {
-						<option class="option" value={ v }>{ v }</option>
-					}
-				</select>
-			</div>
-			<button class="left-controls__btn img backward-arrow" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:innerHTML">
-				<img
-					class="chart__controls--img"
-					src="assets/svg/angle-left-svgrepo-com.svg"
-					alt=""
-				/>
-			</button>
-			<button class="left-controls__btn text" hx-get="/weekStat?week=lastweek" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:innerHTML">Last Week</button>
-			<button class="left-controls__btn text" id="thisWeekButton" hx-get="/weekStat?week=thisweek" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:innerHTML">This Week</button>
-			<button class="left-controls__btn img forward-arrow" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:innerHTML">
-				<img
-					class="chart__controls--img"
-					src="assets/svg/angle-right-svgrepo-com.svg"
-					alt=""
-				/>
-			</button>
-		</div>
-		<div class="spacing"></div>
-		<div class="right-controls">
-			<button class="right-controls__btn text" href="#">Asce.</button>
-			<button class="right-controls__btn text" href="#">Desc.</button>
-		</div>
-		<script>
-		document.addEventListener( 'DOMContentLoaded', function ()
-		{
-			const thisWeekButton = document.querySelector( '#thisWeekButton' );
-
-			if ( thisWeekButton ) {
-				thisWeekButton.click();
-			}	
-
-			const overview = document.getElementById('highlight');
-			const listings = overview.children;
-			let activeOverview = 0;
-			overview.addEventListener('keydown', (e) => {
-				switch ( e.key ) {
-					case 'ArrowDown':
-						if(activeOverview < listings.length - 1) {
-							listings[activeOverview]?.classList.remove('active');
-							activeOverview++;
-							listings[activeOverview]?.classList.add('active');
-						}
-						break;
-					case 'ArrowUp':
-						if(activeOverview > 0) {
-							listings[activeOverview]?.classList.remove('active');
-							--activeOverview;
-							listings[activeOverview]?.classList.add('active');
-						}
-						break;
-				}
-
-				if ( toFocus ) {
-					toFocus.focus();
-					e.preventDefault();
-				}
-			});
-		});
-
-		</script>
-	</div>
+templ AppStatTempl(chart template.HTML, info types.AppIconAndCategory) {
+	@chartWrapper(chart)
 }

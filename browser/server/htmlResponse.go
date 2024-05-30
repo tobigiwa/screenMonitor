@@ -25,8 +25,7 @@ func weekStatResponse(w types.WeekStatMessage) templ.Component {
 	if len(w.FormattedDay) != len(w.Values) {
 		log.Fatal(fmt.Errorf("length of YAxis and XAxis must be equal, instead YAxis - %d and XAxis - %d", len(w.Values), len(w.FormattedDay)))
 	}
-
-	return views.WeekStatChartAndHighlight(
+	return views.WeekStatTempl(
 		chart.WeekStatBarChart(chart.BarChartData{
 			XAxis:       w.FormattedDay[:],
 			YAxis:       w.Values[:],
@@ -43,7 +42,7 @@ func appStatResponse(w types.AppStatMessage) templ.Component {
 	if len(w.FormattedDay) != len(w.Values) {
 		log.Fatal(fmt.Errorf("length of YAxis and XAxis must be equal, instead YAxis - %d and XAxis - %d", len(w.Values), len(w.FormattedDay)))
 	}
-	return views.ChartWrapper(
+	return views.AppStatTempl(
 		chart.AppStatBarChart(
 			chart.BarChartData{
 				AppName:     w.AppInfo.AppName,
@@ -52,6 +51,6 @@ func appStatResponse(w types.AppStatMessage) templ.Component {
 				Month:       w.Month,
 				Year:        w.Year,
 				TotalUptime: w.TotalRangeUptime,
-			},
-		))
+			}),
+		w.AppInfo)
 }

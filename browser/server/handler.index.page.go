@@ -8,7 +8,7 @@ import (
 )
 
 func (a *App) IndexPageHandler(w http.ResponseWriter, r *http.Request) {
-	if err := views.ScreenTimePage().Render(context.TODO(), w); err != nil {
+	if err := views.IndexPage().Render(context.TODO(), w); err != nil {
 		a.logger.Log(context.TODO(), slog.LevelError, err.Error())
 		return
 	}
