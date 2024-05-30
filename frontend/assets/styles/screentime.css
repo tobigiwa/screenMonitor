@@ -17,18 +17,49 @@ body {
     padding: 0%;
     height: 100%;
     font-style: system-ui, sans-serif;
+    overflow: hidden;
+}
 
-   
+a {
+    text-decoration: none;
+    padding: 10px 10px;
+    line-height: initial;
+
+    &:focus {
+        background-color: var(--primary-color1);
+        transition: background-color 0.2s ease-in;
+        transform: scale(0.9);
+    }
+
+    &:not(:focus) {
+        transition: background-color 0.2s ease-out;
+    }
+
+    &:hover {
+        background-color: rgba(0, 0, 0, 0.2);
+        transform: scale(0.9);
+    }
+
+    &:hover:focus {
+        background-color: var(--primary-color1);
+    }
+}
+
+.icon {
+    width: 50px;
+    height: 40px;
+    margin-right: 8px;
 }
 
 .page {
-    display: flex;
+    display: inline-flex;
+    width: 100%;
 }
 
 .menu {
     padding-top: 3.5rem;
     width: 20rem ;
-    height: 100%;
+    min-height: 100%;
     background-color: var(--primary-color2);
     
     display: flex;
@@ -182,10 +213,9 @@ body {
 .main {
     background-color: var(--primary-color2);
     width: 100%;
-    /* display: flex; */
-    flex-direction: column;
+    
     .header {
-        height: 10%;
+        height: 4rem;
         background-color: #363636;
         display: flex;
         justify-content: space-between;
@@ -195,54 +225,19 @@ body {
             padding: 0%;
             color: var(--white-color);
         }
-
-        & a {
-            text-decoration: none;
-            padding: 10px 10px;
-            line-height: initial;
-
-            &:focus {
-                background-color: var(--primary-color1);
-                transition: background-color 0.2s ease-in;
-                transform: scale(0.9);
-            }
-
-            &:not(:focus) {
-                transition: background-color 0.2s ease-out;
-            }
-
-            &:hover {
-                background-color: rgba(0, 0, 0, 0.2);
-                transform: scale(0.9);
-            }
-
-            &:hover:focus {
-                background-color: var(--primary-color1);
-            }
-
-            .icon {
-                width: 50px;
-                height: 40px;
-                margin-right: 8px;
-            }
-        }
     }
 
     .chart-wrapper {
+        /* height: 30rem; set by the chart in the backend */
         #echart {
-            height: auto;
-            width: 100% ;
+            width: 99% ;
             background-color: rgb(255, 255, 255);
             border-radius: 5px;
-        }
-        .item {
-            height: 44%;     
         }
     }
 
     .chart-controls {
-        height: 6%;
-
+        height: 3rem;
         display: flex;
 
         .left-controls {
@@ -301,17 +296,17 @@ body {
     }
 
     .chart-highlight {
-        /* flex: 1; */
-        /* flex-basis: 45%; */
-        height: 40%;
-
+        min-height: auto;
+        max-height: calc(100vh - 37rem);
+        overflow-y: auto;
         background-color: #353535;
         border-radius: 2%;
+        
         & ul {
             list-style-type: none;
             padding: 0;
             margin: 0;
-            overflow-y: auto;
+            width: 99.7%;
             
             .card {
                     display: flex;

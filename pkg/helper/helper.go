@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func Encode[T any](tyPe T) ([]byte, error) {
+func EncodeJSON[T any](tyPe T) ([]byte, error) {
 	encoded, err := json.Marshal(tyPe)
 	if err != nil {
 		return nil, fmt.Errorf("%v:%w", err, types.ErrSerialization)
@@ -17,7 +17,7 @@ func Encode[T any](tyPe T) ([]byte, error) {
 	return encoded, nil
 }
 
-func Decode[T any](data []byte) (T, error) {
+func DecodeJSON[T any](data []byte) (T, error) {
 	var result T
 	err := json.Unmarshal(data, &result)
 	if err != nil {

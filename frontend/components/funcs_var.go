@@ -30,14 +30,15 @@ func getRandomArt() string {
 	return arrayOfArt[randonIndex]
 }
 
-func monthDropDownSelectArray() [3]string {
+func monthDropDownSelectArray(n int) []string {
 	today := time.Now()
-	past4Month := [3]string{}
-	for i := 0; i < 3; i++ {
-		m := today.AddDate(0, -(i + 1), 0)
-		past4Month[i] = m.Month().String()
+	firstDayOfMonth := time.Date(today.Year(), today.Month(), 1, 0, 0, 0, 0, today.Location())
+	past3Month := make([]string, n)
+	for i := 0; i < n; i++ {
+		m := firstDayOfMonth.AddDate(0, -(i + 1), 0)
+		past3Month[i] = m.Month().String()
 	}
-	return past4Month
+	return past3Month
 }
 
 func writeImageToFile(imageData []byte, filename string) (string, error) {

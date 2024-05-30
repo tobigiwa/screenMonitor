@@ -28,7 +28,7 @@ func (bs *BadgerDBStore) GetDay(date types.Date) (DailyStat, error) {
 		return bs.getDailyAppStat(date)
 	}
 
-	dayStat, err := helperFuncs.Decode[DailyStat](byteData)
+	dayStat, err := helperFuncs.DecodeJSON[DailyStat](byteData)
 	if err != nil {
 		return ZeroValueDailyStat, err
 	}
@@ -59,7 +59,7 @@ func (bs *BadgerDBStore) getDailyAppStat(day types.Date) (DailyStat, error) {
 					err            error
 				)
 
-				if app, err = helperFuncs.Decode[AppInfo](v); err != nil {
+				if app, err = helperFuncs.DecodeJSON[AppInfo](v); err != nil {
 					return err
 				}
 
@@ -100,7 +100,7 @@ func (bs *BadgerDBStore) getDailyAppStat(day types.Date) (DailyStat, error) {
 	result.EachApp = arr
 
 	if day != types.Date(formattedToDay().Format(types.TimeFormat)) {
-		byteData, _ := helperFuncs.Encode(result)
+		byteData, _ := helperFuncs.EncodeJSON(result)
 		err := bs.setNewEntryToDB(dbDayKey(day), byteData)
 		if err != nil {
 			fmt.Println("ERROR WRITING NEW DAY ENTRY", day, "ERROR IS:", err)

@@ -32,7 +32,7 @@ func (bs *BadgerDBStore) GetWeek(day string) (WeeklyStat, error) {
 		return bs.getWeeklyAppStat(anyDayInTheWeek)
 	}
 
-	weekStat, err := helperFuncs.Decode[WeeklyStat](byteData)
+	weekStat, err := helperFuncs.DecodeJSON[WeeklyStat](byteData)
 	if err != nil {
 		return ZeroValueWeeklyStat, err
 	}
@@ -106,7 +106,7 @@ func (bs *BadgerDBStore) getWeeklyAppStat(anyDayInTheWeek types.Date) (WeeklySta
 	result.EachApp = eachAppSlice
 
 	if IsPastWeek(date) {
-		byteData, _ := helperFuncs.Encode(result)
+		byteData, _ := helperFuncs.EncodeJSON(result)
 		saturdayOfThatWeek := allConcernedDays[6]
 		err := bs.setNewEntryToDB(dbWeekKey(saturdayOfThatWeek), byteData)
 		if err != nil {

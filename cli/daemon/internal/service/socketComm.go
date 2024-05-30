@@ -90,7 +90,7 @@ func treatMessage(c net.Conn) {
 			continue
 		}
 
-		if msg, err = helperFuncs.Decode[types.Message](buf[:n]); err != nil {
+		if msg, err = helperFuncs.DecodeJSON[types.Message](buf[:n]); err != nil {
 			fmt.Println("error decoding socket message", err)
 			c.Close()
 			return
@@ -113,7 +113,7 @@ func treatMessage(c net.Conn) {
 			msg.AppStatResponse = ServiceInstance.getAppStat(msg)
 		}
 
-		bytes, err := helperFuncs.Encode(msg)
+		bytes, err := helperFuncs.EncodeJSON(msg)
 		if err != nil {
 			fmt.Println("error encoding response:", err)
 			continue

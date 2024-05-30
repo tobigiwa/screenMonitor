@@ -13,7 +13,7 @@ func (a *App) CloseDaemonConnection() error {
 		Endpoint: "closeConnection",
 	}
 
-	bytes, err := helperFuncs.Encode(msg)
+	bytes, err := helperFuncs.EncodeJSON(msg)
 	if err != nil {
 		a.logger.Log(context.TODO(), slog.LevelError, err.Error())
 		return err

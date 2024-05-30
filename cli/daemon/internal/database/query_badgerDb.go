@@ -148,7 +148,7 @@ func (bs *BadgerDBStore) WriteUsage(data types.ScreenTime) error {
 				return err
 			}
 
-			if app, err = helperFuncs.Decode[AppInfo](valCopy); err != nil {
+			if app, err = helperFuncs.DecodeJSON[AppInfo](valCopy); err != nil {
 				return err
 			}
 
@@ -186,7 +186,7 @@ func (bs *BadgerDBStore) WriteUsage(data types.ScreenTime) error {
 			app.ScreenStat[Key()] = stat
 		}
 
-		byteData, err := helperFuncs.Encode(app)
+		byteData, err := helperFuncs.EncodeJSON(app)
 		if err != nil {
 			return err
 		}

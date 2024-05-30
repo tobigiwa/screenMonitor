@@ -26,7 +26,7 @@ func (bs *BadgerDBStore) GetAppIconAndCategory(appNames []string) ([]types.AppIc
 				result[i] = types.AppIconAndCategory{AppName: appName}
 				continue
 			}
-			app, err := helperFuncs.Decode[AppInfo](byteData)
+			app, err := helperFuncs.DecodeJSON[AppInfo](byteData)
 			if err != nil {
 				result[i] = types.AppIconAndCategory{AppName: appName}
 				continue
@@ -99,7 +99,7 @@ func (bs *BadgerDBStore) appRangeStat(appName string, dateRange []types.Date) (t
 			return err
 		}
 
-		app, err = helperFuncs.Decode[AppInfo](byteData)
+		app, err = helperFuncs.DecodeJSON[AppInfo](byteData)
 		if err != nil {
 			return err
 		}

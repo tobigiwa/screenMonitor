@@ -88,7 +88,7 @@ templ chartControls() {
 			<div class="select-month">
 				<select name="month" class="month" hx-get="/weekStat?week=month" hx-vals="js{month: this.value}" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:innerHTML">
 					<option value="" id="placeholder" disabled selected>Last 3 Month</option>
-					for _, v := range monthDropDownSelectArray() {
+					for _, v := range monthDropDownSelectArray(3) {
 						<option class="option" value={ v }>{ v }</option>
 					}
 				</select>

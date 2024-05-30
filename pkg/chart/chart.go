@@ -13,7 +13,7 @@ import (
 
 const baseTpl = `
 <div class="container">
-    <div class="item" id="{{ .ChartID }}" style="height:{{ .Initialization.Height }};"></div>
+    <div class="item" id="{{ .ChartID }}" style="height:30rem;"></div>
 </div>
 {{- range .JSAssets.Values }}
    <script src="{{ . }}"></script>
