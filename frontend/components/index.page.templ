@@ -2,6 +2,7 @@ package frontend
 
 import "html/template"
 import "pkg/types"
+import "reflect"
 import helperFuncs "pkg/helper"
 
 templ IndexPage() {
@@ -11,7 +12,7 @@ templ IndexPage() {
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			<link rel="stylesheet" href="/assets/styles/screentime.css"/>
-			<script src="assets/javascript/charts.out.js"></script>
+			<script src="assets/javascript/script.out.js"></script>
 			<script src="assets/libraries/htmx.min.js"></script>
 			<script src="assets/libraries/echarts.min.js"></script>
 			<title>ScreenTimePage</title>
@@ -28,16 +29,19 @@ templ IndexPage() {
 templ main() {
 	<div class="main">
 		@Header()
-		@chartWrapper("")
+		@chartWrapper("", types.NoAppIconAndCategory)
 		@chartControls()
 		@chartHighlight(nil, 0)
 	</div>
 }
 
-templ chartWrapper(chart template.HTML) {
+templ chartWrapper(chart template.HTML, info types.AppIconAndCategory) {
 	<div class="chart-wrapper">
 		<div id="echart" hx-swap-oob="true">
 			@templ.Raw(chart)
+			if !reflect.ValueOf(info).IsZero() {
+				<img src={ getImageFilePath(info.AppName) } alt={ info.AppName } class="appIcon"/>
+			}
 		</div>
 	</div>
 }
@@ -116,10 +120,9 @@ templ chartHighlight(appDetails []types.ApplicationDetail, totalWeekUsage float6
 	<div class="chart-highlight" id="highlight" hx-swap-obb="true">
 		<ul>
 			for i:=0; i < len(appDetails); i++ {
-				<li class="card" tabindex="10" hx-get={ string(templ.URL("/appStat?range=week&appName=" + appDetails[i].AppInfo.AppName)) } hx-swap="none" hx-select-oob="#echart:innerHTML">
-					if appDetails[i].AppInfo.IsIconSet {
-						{ writeImageToFile(appDetails[i].AppInfo.Icon, appDetails[i].AppInfo.AppName) }
-						<img src={ "/tmp/" + appDetails[i].AppInfo.AppName + ".png" } alt={ appDetails[i].AppInfo.AppName } class="app-icon"/>
+				<li class="card" tabindex="10" hx-get={ string(templ.URL("/appStat?range=week&appName=" + appDetails[i].AppInfo.AppName)) } hx-swap="none" hx-select-oob="#echart:outerHTML">
+					if appDetails[i].AppInfo.IsIconSet && writeImageToFile(appDetails[i].AppInfo.Icon, appDetails[i].AppInfo.AppName) {
+						<img src={ getImageFilePath(appDetails[i].AppInfo.AppName) } alt={ appDetails[i].AppInfo.AppName } class="app-icon"/>
 					} else {
 						<img src="/assets/image/noAppImage.jpg" alt="noImage" class="app-icon"/>
 					}

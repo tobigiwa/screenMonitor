@@ -135,9 +135,11 @@ func (bs *BadgerDBStore) WriteUsage(data types.ScreenTime) error {
 				app.Icon = icon
 				app.IsIconSet = true
 			}
-			if categories, err := getDesktopCategory(data.AppName); err == nil {
-				app.DesktopCategories = categories
+			if r, err := getDesktopCategoryAndCmd(data.AppName); err == nil {
+				app.DesktopCategories = r.desktopCategories
 				app.IsCategorySet = true
+				app.cmdLine = r.cmdLine
+				app.IsCmdLineSet = true
 			}
 
 			fmt.Printf("New appName:%v, time so far is: %v:%v\n\n", data.AppName, app.IsCategorySet, app.IsIconSet)
@@ -163,12 +165,13 @@ func (bs *BadgerDBStore) WriteUsage(data types.ScreenTime) error {
 				}
 			}
 
-			if !app.IsCategorySet {
-				if categories, err := getDesktopCategory(data.AppName); err == nil {
-					app.DesktopCategories = categories
+			if !app.IsCategorySet || !app.IsCmdLineSet {
+				if r, err := getDesktopCategoryAndCmd(data.AppName); err == nil {
+					app.DesktopCategories = r.desktopCategories
 					app.IsCategorySet = true
+					app.cmdLine = r.cmdLine
+					app.IsCmdLineSet = true
 				}
-
 			}
 			fmt.Printf("Existing appName:%v, time so far is: %v:%v\n\n", data.AppName, app.ScreenStat[Key()].Active, app.ScreenStat[Key()].Open)
 		}

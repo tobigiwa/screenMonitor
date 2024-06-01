@@ -15,7 +15,7 @@ func AppStatBarChart(data BarChartData) template.HTML {
 	bar.Renderer = newchartRenderer(bar, bar.Validate)
 
 	bar.SetGlobalOptions(charts.WithInitializationOpts(
-		opts.Initialization{AssetsHost: "/assets/"},
+		opts.Initialization{AssetsHost: "/assets/libraries/"},
 	))
 
 	bar.SetGlobalOptions(
@@ -36,6 +36,15 @@ func AppStatBarChart(data BarChartData) template.HTML {
 			},
 			Left: "center",
 		}),
+		charts.WithToolboxOpts(opts.Toolbox{
+			Feature: &opts.ToolBoxFeature{
+				SaveAsImage: &opts.ToolBoxFeatureSaveAsImage{
+					Show:  opts.Bool(true),
+					Title: "download chart as Image",
+					Name:  fmt.Sprintf("app-screentime-%s-%s-%s-%s-%s", data.AppName, data.XAxis[0], data.XAxis[len(data.XAxis)-1], data.Month, data.Year),
+				},
+			},
+		}),
 		charts.WithLegendOpts(opts.Legend{
 			Show: opts.Bool(false),
 		}),
@@ -46,8 +55,6 @@ func AppStatBarChart(data BarChartData) template.HTML {
 			AxisPointer: &opts.AxisPointer{
 				Type: "cross",
 			},
-			// Formatter: fmt.Sprintf("{b} %s, %s. <br/> {a}: {c}Hrs", data.Month, data.Year),
-			// Formatter: ,
 		}),
 	)
 	bar.SetXAxis(data.XAxis).

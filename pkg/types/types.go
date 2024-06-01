@@ -99,3 +99,27 @@ type ScreenTime struct {
 	Duration float64       `json:"duration"`
 	Interval TimeInterval  `json:"interval"`
 }
+
+type Task struct {
+	AppName  string
+	TaskTime TaskTime
+	UI       UItextInfo
+	Job      TaskType
+}
+
+type UItextInfo struct {
+	Title    string
+	Subtitle string
+	Notes    string
+}
+
+type TaskType string
+
+type TaskTime struct {
+	StartTime time.Time
+	EndTime   time.Time
+	// AlertTimesInMinutes is when to alert
+	// before StartTime of task.
+	AlertTimesInMinutes [3]int
+	AlertSound          [3]bool
+}

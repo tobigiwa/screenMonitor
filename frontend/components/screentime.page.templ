@@ -4,10 +4,10 @@ import "html/template"
 import "pkg/types"
 
 templ WeekStatTempl(chart template.HTML, totalWeekUsage float64, appDetails []types.ApplicationDetail) {
-	@chartWrapper(chart)
+	@chartWrapper(chart, types.NoAppIconAndCategory)
 	if len(appDetails) == 0 || appDetails == nil {
 		<div class="chart-highlight" id="highlight" style="min-height: calc(100vh - 37rem);" hx-swap-obb="true">
-			<div style="text-align:center;color:white;">There seems to be no uage this week 😢</div>
+			<div style="text-align:center;color:white;">There seems to be no usage this week 😢</div>
 		</div>
 	} else {
 		@chartHighlight(appDetails, totalWeekUsage)
@@ -15,5 +15,5 @@ templ WeekStatTempl(chart template.HTML, totalWeekUsage float64, appDetails []ty
 }
 
 templ AppStatTempl(chart template.HTML, info types.AppIconAndCategory) {
-	@chartWrapper(chart)
+	@chartWrapper(chart, info)
 }

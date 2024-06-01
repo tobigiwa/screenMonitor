@@ -1,6 +1,8 @@
 package frontend
 
 import (
+	"errors"
+	"io/fs"
 	"math/rand"
 	"os"
 	"time"
@@ -41,17 +43,35 @@ func monthDropDownSelectArray(n int) []string {
 	return past3Month
 }
 
-func writeImageToFile(imageData []byte, filename string) (string, error) {
-	file, err := os.Create("/tmp/" + filename + ".png")
-	if err != nil {
-		return "", err
+func writeImageToFile(imageData []byte, filename string) bool {
+	var (
+		tmpFolder = "/tmp/LiScreMon/"
+		file      *os.File
+		err       error
+	)
+	if _, err = os.Stat(tmpFolder); err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			if err = os.MkdirAll(tmpFolder, 0755); err != nil {
+				return false
+			}
+			return false
+		}
+	}
+	if file, err = os.Create(tmpFolder + filename + ".png"); err != nil {
+		return false
 	}
 	defer file.Close()
 
-	_, err = file.Write(imageData)
-	if err != nil {
-		return "", err
+	if _, err = file.Write(imageData); err != nil {
+		return false
 	}
 
-	return "", nil
+	return true
+}
+
+func getImageFilePath(filename string) string {
+	if _, err := os.Stat("/tmp/LiScreMon/" + filename + ".png"); err != nil {
+		return "/assets/image/noAppImage.jpg"
+	}
+	return "/tmp/LiScreMon/" + filename + ".png"
 }

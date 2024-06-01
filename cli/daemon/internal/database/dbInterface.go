@@ -13,4 +13,6 @@ type IRepository interface {
 	AppMonthlyStat(appName, month, year string) (types.AppRangeStat, error)
 	AppDateRangeStat(appName string, start, end types.Date) (types.AppRangeStat, error)
 	GetAppIconAndCategory([]string) ([]types.AppIconAndCategory, error)
+	// GetTaskByAppName(appName string) ([]types.Task, error)
+	// GetAllTask() ([]types.Task, error)
 }

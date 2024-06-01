@@ -1,2 +1,2 @@
-(()=>{document.addEventListener("htmx:afterSwap",function(t){});})();
+(()=>{document.addEventListener("DOMContentLoaded",function(e){});})();
 //# sourceMappingURL=script.out.js.map

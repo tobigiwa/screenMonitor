@@ -29,6 +29,7 @@ func weekStatResponse(w types.WeekStatMessage) templ.Component {
 		chart.WeekStatBarChart(chart.BarChartData{
 			XAxis:       w.FormattedDay[:],
 			YAxis:       w.Values[:],
+			Keys:        w.Keys[:],
 			Month:       w.Month,
 			Year:        w.Year,
 			TotalUptime: w.TotalWeekUptime,

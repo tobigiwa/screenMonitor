@@ -19,11 +19,13 @@ type dailyAppScreenTime map[types.Date]types.Stats
 
 type AppInfo struct {
 	AppName           string             `json:"appName"`
-	Icon              []byte             `json:"icon"`
 	IsIconSet         bool               `json:"isIconSet"`
-	Category          types.Category     `json:"category"`
+	IsCmdLineSet      bool               `json:"isCmdLine`
 	IsCategorySet     bool               `json:"isCategorySet"`
+	cmdLine           string             `json:"cmdLine`
+	Icon              []byte             `json:"icon"`
 	DesktopCategories []string           `json:"desktopCategories"`
+	Category          types.Category     `json:"category"`
 	ScreenStat        dailyAppScreenTime `json:"screenStat"`
 }
 

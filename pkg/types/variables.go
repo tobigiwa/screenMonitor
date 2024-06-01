@@ -3,7 +3,8 @@ package types
 import "fmt"
 
 var (
-	NoMessage = Message{}
+	NoMessage            = Message{}
+	NoAppIconAndCategory = AppIconAndCategory{}
 )
 
 var (
@@ -16,4 +17,8 @@ const (
 	Inactive   ScreenType = "inactive"
 	Open       ScreenType = "open"
 	TimeFormat string     = "2006-01-02"
+
+	ReminderWithNoAction TaskType = "ReminderWithNoAction"
+	ReminderWithAction   TaskType = "ReminderWithAction"
+	Limit                TaskType = "Limit"
 )

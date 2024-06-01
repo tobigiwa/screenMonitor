@@ -41,13 +41,6 @@ const firstOption = `{
 		textStyle: {
 			color: '#000000'
 		},
-		// formatter: function(params) {
-		// 	var params = params.value
-		// 	var hours = Math.floor(value);
-		// 	var minutes = Math.round((value - hours) * 60);
-		// 	var v = hours + 'Hrs:' + minutes + 'Mins' 
-		// 	return '{b}:<br />{a}: ${v}';
-		// }
 		valueFormatter: function(value) {
 			var hours = Math.floor(value);
 			var minutes = Math.round((value - hours) * 60);
@@ -146,8 +139,7 @@ func generateBarItems(YAxis []float64, xAxis []string) []opts.BarData {
 			Name:  xAxis[i],
 			Value: YAxis[i],
 			Label: &opts.Label{
-				Color:     "auto",
-				FontStyle: "bold",
+				FontStyle: "italic",
 			},
 			ItemStyle: &opts.ItemStyle{
 				Color:       barChartColors[i],

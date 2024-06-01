@@ -76,13 +76,13 @@ func AllTheDaysInMonth(year, month string) ([]types.Date, error) {
 	return dates, nil
 }
 
-func getDesktopCategory(appName string) ([]string, error) {
-
+func getDesktopCategoryAndCmd(appName string) (res, error) {
+	var r res
 	if OperatingSytem := runtime.GOOS; OperatingSytem == "linux" {
 		dir := "/usr/share/applications/"
 		files, err := os.ReadDir(dir)
 		if err != nil {
-			return nil, err
+			return res{}, err
 		}
 		for _, file := range files {
 			if strings.Contains(strings.ToLower(file.Name()), strings.ToLower(appName)) && strings.HasSuffix(file.Name(), ".desktop") {
@@ -92,23 +92,37 @@ func getDesktopCategory(appName string) ([]string, error) {
 				}
 				lines := bytes.Split(content, []byte("\n"))
 				for i := 0; i < len(lines); i++ {
-					if line := string(lines[i]); strings.HasPrefix(line, "Categories=") {
+					line := string(lines[i])
+
+					if strings.HasPrefix(line, "Exec=") {
+						r.cmdLine = strings.TrimPrefix(line, "Exce=")
+					}
+
+					if strings.HasPrefix(line, "Categories=") {
 						if after, found := strings.CutPrefix(line, "Categories="); found {
 							categories := strings.Split(after, ";")
 
 							categories = slices.DeleteFunc(categories, func(s string) bool { // some end the line with ";"
 								return strings.TrimSpace(s) == ""
 							})
-							return categories, nil
+
+							r.desktopCategories = categories
+							return r, nil
 						}
 					}
+
 				}
 			}
 		}
 
 	} else if OperatingSytem == "windows" {
-		return nil, nil
+		return res{}, nil
 	}
 
-	return nil, errors.New("just an error")
+	return res{}, errors.New("just an error")
+}
+
+type res struct {
+	desktopCategories []string
+	cmdLine           string
 }

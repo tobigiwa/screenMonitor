@@ -28,3 +28,6 @@ func dbDayKey(date types.Date) []byte {
 func dbWeekKey(date types.Date) []byte {
 	return []byte(fmt.Sprintf("week:%v", string(date)))
 }
+func dbTaskKey() []byte {
+	return []byte("tasks")
+}

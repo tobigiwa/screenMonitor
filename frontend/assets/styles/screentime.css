@@ -17,7 +17,7 @@ body {
     padding: 0%;
     height: 100%;
     font-style: system-ui, sans-serif;
-    overflow: hidden;
+    /* overflow: hidden; */
 }
 
 a {
@@ -50,6 +50,7 @@ a {
     height: 40px;
     margin-right: 8px;
 }
+
 
 .page {
     display: inline-flex;
@@ -229,10 +230,20 @@ a {
 
     .chart-wrapper {
         /* height: 30rem; set by the chart in the backend */
+        position: relative;
+        
         #echart {
             width: 99% ;
             background-color: rgb(255, 255, 255);
             border-radius: 5px;
+        }
+
+        .appIcon {
+            position: absolute;
+            left: 1.2%;
+            top: 1.5%;
+            width: 20px;
+            height: 20px;
         }
     }
 

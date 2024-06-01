@@ -1,10 +1,8 @@
-
-
-document.addEventListener( 'htmx:afterSwap', function (evt)
+document.addEventListener( 'DOMContentLoaded', function (evt)
 {
 
-} );
 
+} );
 
 
 

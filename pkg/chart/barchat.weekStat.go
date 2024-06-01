@@ -1,21 +1,19 @@
 package chart
 
 import (
-	"bytes"
 	"fmt"
 	"html/template"
 	helperFuncs "pkg/helper"
 
 	"github.com/go-echarts/go-echarts/v2/charts"
 	"github.com/go-echarts/go-echarts/v2/opts"
-	"github.com/go-echarts/go-echarts/v2/render"
 )
 
 func WeekStatBarChart(data BarChartData) template.HTML {
 	bar := charts.NewBar()
 
 	bar.SetGlobalOptions(charts.WithInitializationOpts(
-		opts.Initialization{AssetsHost: "/assets/"},
+		opts.Initialization{AssetsHost: "/assets/libraries/"},
 	))
 
 	bar.Renderer = newchartRenderer(bar, bar.Validate)
@@ -39,7 +37,20 @@ func WeekStatBarChart(data BarChartData) template.HTML {
 			Left: "center",
 		}),
 		charts.WithLegendOpts(opts.Legend{
-			Show: opts.Bool(false),
+			Show: opts.Bool(true),
+			Left: "20%",
+			Data: data.Keys,
+			Icon: "triangle",
+		}),
+
+		charts.WithToolboxOpts(opts.Toolbox{
+			Feature: &opts.ToolBoxFeature{
+				SaveAsImage: &opts.ToolBoxFeatureSaveAsImage{
+					Show:  opts.Bool(true),
+					Title: "Download chart as Image",
+					Name:  fmt.Sprintf("weekly-screentime-%s-%s-%s-%s", data.XAxis[0], data.XAxis[6], data.Month, data.Year),
+				},
+			},
 		}),
 		charts.WithTooltipOpts(opts.Tooltip{
 			Show:      opts.Bool(true),
@@ -48,46 +59,21 @@ func WeekStatBarChart(data BarChartData) template.HTML {
 			AxisPointer: &opts.AxisPointer{
 				Type: "cross",
 			},
-			// Formatter: opts.FuncOpts(TooltipFormatter),
 		}),
 	)
+	// bar.AddJSFuncStrs(opts.FuncOpts(aaa))
 	bar.SetXAxis(data.XAxis).
 		AddSeries("Daily uptime", generateBarItems(data.YAxis, data.XAxis)).SetSeriesOptions()
 	return renderToHtml(bar)
 }
 
-func renderToHtml2(chart render.Renderer) template.HTML {
-	var buf bytes.Buffer
-	chartSnippet := chart.RenderSnippet()
-
-	tmpl := "{{.Element  }} {{.Script }} {{.Option}}"
-	t := template.New("snippet")
-	t, err := t.Parse(tmpl)
-	if err != nil {
-		panic(fmt.Errorf("crash from renderToHtml2:t.Parse error: %w", err))
-	}
-
-	// fmt.Printf("chartSnippet\n%+v\n\n", chartSnippet)
-
-	data := struct {
-		Element template.HTML
-		Script  template.HTML
-		Option  template.HTML
-	}{
-		Element: template.HTML(baseTpl),
-		Script:  template.HTML(chartSnippet.Script),
-		Option:  template.HTML(chartSnippet.Option),
-	}
-
-	err = t.Execute(&buf, data)
-	if err != nil {
-		panic(fmt.Errorf("crash from renderToHtml2:t.Execute error: %w", err))
-	}
-
-	// fmt.Println(buf.String())
-
-	return template.HTML(buf.String())
+var aaa = `
+function(){
+    const myChart = %MY_ECHARTS%;
+    var dataLen = myChart.getOption().legend.data;
+    console.log(dataLen);
 }
+`
 
 var TooltipFormatter = `
 function(params) {

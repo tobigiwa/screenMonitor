@@ -3,6 +3,7 @@ package chart
 type BarChartData struct {
 	XAxis       []string
 	YAxis       []float64
+	Keys        []string
 	Month       string
 	Year        string
 	TotalUptime float64
