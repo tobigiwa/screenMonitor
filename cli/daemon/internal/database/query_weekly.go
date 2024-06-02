@@ -19,7 +19,7 @@ func (bs *BadgerDBStore) GetWeek(day string) (WeeklyStat, error) {
 		return ZeroValueWeeklyStat, ErrFutureWeek
 	}
 
-	saturdayOfThatWeek := SaturdayOfTheWeek(date)
+	saturdayOfThatWeek := helperFuncs.SaturdayOfTheWeek(date)
 
 	byteData, err := bs.Get(dbWeekKey(types.Date(saturdayOfThatWeek)))
 	errKeyNotFound := errors.Is(err, badger.ErrKeyNotFound)

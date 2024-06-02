@@ -9,4 +9,7 @@ require (
 	pkg v0.0.0
 )
 
-require github.com/BurntSushi/xgb v0.0.0-20210121224620-deaf085860bc // indirect
+require (
+	github.com/BurntSushi/xgb v0.0.0-20210121224620-deaf085860bc // indirect
+	github.com/google/uuid v1.6.0 // indirect
+)

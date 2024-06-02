@@ -2,26 +2,25 @@ package webserver
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"pkg/types"
 	"strings"
 	"time"
 
+	helperFuncs "pkg/helper"
+
 	"github.com/a-h/templ"
 )
 
-type WeekStatDataCache struct {
-	Day  string
-	Data types.Message
-}
-
 var (
-	lastRequest       = time.Now()
-	weekStatCache     = make(map[string]templ.Component, 20)
-	cacheLastSaturday string
+	lastRequest    = time.Now()
+	weekStatCache  = make(map[string]templ.Component, 20)
+	cachedSaturday string
 )
+
+const HeaderKey = "Saturday"
 
 func (a *App) WeekStatHandler(w http.ResponseWriter, r *http.Request) {
 
@@ -35,103 +34,104 @@ func (a *App) WeekStatHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch query {
 	case "thisweek":
+		saturdayOfTheWeek := helperFuncs.SaturdayOfTheWeek(time.Now())
 		if templComp, ok := weekStatCache["thisweek"]; ok && time.Since(lastRequest) <= 10*time.Minute {
+			w.Header().Set(HeaderKey, saturdayOfTheWeek)
 			if err = templComp.Render(context.TODO(), w); err != nil {
-				fmt.Println("error writing templ response", err)
-				return
+				a.serverError(w, err)
 			}
 			return
 		}
-
 		lastRequest = time.Now()
-		today := time.Now().Format(types.TimeFormat)
 		msg = types.Message{
 			Endpoint:        endpoint,
-			WeekStatRequest: today,
+			WeekStatRequest: saturdayOfTheWeek,
 		}
+		cachedSaturday = saturdayOfTheWeek
 
 	case "lastweek":
-		lastSaturday := returnLastSaturday(time.Now())
+		lastSaturday := helperFuncs.ReturnLastWeekSaturday(time.Now())
 		if templComp, ok := weekStatCache[lastSaturday]; ok {
-			templComp.Render(context.TODO(), w)
+			w.Header().Set(HeaderKey, lastSaturday)
+			if err = templComp.Render(context.TODO(), w); err != nil {
+				a.serverError(w, err)
+			}
 			return
 		}
-
 		msg = types.Message{
 			Endpoint:        endpoint,
 			WeekStatRequest: lastSaturday,
 		}
+		cachedSaturday = lastSaturday
 
-		cacheLastSaturday = lastSaturday
-
-	case "backward-arrow", "forward-arrow":
-		var (
-			t            time.Time
-			err          error
-			lastSaturday string
-			q            string
-		)
-
-		if q = r.URL.Query().Get("saturday"); q == "" {
-			fmt.Println("empty q")
-			log.Fatal(err)
+	case "month":
+		var firstSaturdayOfTheMonth, q string
+		if q = r.URL.Query().Get("month"); q == "" {
+			a.clientError(w, http.StatusBadRequest, errors.New("query param:month: cannot be empty"))
+			return
+		}
+		if firstSaturdayOfTheMonth = helperFuncs.FirstSaturdayOfTheMonth(q); firstSaturdayOfTheMonth == "" {
+			a.clientError(w, http.StatusBadRequest, errors.New("query param:month: invalid"))
+			return
+		}
+		if templComp, ok := weekStatCache[firstSaturdayOfTheMonth]; ok {
+			w.Header().Set("saturday", firstSaturdayOfTheMonth)
+			if err = templComp.Render(context.TODO(), w); err != nil {
+				a.serverError(w, err)
+			}
+			return
 		}
 
-		if t, err = time.Parse(types.TimeFormat, q); err != nil {
-			log.Fatal(err)
+		msg = types.Message{
+			Endpoint:        endpoint,
+			WeekStatRequest: firstSaturdayOfTheMonth,
+		}
+		cachedSaturday = firstSaturdayOfTheMonth
+
+	case "backward-arrow", "forward-arrow":
+		var displayedWeek, saturday string
+		var t time.Time
+
+		if displayedWeek = r.Header.Get(saturday); displayedWeek == "" {
+			a.clientError(w, http.StatusBadRequest, errors.New("missing header saturday"))
+			return
+		}
+		if t, err = time.Parse(types.TimeFormat, displayedWeek); err != nil {
+			a.clientError(w, http.StatusBadRequest, errors.New("header value 'lastSaturday' invalide"))
+			return
 		}
 
 		if query == "backward-arrow" {
-			lastSaturday = returnLastSaturday(t)
+			saturday = helperFuncs.ReturnLastWeekSaturday(t)
 			msg = types.Message{
 				Endpoint:        endpoint,
-				WeekStatRequest: lastSaturday,
+				WeekStatRequest: saturday,
 			}
 		}
 
 		if query == "forward-arrow" {
-			if futureDate(t) {
+			if helperFuncs.IsFutureDate(t) {
 				weekStatCache["thisweek"].Render(context.TODO(), w)
 				return
 			}
-			lastSaturday = returnNextSaturday(t)
+			saturday = helperFuncs.ReturnNexWeektSaturday(t)
 			msg = types.Message{
 				Endpoint:        endpoint,
-				WeekStatRequest: lastSaturday,
+				WeekStatRequest: saturday,
 			}
 		}
 
-		if templComp, ok := weekStatCache[lastSaturday]; ok {
-			templComp.Render(context.TODO(), w)
+		if templComp, ok := weekStatCache[saturday]; ok {
+			w.Header().Set(HeaderKey, saturday)
+			if err = templComp.Render(context.TODO(), w); err != nil {
+				a.serverError(w, err)
+			}
 			return
 		}
-
-		cacheLastSaturday = lastSaturday
-
-	case "month":
-		var lastSaturday, q string
-		if q = r.URL.Query().Get("month"); q == "" {
-			log.Fatalf("empty query")
-		}
-		if lastSaturday = lastSaturdayOfTheMonth(q); lastSaturday == "" {
-			log.Fatal("invalid input")
-		}
-
-		if templComp, ok := weekStatCache[lastSaturday]; ok {
-			templComp.Render(context.TODO(), w)
-			return
-		}
-
-		msg = types.Message{
-			Endpoint:        endpoint,
-			WeekStatRequest: lastSaturday,
-		}
-
-		cacheLastSaturday = lastSaturday
+		cachedSaturday = saturday
 	}
 
-	// fmt.Println("would be consulting the deamonservice")
-
+	fmt.Println("would be consulting the deamonservice")
 	msg, err = a.writeAndReadWithDaemonService(msg)
 	if err != nil {
 		fmt.Println("error occurred in writeAndReadWithDaemonService", err)
@@ -139,56 +139,26 @@ func (a *App) WeekStatHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	templComp := prepareHtTMLResponse(msg)
-	err = templComp.Render(context.TODO(), w)
-	if err != nil {
-		fmt.Println("err with templ:", err)
-	}
 
 	// Cache
 	// if query == "thisweek" {
 	// 	weekStatCache[query] = templComp
-	// } else if query == "backward-arrow" || query == "forward-arrow" || query == "lastweek" {
-	// 	weekStatCache[cacheLastSaturday] = templComp
+	// } else {
+	// 	weekStatCache[cachedSaturday] = templComp
 	// }
 
-	templComp.Render(context.TODO(), w)
-}
-
-func returnLastSaturday(t time.Time) string {
-
-	if t.Weekday() == time.Saturday {
-		return t.AddDate(0, 0, -7).Format(types.TimeFormat)
+	w.Header().Set(HeaderKey, cachedSaturday)
+	if err = templComp.Render(context.TODO(), w); err != nil {
+		w.Header().Del("lastSaturday")
+		a.serverError(w, err)
 	}
-
-	daysSinceSaturday := int(t.Weekday()+1) % 7
-	return t.AddDate(0, 0, -daysSinceSaturday).Format(types.TimeFormat)
 }
 
-func returnNextSaturday(t time.Time) string {
-	return t.AddDate(0, 0, 7).Format(types.TimeFormat)
-}
-
-func futureDate(t time.Time) bool {
-	today := time.Now()
-	nextWeekDay := t.AddDate(0, 0, 7)
-	return nextWeekDay.After(today)
-}
-
-func lastSaturdayOfTheMonth(month string) string {
-	t, err := time.Parse("January", month)
-	if err != nil {
-		fmt.Println(err)
-		return ""
-	}
-	NextMonth := time.Date(time.Now().Year(), t.Month()+1, 1, 0, 0, 0, 0, time.UTC)
-
-	var s time.Time
-	for {
-		NextMonth = NextMonth.AddDate(0, 0, -1)
-		if NextMonth.Weekday() == time.Saturday {
-			s = NextMonth
-			break
-		}
-	}
-	return s.Format(types.TimeFormat)
-}
+// func (a *App) renderFromCache(key string, w http.ResponseWriter) {
+// 	if templComp, ok := weekStatCache[key]; ok {
+// 		w.Header().Set(saturday, cachedSaturday)
+// 		if err := templComp.Render(context.TODO(), w); err != nil {
+// 			a.serverError(w, err)
+// 		}
+// 	}
+// }

@@ -44,10 +44,7 @@ func IsPastWeek(t time.Time) bool {
 	return inputWeek < currentWeek
 }
 
-func SaturdayOfTheWeek(t time.Time) string {
-	daysUntilSaturday := 6 - int(t.Weekday())
-	return t.AddDate(0, 0, daysUntilSaturday).Format(types.TimeFormat)
-}
+
 
 func daysInThatWeek(w time.Time) [7]types.Date {
 	var arr [7]types.Date
@@ -76,53 +73,63 @@ func AllTheDaysInMonth(year, month string) ([]types.Date, error) {
 	return dates, nil
 }
 
-func getDesktopCategoryAndCmd(appName string) (res, error) {
-	var r res
+func getDesktopCategoryAndCmd(appName string) (dotDesktopFileInfo, error) {
+	var r dotDesktopFileInfo
+
 	if OperatingSytem := runtime.GOOS; OperatingSytem == "linux" {
 		dir := "/usr/share/applications/"
 		files, err := os.ReadDir(dir)
 		if err != nil {
-			return res{}, err
+			return dotDesktopFileInfo{}, err
 		}
+
 		for _, file := range files {
 			if strings.Contains(strings.ToLower(file.Name()), strings.ToLower(appName)) && strings.HasSuffix(file.Name(), ".desktop") {
 				content, err := os.ReadFile(filepath.Join(dir, file.Name()))
 				if err != nil {
-					continue
+					// continue
+					// since there should be only one
+					return dotDesktopFileInfo{}, err
 				}
+
 				lines := bytes.Split(content, []byte("\n"))
 				for i := 0; i < len(lines); i++ {
 					line := string(lines[i])
 
 					if strings.HasPrefix(line, "Exec=") {
-						r.cmdLine = strings.TrimPrefix(line, "Exce=")
+						r.cmdLine = strings.TrimPrefix(line, "Exec=")
 					}
 
 					if strings.HasPrefix(line, "Categories=") {
 						if after, found := strings.CutPrefix(line, "Categories="); found {
 							categories := strings.Split(after, ";")
 
-							categories = slices.DeleteFunc(categories, func(s string) bool { // some end the line with ";"
+							// trims out empty value, some end the line with ";"
+							categories = slices.DeleteFunc(categories, func(s string) bool {
 								return strings.TrimSpace(s) == ""
 							})
 
 							r.desktopCategories = categories
-							return r, nil
 						}
+					}
+					if r.cmdLine != "" && r.desktopCategories != nil {
+						return r, nil
 					}
 
 				}
+				// since there should be only one .desktop for a name
+				return r, nil // return anyone of 'em that has been set
 			}
 		}
 
 	} else if OperatingSytem == "windows" {
-		return res{}, nil
+		return dotDesktopFileInfo{}, nil
 	}
 
-	return res{}, errors.New("just an error")
+	return dotDesktopFileInfo{}, errors.New("just an error")
 }
 
-type res struct {
+type dotDesktopFileInfo struct {
 	desktopCategories []string
 	cmdLine           string
 }

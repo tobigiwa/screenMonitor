@@ -77,3 +77,63 @@ func PercentagesString(part, total float64) string {
 	}
 	return fmt.Sprintf("%.0f%%", p)
 }
+
+func SaturdayOfTheWeek(t time.Time) string {
+	daysUntilSaturday := 6 - int(t.Weekday())
+	return t.AddDate(0, 0, daysUntilSaturday).Format(types.TimeFormat)
+}
+
+func FirstSaturdayOfTheMonth(month string) string {
+	t, err := time.Parse("January", month)
+	if err != nil {
+		return ""
+	}
+	year := time.Now().Year()
+	firstDayOfMonth := time.Date(year, t.Month(), 1, 0, 0, 0, 0, time.UTC)
+
+	for {
+		if firstDayOfMonth.Weekday() == time.Saturday {
+			return firstDayOfMonth.Format(types.TimeFormat)
+		}
+		firstDayOfMonth = firstDayOfMonth.AddDate(0, 0, 1)
+	}
+}
+
+func LastSaturdayOfTheMonth(month string) string {
+	t, err := time.Parse("January", month)
+	if err != nil {
+		fmt.Println(err)
+		return ""
+	}
+	NextMonth := time.Date(time.Now().Year(), t.Month()+1, 1, 0, 0, 0, 0, time.UTC)
+
+	var s time.Time
+	for {
+		NextMonth = NextMonth.AddDate(0, 0, -1)
+		if NextMonth.Weekday() == time.Saturday {
+			s = NextMonth
+			break
+		}
+	}
+	return s.Format(types.TimeFormat)
+}
+
+func ReturnLastWeekSaturday(t time.Time) string {
+
+	if t.Weekday() == time.Saturday {
+		return t.AddDate(0, 0, -7).Format(types.TimeFormat)
+	}
+
+	daysSinceSaturday := int(t.Weekday()+1) % 7
+	return t.AddDate(0, 0, -daysSinceSaturday).Format(types.TimeFormat)
+}
+
+func IsFutureDate(t time.Time) bool {
+	today := time.Now()
+	nextWeekDay := t.AddDate(0, 0, 7)
+	return nextWeekDay.After(today)
+}
+
+func ReturnNexWeektSaturday(saturday time.Time) string {
+	return saturday.AddDate(0, 0, 7).Format(types.TimeFormat)
+}

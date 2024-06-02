@@ -8,6 +8,7 @@ import (
 	"slices"
 
 	badger "github.com/dgraph-io/badger/v4"
+	"github.com/google/uuid"
 )
 
 func (bs *BadgerDBStore) getAllTasks() ([]types.Task, error) {
@@ -26,7 +27,18 @@ func (bs *BadgerDBStore) getAllTasks() ([]types.Task, error) {
 
 func (bs *BadgerDBStore) GetAllTask() ([]types.Task, error) {
 	return bs.GetTaskByAppName("all")
+}
 
+func (bs *BadgerDBStore) RemoveTask(id uuid.UUID) error {
+	taskArry, err := bs.getAllTasks()
+	if err != nil {
+		return err
+	}
+	slices.DeleteFunc(taskArry, func(s types.Task) bool {
+		return s.UUID == id
+	})
+
+	return nil
 }
 
 func (bs *BadgerDBStore) GetTaskByAppName(appName string) ([]types.Task, error) {

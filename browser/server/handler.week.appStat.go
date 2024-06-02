@@ -17,6 +17,7 @@ func (a *App) AppStatHandler(w http.ResponseWriter, r *http.Request) {
 
 	if queryRange == "" || appName == "" {
 		a.clientError(w, http.StatusBadRequest, errors.New("query params cannot be empty"))
+		return
 	}
 
 	var (
@@ -29,8 +30,13 @@ func (a *App) AppStatHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch queryRange {
 	case "week":
+		var start string
+		if start = r.URL.Query().Get("start"); start == "" {
+			a.clientError(w, http.StatusBadRequest, errors.New("query params:start: cannot be empty"))
+			return
+		}
 		msg.AppStatRequest.StatRange = queryRange
-		msg.AppStatRequest.Start = types.Date("2024-05-26")
+		msg.AppStatRequest.Start = types.Date(start)
 	case "month":
 		msg.AppStatRequest.StatRange = queryRange
 		msg.AppStatRequest.Month = ""

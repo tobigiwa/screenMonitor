@@ -66,6 +66,7 @@ func DaemonServiceLinux() {
 		// 	monitor.Db.DeleteBucket(v)
 		// }
 
+		// monitor.Db.UpdateOpertionOnBuCKET("app", database.DeleteCmdOnAppInfo)
 		xevent.Quit(monitor.X11Connection)
 		service.SocketConn.Close()
 		monitor.Db.Close()

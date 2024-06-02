@@ -36,6 +36,7 @@ func weekStatResponse(w types.WeekStatMessage) templ.Component {
 		}),
 		w.TotalWeekUptime,
 		w.AppDetail,
+		w.Keys[6],
 	)
 }
 

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/BurntSushi/xgb/xproto"
+	"github.com/google/uuid"
 )
 
 type Message struct {
@@ -56,8 +57,9 @@ type AppIconAndCategory struct {
 }
 
 type ApplicationDetail struct {
-	AppInfo AppIconAndCategory `json:"appInfo"`
-	Usage   float64            `json:"usage"`
+	AppInfo      AppIconAndCategory `json:"appInfo"`
+	Usage        float64            `json:"usage"`
+	AnyDayInStat Date               `json:"anyDayInStat"`
 }
 
 type GenericKeyValue[K, V any] struct {
@@ -101,25 +103,25 @@ type ScreenTime struct {
 }
 
 type Task struct {
-	AppName  string
-	TaskTime TaskTime
-	UI       UItextInfo
-	Job      TaskType
+	UUID       uuid.UUID  `json:"uuid"`
+	AppName    string     `json:"appName"`
+	AppCmdLine string     `json:"appCmdLine"`
+	TaskTime   TaskTime   `json:"taskTime"`
+	UI         UItextInfo `json:"ui"`
+	Job        TaskType   `json:"job"`
 }
 
 type UItextInfo struct {
-	Title    string
-	Subtitle string
-	Notes    string
+	Title    string `json:"title"`
+	Subtitle string `json:"subtitle"`
+	Notes    string `json:"notes"`
 }
 
 type TaskType string
 
 type TaskTime struct {
-	StartTime time.Time
-	EndTime   time.Time
-	// AlertTimesInMinutes is when to alert
-	// before StartTime of task.
-	AlertTimesInMinutes [3]int
-	AlertSound          [3]bool
+	StartTime           time.Time `json:"startTime"`
+	EndTime             time.Time `json:"endTime"`
+	AlertTimesInMinutes [3]int    `json:"alertTimesInMinutes"`
+	AlertSound          [3]bool   `json:"alertSound"`
 }

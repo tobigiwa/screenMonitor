@@ -31,7 +31,7 @@ templ main() {
 		@Header()
 		@chartWrapper("", types.NoAppIconAndCategory)
 		@chartControls()
-		@chartHighlight(nil, 0)
+		@chartHighlight(nil, 0, "")
 	</div>
 }
 
@@ -116,11 +116,11 @@ templ chartControls() {
 	</div>
 }
 
-templ chartHighlight(appDetails []types.ApplicationDetail, totalWeekUsage float64) {
+templ chartHighlight(appDetails []types.ApplicationDetail, totalWeekUsage float64, anyDay string) {
 	<div class="chart-highlight" id="highlight" hx-swap-obb="true">
 		<ul>
 			for i:=0; i < len(appDetails); i++ {
-				<li class="card" tabindex="10" hx-get={ string(templ.URL("/appStat?range=week&appName=" + appDetails[i].AppInfo.AppName)) } hx-swap="none" hx-select-oob="#echart:outerHTML">
+				<li class="card" tabindex="10" hx-get={ string(templ.URL("/appStat?range=week&appName=" + appDetails[i].AppInfo.AppName + "&start=" + anyDay)) } hx-swap="none" hx-select-oob="#echart:outerHTML">
 					if appDetails[i].AppInfo.IsIconSet && writeImageToFile(appDetails[i].AppInfo.Icon, appDetails[i].AppInfo.AppName) {
 						<img src={ getImageFilePath(appDetails[i].AppInfo.AppName) } alt={ appDetails[i].AppInfo.AppName } class="app-icon"/>
 					} else {
