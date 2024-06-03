@@ -57,7 +57,7 @@ templ chartControls() {
 					}
 				</select>
 			</div>
-			<button class="left-controls__btn img backward-arrow" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:innerHTML">
+			<button class="left-controls__btn img backward-arrow" hx-get="/weekStat?week=backward" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:innerHTML">
 				<img
 					class="chart__controls--img"
 					src="assets/svg/angle-left-svgrepo-com.svg"
@@ -66,7 +66,7 @@ templ chartControls() {
 			</button>
 			<button class="left-controls__btn text" hx-get="/weekStat?week=lastweek" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">Last Week</button>
 			<button class="left-controls__btn text" id="thisWeekButton" hx-get="/weekStat?week=thisweek" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:innerHTML">This Week</button>
-			<button class="left-controls__btn img forward-arrow" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:innerHTML">
+			<button class="left-controls__btn img forward-arrow" hx-get="/weekStat?week=forward" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:innerHTML">
 				<img
 					class="chart__controls--img"
 					src="assets/svg/angle-right-svgrepo-com.svg"
@@ -86,31 +86,6 @@ templ chartControls() {
 			if ( thisWeekButton ) {
 				thisWeekButton.click();
 			}	
-			const overview = document.getElementById('highlight');
-			const listings = overview.children;
-			let activeOverview = 0;
-			overview.addEventListener('keydown', (e) => {
-				switch ( e.key ) {
-					case 'ArrowDown':
-						if(activeOverview < listings.length - 1) {
-							listings[activeOverview]?.classList.remove('active');
-							activeOverview++;
-							listings[activeOverview]?.classList.add('active');
-						}
-						break;
-					case 'ArrowUp':
-						if(activeOverview > 0) {
-							listings[activeOverview]?.classList.remove('active');
-							--activeOverview;
-							listings[activeOverview]?.classList.add('active');
-						}
-						break;
-				}
-				if ( toFocus ) {
-					toFocus.focus();
-					e.preventDefault();
-				}
-			});
 		});
 		</script>
 	</div>
