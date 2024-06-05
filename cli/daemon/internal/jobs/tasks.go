@@ -30,7 +30,7 @@ func StartTaskManger(dbHandle TaskManagerDbRequirement) (chan<- types.Task, erro
 
 	for _, task := range tasks {
 		if task.TaskTime.StartTime.Before(time.Now()) {
-			
+
 			continue
 		}
 		tm.Chan <- task
@@ -103,7 +103,7 @@ func (tm *TaskManager) createRemidersWithAction(task types.Task) {
 		gocron.WithEventListeners(
 			gocron.AfterJobRuns(
 				func(jobID uuid.UUID, jobName string) {
-					cmd := exec.Command("bash", "-c", task.AppCmdLine)
+					cmd := exec.Command("bash", "-c", task.AppInfo.CmdLine)
 					err := cmd.Start()
 					if err != nil {
 						log.Println(err)

@@ -37,29 +37,31 @@ type AppStatRequest struct {
 }
 
 type AppStatMessage struct {
-	FormattedDay     []string           `json:"formattedDay"`
-	Values           []float64          `json:"values"`
-	Month            string             `json:"month"`
-	Year             string             `json:"year"`
-	TotalRangeUptime float64            `json:"totalRangeUptime"`
-	AppInfo          AppIconAndCategory `json:"appInfo"`
-	IsError          bool               `json:"isError"`
-	Error            error              `json:"error"`
+	FormattedDay     []string                  `json:"formattedDay"`
+	Values           []float64                 `json:"values"`
+	Month            string                    `json:"month"`
+	Year             string                    `json:"year"`
+	TotalRangeUptime float64                   `json:"totalRangeUptime"`
+	AppInfo          AppIconCategoryAndCmdLine `json:"appInfo"`
+	IsError          bool                      `json:"isError"`
+	Error            error                     `json:"error"`
 }
 
-type AppIconAndCategory struct {
+type AppIconCategoryAndCmdLine struct {
 	AppName           string   `json:"appName"`
 	Icon              []byte   `json:"icon"`
 	IsIconSet         bool     `json:"isIconSet"`
+	IsCmdLineSet      bool     `json:"isCmdLine"`
+	CmdLine           string   `json:"cmdLine"`
 	Category          string   `json:"category"`
 	IsCategorySet     bool     `json:"isCategorySet"`
 	DesktopCategories []string `json:"desktopCategories"`
 }
 
 type ApplicationDetail struct {
-	AppInfo      AppIconAndCategory `json:"appInfo"`
-	Usage        float64            `json:"usage"`
-	AnyDayInStat Date               `json:"anyDayInStat"`
+	AppInfo      AppIconCategoryAndCmdLine `json:"appInfo"`
+	Usage        float64                   `json:"usage"`
+	AnyDayInStat Date                      `json:"anyDayInStat"`
 }
 
 type GenericKeyValue[K, V any] struct {
@@ -68,7 +70,7 @@ type GenericKeyValue[K, V any] struct {
 }
 
 type AppRangeStat struct {
-	AppInfo    AppIconAndCategory             `json:"appInfo"`
+	AppInfo    AppIconCategoryAndCmdLine      `json:"appInfo"`
 	DaysRange  []GenericKeyValue[Date, Stats] `json:"daysRange"`
 	TotalRange Stats                          `json:"totalRange"`
 }
@@ -103,12 +105,11 @@ type ScreenTime struct {
 }
 
 type Task struct {
-	UUID       uuid.UUID  `json:"uuid"`
-	AppName    string     `json:"appName"`
-	AppCmdLine string     `json:"appCmdLine"`
-	TaskTime   TaskTime   `json:"taskTime"`
-	UI         UItextInfo `json:"ui"`
-	Job        TaskType   `json:"job"`
+	UUID     uuid.UUID                 `json:"uuid"`
+	AppInfo  AppIconCategoryAndCmdLine `json:"appInfo"`
+	TaskTime TaskTime                  `json:"taskTime"`
+	UI       UItextInfo                `json:"ui"`
+	Job      TaskType                  `json:"job"`
 }
 
 type UItextInfo struct {
@@ -122,6 +123,6 @@ type TaskType string
 type TaskTime struct {
 	StartTime           time.Time `json:"startTime"`
 	EndTime             time.Time `json:"endTime"`
-	AlertTimesInMinutes [3]int    `json:"alertTimesInMinutes"`
+	AlertTimesInMinutes [3]int  `json:"alertTimesInMinutes"`
 	AlertSound          [3]bool   `json:"alertSound"`
 }

@@ -14,7 +14,7 @@ type Service struct {
 func (s *Service) getWeekStat(msg types.Message) types.WeekStatMessage {
 	var (
 		weekStat db.WeeklyStat
-		appsInfo []types.AppIconAndCategory
+		appsInfo []types.AppIconCategoryAndCmdLine
 		err      error
 	)
 

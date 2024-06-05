@@ -12,6 +12,6 @@ type IRepository interface {
 	AppWeeklyStat(appName string, anyDayInTheWeek types.Date) (types.AppRangeStat, error)
 	AppMonthlyStat(appName, month, year string) (types.AppRangeStat, error)
 	AppDateRangeStat(appName string, start, end types.Date) (types.AppRangeStat, error)
-	GetAppIconAndCategory([]string) ([]types.AppIconAndCategory, error)
+	GetAppIconAndCategory([]string) ([]types.AppIconCategoryAndCmdLine, error)
 	UpdateOpertionOnBuCKET(dbPrefix string, opsFunc func([]byte) ([]byte, error)) error
 }

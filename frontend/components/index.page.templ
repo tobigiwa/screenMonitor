@@ -11,6 +11,7 @@ templ IndexPage() {
 		<head>
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<link rel="stylesheet" href="/assets/styles/index.css"/>
 			<link rel="stylesheet" href="/assets/styles/screentime.css"/>
 			<script src="assets/javascript/script.out.js"></script>
 			<script src="assets/libraries/htmx.min.js"></script>
@@ -20,13 +21,13 @@ templ IndexPage() {
 		<body>
 			<div class="page">
 				@menu()
-				@main()
+				@screentime()
 			</div>
 		</body>
 	</html>
 }
 
-templ main() {
+templ screentime() {
 	<div class="main">
 		@Header()
 		@chartWrapper("", types.NoAppIconAndCategory)
@@ -35,12 +36,12 @@ templ main() {
 	</div>
 }
 
-templ chartWrapper(chart template.HTML, info types.AppIconAndCategory) {
+templ chartWrapper(chart template.HTML, info types.AppIconCategoryAndCmdLine) {
 	<div class="chart-wrapper">
 		<div id="echart" hx-swap-oob="true">
 			@templ.Raw(chart)
 			if !reflect.ValueOf(info).IsZero() {
-				<img src={ getImageFilePath(info.AppName) } alt={ info.AppName } class="appIcon"/>
+				<img src={ getImageFilePath(info.AppName, info.Icon) } alt={ info.AppName } class="appIcon"/>
 			}
 		</div>
 	</div>
@@ -50,14 +51,14 @@ templ chartControls() {
 	<div class="chart-controls">
 		<div class="left-controls">
 			<div class="select-month">
-				<select name="month" class="month" hx-get="/weekStat?week=month" hx-vals="js{month: this.value}" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:innerHTML">
+				<select name="month" class="month" hx-get="/weekStat?week=month" hx-vals="js{month: this.value}" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">
 					<option value="" id="placeholder" disabled selected>Last 3 Month</option>
 					for _, v := range monthDropDownSelectArray(3) {
 						<option class="option" value={ v }>{ v }</option>
 					}
 				</select>
 			</div>
-			<button class="left-controls__btn img backward-arrow" hx-get="/weekStat?week=backward" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:innerHTML">
+			<button class="left-controls__btn img backward-arrow" hx-get="/weekStat?week=backward" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">
 				<img
 					class="chart__controls--img"
 					src="assets/svg/angle-left-svgrepo-com.svg"
@@ -65,8 +66,8 @@ templ chartControls() {
 				/>
 			</button>
 			<button class="left-controls__btn text" hx-get="/weekStat?week=lastweek" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">Last Week</button>
-			<button class="left-controls__btn text" id="thisWeekButton" hx-get="/weekStat?week=thisweek" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:innerHTML">This Week</button>
-			<button class="left-controls__btn img forward-arrow" hx-get="/weekStat?week=forward" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:innerHTML">
+			<button class="left-controls__btn text" id="thisWeekButton" hx-get="/weekStat?week=thisweek" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">This Week</button>
+			<button class="left-controls__btn img forward-arrow" hx-get="/weekStat?week=forward" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">
 				<img
 					class="chart__controls--img"
 					src="assets/svg/angle-right-svgrepo-com.svg"
@@ -94,25 +95,25 @@ templ chartControls() {
 templ chartHighlight(appDetails []types.ApplicationDetail, totalWeekUsage float64, anyDay string) {
 	<div class="chart-highlight" id="highlight" hx-swap-obb="true">
 		<ul>
-			for i:=0; i < len(appDetails); i++ {
-				<li class="card" tabindex="10" hx-get={ string(templ.URL("/appStat?range=week&appName=" + appDetails[i].AppInfo.AppName + "&start=" + anyDay)) } hx-swap="none" hx-select-oob="#echart:outerHTML">
-					if appDetails[i].AppInfo.IsIconSet && writeImageToFile(appDetails[i].AppInfo.Icon, appDetails[i].AppInfo.AppName) {
-						<img src={ getImageFilePath(appDetails[i].AppInfo.AppName) } alt={ appDetails[i].AppInfo.AppName } class="app-icon"/>
+			for _, app := range appDetails {
+				<li class="card" tabindex="10" hx-get={ string(templ.URL("/appStat?range=week&appName=" + app.AppInfo.AppName + "&start=" + anyDay)) } hx-swap="none" hx-select-oob="#echart:outerHTML">
+					if app.AppInfo.IsIconSet && writeImageToFile(app.AppInfo.Icon, app.AppInfo.AppName) {
+						<img src={ getImageFilePath(app.AppInfo.AppName, app.AppInfo.Icon) } alt={ app.AppInfo.AppName } class="app-icon"/>
 					} else {
 						<img src="/assets/image/noAppImage.jpg" alt="noImage" class="app-icon"/>
 					}
 					<div class="info">
-						<div class="appName" style="font-size:large;font-weight:bold;">{ appDetails[i].AppInfo.AppName }</div>
-						if appDetails[i].AppInfo.IsCategorySet {
-							<button class="category">Category: { appDetails[i].AppInfo.Category }</button>
+						<div class="appName" style="font-size:large;font-weight:bold;">{ app.AppInfo.AppName }</div>
+						if app.AppInfo.IsCategorySet {
+							<button class="category">Category: { app.AppInfo.Category }</button>
 						} else {
 							<button class="category">Selct application catergory</button>
 						}
 					</div>
-					if percentageUse := helperFuncs.PercentagesString(appDetails[i].Usage, totalWeekUsage); percentageUse == "NaN" {
+					if percentageUse := helperFuncs.PercentagesString(app.Usage, totalWeekUsage); percentageUse == "NaN" {
 						<div class="appStat" style="font-style:italic;">0% of weeks usage</div>
 					} else {
-						<div class="appStat" style="font-style:italic;">{ percentageUse } of weeks usage: { helperFuncs.UsageTimeInHrsMin(appDetails[i].Usage) }</div>
+						<div class="appStat" style="font-style:italic;">{ percentageUse } of weeks usage: { helperFuncs.UsageTimeInHrsMin(app.Usage) }</div>
 					}
 				</li>
 			}

@@ -14,6 +14,7 @@ func (a *App) Routes() *http.ServeMux {
 	mux.HandleFunc("GET /index", a.IndexPageHandler)
 	mux.HandleFunc("GET /weekStat", a.WeekStatHandler)
 	mux.HandleFunc("GET /appStat", a.AppStatHandler)
+	mux.HandleFunc("GET /reminder", a.ReminderAndAlertPageHandler)
 
 	return mux
 }

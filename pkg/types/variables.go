@@ -4,7 +4,7 @@ import "fmt"
 
 var (
 	NoMessage            = Message{}
-	NoAppIconAndCategory = AppIconAndCategory{}
+	NoAppIconAndCategory = AppIconCategoryAndCmdLine{}
 )
 
 var (

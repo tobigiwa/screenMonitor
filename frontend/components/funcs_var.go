@@ -69,9 +69,20 @@ func writeImageToFile(imageData []byte, filename string) bool {
 	return true
 }
 
-func getImageFilePath(filename string) string {
+func getImageFilePath(filename string, imageData []byte) string {
 	if _, err := os.Stat("/tmp/LiScreMon/" + filename + ".png"); err != nil {
+		if writeImageToFile([]byte{}, filename) {
+			return "/tmp/LiScreMon/" + filename + ".png"
+		}
 		return "/assets/image/noAppImage.jpg"
 	}
 	return "/tmp/LiScreMon/" + filename + ".png"
+}
+
+func formatTimeToHumanReadable(t time.Time) string {
+	return t.Format("Monday, 02 January 2006, 03:04 PM")
+}
+
+func intToDuration(minutes int) time.Duration {
+	return time.Duration(minutes) * time.Minute
 }

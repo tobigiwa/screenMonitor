@@ -9,8 +9,8 @@ import (
 	badger "github.com/dgraph-io/badger/v4"
 )
 
-func (bs *BadgerDBStore) GetAppIconAndCategory(appNames []string) ([]types.AppIconAndCategory, error) {
-	result := make([]types.AppIconAndCategory, len(appNames))
+func (bs *BadgerDBStore) GetAppIconAndCategory(appNames []string) ([]types.AppIconCategoryAndCmdLine, error) {
+	result := make([]types.AppIconCategoryAndCmdLine, len(appNames))
 	bs.db.View(func(txn *badger.Txn) error {
 
 		for i := 0; i < len(appNames); i++ {
@@ -18,21 +18,21 @@ func (bs *BadgerDBStore) GetAppIconAndCategory(appNames []string) ([]types.AppIc
 			appName := appNames[i]
 			item, err := txn.Get(dbAppKey(appName))
 			if err != nil {
-				result[i] = types.AppIconAndCategory{AppName: appName}
+				result[i] = types.AppIconCategoryAndCmdLine{AppName: appName}
 				continue
 			}
 			byteData, err := item.ValueCopy(nil)
 			if err != nil {
-				result[i] = types.AppIconAndCategory{AppName: appName}
+				result[i] = types.AppIconCategoryAndCmdLine{AppName: appName}
 				continue
 			}
 			app, err := helperFuncs.DecodeJSON[AppInfo](byteData)
 			if err != nil {
-				result[i] = types.AppIconAndCategory{AppName: appName}
+				result[i] = types.AppIconCategoryAndCmdLine{AppName: appName}
 				continue
 			}
 
-			a := types.AppIconAndCategory{AppName: app.AppName}
+			a := types.AppIconCategoryAndCmdLine{AppName: app.AppName}
 			if app.IsIconSet {
 				a.Icon = app.Icon
 				a.IsIconSet = true
@@ -42,6 +42,10 @@ func (bs *BadgerDBStore) GetAppIconAndCategory(appNames []string) ([]types.AppIc
 				a.IsCategorySet = true
 			} else {
 				a.DesktopCategories = app.DesktopCategories
+			}
+			if app.IsCmdLineSet {
+				a.CmdLine = app.CmdLine
+				a.IsCmdLineSet = true
 			}
 			result[i] = a
 		}
