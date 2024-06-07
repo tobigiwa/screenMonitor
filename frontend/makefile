@@ -1,5 +1,5 @@
 build:
-	@rm -f *_templ.go && npm run build && templ generate
+	@rm -rf *_templ.go && npm run build && templ generate
 
 fmt:
 	@templ fmt .
@@ -7,4 +7,4 @@ fmt:
 live:
 	@templ generate --watch --proxy="http://localhost:8080" --open-browser=false -v
 
-run: build live
+run: build fmt live

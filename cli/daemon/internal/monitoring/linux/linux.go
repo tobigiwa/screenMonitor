@@ -58,10 +58,9 @@ func InitMonitoring(db *db.BadgerDBStore) X11Monitor {
 		if err != nil {
 			continue
 		}
-		fmt.Println(window, "===========>", name)
+		fmt.Printf("Opened windows:%d ==========>%s\n", window, name)
 
 		registerWindowForEvents(window)
-		addWindowTocurSessionNamedWindowMap(window, name)
 	}
 
 	netActiveWindowAtom, netClientStackingAtom = neededAtom()[0], neededAtom()[1]

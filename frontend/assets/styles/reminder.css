@@ -1,0 +1,185 @@
+.reminder-page {
+    max-height: calc(100vh - 4rem);
+    min-height: auto;
+    overflow-y: auto;
+}
+
+.sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: inline-flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    background-color: var(--primary-color2);
+    color: white;
+
+    & button {
+        width: 3rem;
+        height: 3rem;
+        border-radius: 5px;
+        /* margin-right: 10px; */
+    }
+
+    & img {
+        height: 1.5rem;
+        width: 1rem;
+    }
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+li+li {
+    margin-top: 1rem;
+}
+
+.card {
+    width: 100%;
+    background-color: wheat;
+    display: inline-flex;
+    justify-content: space-between;
+
+    & p {
+        margin: 5px;
+    }
+
+    .info {
+        background-color: rgb(143, 118, 118);
+        padding-left: 10px;
+        padding-right: 10px;
+
+
+        .title .content {
+            font-weight: bolder;
+            font-size: 1.2em;
+            padding: 10px;
+        }
+
+        .subtitle .content {
+            font-weight: bold;
+        }
+
+        .label {
+            font-size: 1em;
+        }
+
+        .action {
+            font-size: 0.8em;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+
+            & img {
+                height: 1rem;
+                width: 1rem;
+            }
+        }
+    }
+
+    .alert {
+        background-color: rgb(143, 118, 118);
+
+        .start .label {
+            font-size: 1em;
+            font-weight: bold;
+        }
+
+        .remind .label {
+            font-size: 0.8em;
+            font-style: italic;
+            font-weight: bold;
+        }
+    }
+
+
+    .content {}
+
+    .spacing {
+        flex: 1;
+        position: relative;
+
+        .edit-button {
+            position: absolute;
+            right: 2%;
+            bottom: 0;
+        }
+    }
+}
+
+.new-reminder {
+    width: 98%;
+    padding: 0 10px;
+}
+
+.form-pair {
+    display: flex;
+    flex-direction: column;
+}
+
+.titles {
+    width: 100%;
+    display: inline-flex;
+    justify-content: space-between;
+}
+
+.reminder-time {
+    width: 100%;
+    display: inline-flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+
+    & img {
+        width: 1rem;
+    }
+}
+
+.combine {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+label {
+    margin-bottom: 5px;
+    font-style: italic;
+    font-size: 90%;
+}
+
+input[type="text"],
+input[type="datetime-local"],
+input[type="number"],
+input[type="search"],
+textarea {
+    padding: 5px;
+    font-size: 0.8rem;
+    margin-bottom: 10px;
+}
+
+.button-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+button {
+    padding: 10px;
+    font-size: 1rem;
+    background-color: #198686;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+::backdrop {
+    background-image: linear-gradient(45deg,
+            magenta,
+            rebeccapurple,
+            dodgerblue,
+            green);
+    opacity: 0.75;
+}

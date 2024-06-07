@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	helperFuncs "pkg/helper"
+	"pkg/types"
 	"slices"
 
 	badger "github.com/dgraph-io/badger/v4"
@@ -12,15 +13,15 @@ import (
 
 func (bs *BadgerDBStore) GetWeek(day string) (WeeklyStat, error) {
 
-	anyDayInTheWeek := Date(day)
+	anyDayInTheWeek := types.Date(day)
 	date, _ := ParseKey(anyDayInTheWeek)
 	if IsFutureWeek(date) {
 		return ZeroValueWeeklyStat, ErrFutureWeek
 	}
 
-	saturdayOfThatWeek := SaturdayOfTheWeek(date)
+	saturdayOfThatWeek := helperFuncs.SaturdayOfTheWeek(date)
 
-	byteData, err := bs.Get(dbWeekKey(Date(saturdayOfThatWeek)))
+	byteData, err := bs.Get(dbWeekKey(types.Date(saturdayOfThatWeek)))
 	errKeyNotFound := errors.Is(err, badger.ErrKeyNotFound)
 
 	if err != nil && !errKeyNotFound {
@@ -31,19 +32,19 @@ func (bs *BadgerDBStore) GetWeek(day string) (WeeklyStat, error) {
 		return bs.getWeeklyAppStat(anyDayInTheWeek)
 	}
 
-	weekStat, err := helperFuncs.Decode[WeeklyStat](byteData)
+	weekStat, err := helperFuncs.DecodeJSON[WeeklyStat](byteData)
 	if err != nil {
 		return ZeroValueWeeklyStat, err
 	}
 	return weekStat, nil
 }
 
-func (bs *BadgerDBStore) getWeeklyAppStat(anyDayInTheWeek Date) (WeeklyStat, error) {
+func (bs *BadgerDBStore) getWeeklyAppStat(anyDayInTheWeek types.Date) (WeeklyStat, error) {
 
 	var (
 		result     WeeklyStat
-		weekTotal  Stats
-		tmpStorage = make(map[string]Stats, 20)
+		weekTotal  types.Stats
+		tmpStorage = make(map[string]types.Stats, 20)
 	)
 
 	date, _ := ParseKey(anyDayInTheWeek)
@@ -56,7 +57,7 @@ func (bs *BadgerDBStore) getWeeklyAppStat(anyDayInTheWeek Date) (WeeklyStat, err
 
 			dayStat, err := bs.GetDay(day)
 			if err != nil {
-				result.DayByDayTotal[i] = GenericKeyValue[Date, Stats]{Key: day, Value: Stats{}}
+				result.DayByDayTotal[i] = types.GenericKeyValue[types.Date, types.Stats]{Key: day, Value: types.Stats{}}
 				continue
 			}
 
@@ -105,9 +106,9 @@ func (bs *BadgerDBStore) getWeeklyAppStat(anyDayInTheWeek Date) (WeeklyStat, err
 	result.EachApp = eachAppSlice
 
 	if IsPastWeek(date) {
-		byteData, _ := helperFuncs.Encode(result)
+		byteData, _ := helperFuncs.EncodeJSON(result)
 		saturdayOfThatWeek := allConcernedDays[6]
-		err := bs.setNewEntryToDB(dbWeekKey(saturdayOfThatWeek), byteData)
+		err := bs.updateKeyValue(dbWeekKey(saturdayOfThatWeek), byteData)
 		if err != nil {
 			fmt.Println("ERROR WRITING NEW WEEK ENTRY", saturdayOfThatWeek, "ERROR IS:", err)
 		} else {

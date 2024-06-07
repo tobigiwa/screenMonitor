@@ -5,12 +5,13 @@ import (
 	"errors"
 	"fmt"
 	helperFuncs "pkg/helper"
+	"pkg/types"
 	"slices"
 
 	badger "github.com/dgraph-io/badger/v4"
 )
 
-func (bs *BadgerDBStore) GetDay(date Date) (DailyStat, error) {
+func (bs *BadgerDBStore) GetDay(date types.Date) (DailyStat, error) {
 
 	if day, _ := ParseKey(date); day.After(formattedToDay()) {
 		return ZeroValueDailyStat, ErrFutureDay
@@ -27,17 +28,17 @@ func (bs *BadgerDBStore) GetDay(date Date) (DailyStat, error) {
 		return bs.getDailyAppStat(date)
 	}
 
-	dayStat, err := helperFuncs.Decode[DailyStat](byteData)
+	dayStat, err := helperFuncs.DecodeJSON[DailyStat](byteData)
 	if err != nil {
 		return ZeroValueDailyStat, err
 	}
 	return dayStat, nil
 }
 
-func (bs *BadgerDBStore) getDailyAppStat(day Date) (DailyStat, error) {
+func (bs *BadgerDBStore) getDailyAppStat(day types.Date) (DailyStat, error) {
 	var (
 		result       DailyStat
-		dayTotalData Stats
+		dayTotalData types.Stats
 		arr          = make([]AppStat, 0, 20)
 	)
 
@@ -58,23 +59,24 @@ func (bs *BadgerDBStore) getDailyAppStat(day Date) (DailyStat, error) {
 					err            error
 				)
 
-				if app, err = helperFuncs.Decode[AppInfo](v); err != nil {
+				if app, err = helperFuncs.DecodeJSON[AppInfo](v); err != nil {
 					return err
 				}
 
-				thatDayStat := app.ScreenStat[day]
+				thatDayStat, ok := app.ScreenStat[day]
+				if ok { // if the app has that day
+					// EachApp []appstat
+					appStatArrData.AppName = app.AppName
+					appStatArrData.Usage.Active = thatDayStat.Active
+					appStatArrData.Usage.Inactive = thatDayStat.Inactive
+					appStatArrData.Usage.Open = thatDayStat.Open
+					arr = append(arr, appStatArrData)
 
-				// EachApp []appstat
-				appStatArrData.AppName = app.AppName
-				appStatArrData.Usage.Active = thatDayStat.Active
-				appStatArrData.Usage.Inactive = thatDayStat.Inactive
-				appStatArrData.Usage.Open = thatDayStat.Open
-				arr = append(arr, appStatArrData)
-
-				// DayTotall stats
-				dayTotalData.Active += thatDayStat.Active
-				dayTotalData.Inactive += thatDayStat.Inactive
-				dayTotalData.Open += thatDayStat.Open
+					// DayTotall stats
+					dayTotalData.Active += thatDayStat.Active
+					dayTotalData.Inactive += thatDayStat.Inactive
+					dayTotalData.Open += thatDayStat.Open
+				}
 
 				return nil
 			})
@@ -97,9 +99,9 @@ func (bs *BadgerDBStore) getDailyAppStat(day Date) (DailyStat, error) {
 	result.DayTotal.Open = dayTotalData.Open
 	result.EachApp = arr
 
-	if day != Date(formattedToDay().Format(timeFormat)) {
-		byteData, _ := helperFuncs.Encode(result)
-		err := bs.setNewEntryToDB(dbDayKey(day), byteData)
+	if day != types.Date(formattedToDay().Format(types.TimeFormat)) {
+		byteData, _ := helperFuncs.EncodeJSON(result)
+		err := bs.updateKeyValue(dbDayKey(day), byteData)
 		if err != nil {
 			fmt.Println("ERROR WRITING NEW DAY ENTRY", day, "ERROR IS:", err)
 		} else {

@@ -55,14 +55,14 @@ func listenToDaemonService() (net.Conn, error) {
 
 func (a *App) CheckDaemonService() (types.Message, error) {
 	msg := types.Message{
-		Endpoint:          "startConnection",
-		StringDataRequest: "I wish this project prospered.",
+		Endpoint:    "startConnection",
+		StatusCheck: "I wish this project prospered.",
 	}
 	return a.writeAndReadWithDaemonService(msg)
 }
 
 func (a *App) writeAndReadWithDaemonService(msg types.Message) (types.Message, error) {
-	bytesData, err := helperFuncs.Encode(msg) // encode message in byte
+	bytesData, err := helperFuncs.EncodeJSON(msg) // encode message in byte
 	if err != nil {
 		return types.NoMessage, fmt.Errorf("encode %w", err)
 	}
@@ -91,5 +91,5 @@ func (a *App) writeAndReadWithDaemonService(msg types.Message) (types.Message, e
 		}
 	}
 
-	return helperFuncs.Decode[types.Message](dataBuf.Bytes())
+	return helperFuncs.DecodeJSON[types.Message](dataBuf.Bytes())
 }

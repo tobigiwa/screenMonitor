@@ -2,25 +2,34 @@ package service
 
 import (
 	db "LiScreMon/cli/daemon/internal/database"
+	"LiScreMon/cli/daemon/internal/jobs"
 	"fmt"
-	"os"
+	helperFuncs "pkg/helper"
 	"pkg/types"
-	"strings"
 )
 
 type Service struct {
-	db db.IRepository
+	db          db.IRepository
+	taskManager *jobs.TaskManager
+}
+
+func (s *Service) StopTaskManger() error {
+	return s.taskManager.CloseChan()
 }
 
 func (s *Service) getWeekStat(msg types.Message) types.WeekStatMessage {
-	weekStat, err := s.db.GetWeek(msg.StringDataRequest)
-	if err != nil {
-		fmt.Println("error weekStat:", err)
+	var (
+		weekStat db.WeeklyStat
+		appsInfo []types.AppIconCategoryAndCmdLine
+		err      error
+	)
+
+	if weekStat, err = s.db.GetWeek(msg.WeekStatRequest); err != nil {
 		return types.WeekStatMessage{
 			IsError: true,
-			Error:   err,
-		}
+			Error:   fmt.Errorf("error weekStat: %w", err)}
 	}
+
 	var (
 		keys             = [7]string{}
 		formattedDay     = [7]string{}
@@ -33,29 +42,21 @@ func (s *Service) getWeekStat(msg types.Message) types.WeekStatMessage {
 	for i := 0; i < 7; i++ {
 		keys[i] = string(weekStat.DayByDayTotal[i].Key)
 		values[i] = weekStat.DayByDayTotal[i].Value.Active
-
-		day, _ := db.ParseKey(db.Date(weekStat.DayByDayTotal[i].Key))
-		dayWithSuffix := addOrdinalSuffix(day.Day())
-		weekDay := strings.TrimSuffix(day.Weekday().String(), "day")
-		formattedDay[i] = fmt.Sprintf("%v. %v", weekDay, dayWithSuffix)
+		formattedDay[i] = helperFuncs.FormattedDay(types.Date(weekStat.DayByDayTotal[i].Key))
 	}
 
-	saturdayOftheWeek, _ := db.ParseKey(db.Date(weekStat.DayByDayTotal[6].Key))
-	year, month, _ := saturdayOftheWeek.Date()
-	stringMonth := month.String()
+	month, year := helperFuncs.MonthAndYear(types.Date(weekStat.DayByDayTotal[6].Key))
 
 	for i := 0; i < sizeOfApps; i++ {
 		appNameInTheWeek = append(appNameInTheWeek, weekStat.EachApp[i].AppName)
 	}
 
-	appsInfo, err := s.db.GetAppIconAndCategory(appNameInTheWeek)
-	if err != nil {
-		fmt.Println("err with GetAppIconAndCategory:", err)
+	if appsInfo, err = s.db.GetAppIconCategoryAndCmdLine(appNameInTheWeek); err != nil {
 		return types.WeekStatMessage{
 			IsError: true,
-			Error:   err,
-		}
+			Error:   fmt.Errorf("err with GetAppIconAndCategory:%w", err)}
 	}
+
 	for i := 0; i < sizeOfApps; i++ {
 		appCard = append(appCard, types.ApplicationDetail{AppInfo: appsInfo[i], Usage: weekStat.EachApp[i].Usage.Active})
 	}
@@ -65,38 +66,96 @@ func (s *Service) getWeekStat(msg types.Message) types.WeekStatMessage {
 		FormattedDay:    formattedDay,
 		Values:          values,
 		TotalWeekUptime: weekStat.WeekTotal.Active,
-		Month:           stringMonth,
+		Month:           month,
 		Year:            fmt.Sprint(year),
 		AppDetail:       appCard,
 	}
 }
 
-func addOrdinalSuffix(n int) string {
-	switch n {
-	case 1, 21, 31:
-		return fmt.Sprintf("%dst", n)
-	case 2, 22:
-		return fmt.Sprintf("%dnd", n)
-	case 3, 23:
-		return fmt.Sprintf("%drd", n)
-	default:
-		return fmt.Sprintf("%dth", n)
+func (s *Service) getAppStat(msg types.Message) types.AppStatMessage {
+	var (
+		appStat types.AppRangeStat
+		err     error
+	)
+
+	switch msg.AppStatRequest.StatRange {
+	case "week":
+		appStat, err = s.db.AppWeeklyStat(msg.AppStatRequest.AppName, msg.AppStatRequest.Start)
+	case "month":
+		appStat, err = s.db.AppMonthlyStat(msg.AppStatRequest.AppName, msg.AppStatRequest.Month, msg.AppStatRequest.Year)
+	case "range":
+		appStat, err = s.db.AppDateRangeStat(msg.AppStatRequest.AppName, msg.AppStatRequest.Start, msg.AppStatRequest.End)
+	}
+
+	if err != nil {
+		fmt.Println("error weekStat:", err)
+		return types.AppStatMessage{
+			IsError: true,
+			Error:   err,
+		}
+	}
+
+	var (
+		formattedDay      = make([]string, 0, len(appStat.DaysRange))
+		values            = []float64{}
+		lastDayOfTheRange = len(appStat.DaysRange) - 1
+	)
+
+	for i := 0; i < len(appStat.DaysRange); i++ {
+		formattedDay = append(formattedDay, helperFuncs.FormattedDay(types.Date(appStat.DaysRange[i].Key)))
+		values = append(values, appStat.DaysRange[i].Value.Active)
+	}
+	month, year := helperFuncs.MonthAndYear(types.Date(appStat.DaysRange[lastDayOfTheRange].Key))
+
+	return types.AppStatMessage{
+		FormattedDay:     formattedDay,
+		Values:           values,
+		Month:            month,
+		Year:             year,
+		TotalRangeUptime: appStat.TotalRange.Active,
+		AppInfo:          appStat.AppInfo,
 	}
 }
 
-func savePNGImage(filename string, bytes []byte) error {
-	// Create a new file
-	file, err := os.Create(filename)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
+func (s *Service) createReminder(msg types.Message) types.ReminderMessage {
 
-	// Write the byte slice to the file
-	_, err = file.Write(bytes)
-	if err != nil {
-		return err
+	task := msg.ReminderRequest
+
+	if task.Job == types.ReminderWithAction {
+		appInfo, err := s.db.GetAppIconCategoryAndCmdLine([]string{task.AppInfo.AppName})
+		if err != nil {
+			return types.ReminderMessage{
+				IsError: true,
+				Error:   err}
+		}
+		task.AppInfo = appInfo[0]
 	}
 
-	return nil
+	err := s.taskManager.SendTaskToTaskManager(task)
+	if err != nil {
+		return types.ReminderMessage{
+			IsError: true,
+			Error:   err}
+	}
+
+	return types.ReminderMessage{
+		CreatedNewTask: true,
+	}
 }
+
+// func savePNGImage(filename string, bytes []byte) error {
+// 	// Create a new file
+// 	file, err := os.Create(filename)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	defer file.Close()
+
+// 	// Write the byte slice to the file
+// 	_, err = file.Write(bytes)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	return nil
+// }

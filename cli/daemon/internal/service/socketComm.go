@@ -2,6 +2,7 @@ package service
 
 import (
 	db "LiScreMon/cli/daemon/internal/database"
+	"LiScreMon/cli/daemon/internal/jobs"
 	"errors"
 	"fmt"
 	"io"
@@ -19,7 +20,15 @@ var (
 )
 
 func StartService(socketDir string, db *db.BadgerDBStore) {
+
 	ServiceInstance.db = db
+
+	ServiceInstance.taskManager = jobs.NewTaskManger(db)
+
+	if ServiceInstance.taskManager.StartTaskManger() != nil {
+		log.Fatal("error starting task manager")
+	}
+
 	SocketConn = domainSocket(socketDir)
 	handleConnection(SocketConn)
 }
@@ -90,15 +99,16 @@ func treatMessage(c net.Conn) {
 			continue
 		}
 
-		if msg, err = helperFuncs.Decode[types.Message](buf[:n]); err != nil {
+		if msg, err = helperFuncs.DecodeJSON[types.Message](buf[:n]); err != nil {
 			fmt.Println("error decoding socket message", err)
 			c.Close()
 			return
 		}
 
 		switch msg.Endpoint {
+
 		case "startConnection":
-			msg = types.Message{StringDataResponse: "hELLo.., this is the DaemonService speaking, your connection is established."}
+			msg = types.Message{StatusCheck: "hELLo.., this is the DaemonService speaking, your connection is established."}
 
 		case "closeConnection":
 			fmt.Println("we got a close connection message")
@@ -106,20 +116,29 @@ func treatMessage(c net.Conn) {
 			return
 
 		case "weekStat":
-			weekStat := ServiceInstance.getWeekStat(msg)
-			msg.WeekStatResponse = weekStat
+			msg.WeekStatResponse = ServiceInstance.getWeekStat(msg)
+
+		case "appStat":
+			msg.AppStatResponse = ServiceInstance.getAppStat(msg)
+
+		case "createReminder":
+			msg.ReminderResponse = ServiceInstance.createReminder(msg)
+
 		}
 
-		bytes, err := helperFuncs.Encode(msg)
+		bytes, err := helperFuncs.EncodeJSON(msg)
 		if err != nil {
 			fmt.Println("error encoding response:", err)
 			continue
 		}
+
 		n, err = c.Write(bytes)
 		if err != nil {
-			fmt.Println("error encoding response:", err)
+			fmt.Println("error writing response:", err)
 			continue
 		}
-		fmt.Println("bytes written", n, "encoded byte", len(bytes))
+		if n != len(bytes) {
+			fmt.Println("bytes written", n, "encoded byte", len(bytes))
+		}
 	}
 }

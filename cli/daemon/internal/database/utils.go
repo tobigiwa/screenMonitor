@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"pkg/types"
 	"runtime"
 	"slices"
 	"strings"
@@ -13,7 +14,7 @@ import (
 )
 
 func formattedToDay() time.Time {
-	t, _ := ParseKey(Date(time.Now().Format(timeFormat)))
+	t, _ := ParseKey(types.Date(time.Now().Format(types.TimeFormat)))
 	return t
 }
 
@@ -43,21 +44,18 @@ func IsPastWeek(t time.Time) bool {
 	return inputWeek < currentWeek
 }
 
-func SaturdayOfTheWeek(t time.Time) string {
-	daysUntilSaturday := 6 - int(t.Weekday())
-	return t.AddDate(0, 0, daysUntilSaturday).Format(timeFormat)
-}
 
-func daysInThatWeek(w time.Time) [7]Date {
-	var arr [7]Date
+
+func daysInThatWeek(w time.Time) [7]types.Date {
+	var arr [7]types.Date
 	startOftheWeek := w.AddDate(0, 0, -int(w.Weekday()))
 	for i := 0; i < 7; i++ {
-		arr[i] = Date(fmt.Sprint(startOftheWeek.AddDate(0, 0, i).Format(timeFormat)))
+		arr[i] = types.Date(fmt.Sprint(startOftheWeek.AddDate(0, 0, i).Format(types.TimeFormat)))
 	}
 	return arr
 }
 
-func AllTheDaysInMonth(year, month string) ([]Date, error) {
+func AllTheDaysInMonth(year, month string) ([]types.Date, error) {
 	t, err := time.Parse("2006 January", year+" "+month)
 	if err != nil {
 		return nil, fmt.Errorf("parse %w", err)
@@ -66,48 +64,72 @@ func AllTheDaysInMonth(year, month string) ([]Date, error) {
 	fmt.Println(t.Day(), t.Month(), t.Year())
 	lastDayOfTheGivenMonth := time.Date(t.Year(), t.Month()+1, 0, 0, 0, 0, 0, t.Location()).Day()
 
-	dates := make([]Date, 0, lastDayOfTheGivenMonth)
+	dates := make([]types.Date, 0, lastDayOfTheGivenMonth)
 
 	for day := 1; day <= lastDayOfTheGivenMonth; day++ {
-		dates = append(dates, Date(time.Date(t.Year(), t.Month(), day, 0, 0, 0, 0, t.Location()).Format(timeFormat)))
+		dates = append(dates, types.Date(time.Date(t.Year(), t.Month(), day, 0, 0, 0, 0, t.Location()).Format(types.TimeFormat)))
 	}
 
 	return dates, nil
 }
 
-func getDesktopCategory(appName string) ([]string, error) {
+func getDesktopCategoryAndCmd(appName string) (dotDesktopFileInfo, error) {
+	var r dotDesktopFileInfo
 
 	if OperatingSytem := runtime.GOOS; OperatingSytem == "linux" {
 		dir := "/usr/share/applications/"
 		files, err := os.ReadDir(dir)
 		if err != nil {
-			return nil, err
+			return dotDesktopFileInfo{}, err
 		}
+
 		for _, file := range files {
 			if strings.Contains(strings.ToLower(file.Name()), strings.ToLower(appName)) && strings.HasSuffix(file.Name(), ".desktop") {
 				content, err := os.ReadFile(filepath.Join(dir, file.Name()))
 				if err != nil {
-					continue
+					// continue
+					// since there should be only one
+					return dotDesktopFileInfo{}, err
 				}
+
 				lines := bytes.Split(content, []byte("\n"))
 				for i := 0; i < len(lines); i++ {
-					if line := string(lines[i]); strings.HasPrefix(line, "Categories=") {
+					line := string(lines[i])
+
+					if strings.HasPrefix(line, "Exec=") {
+						r.cmdLine = strings.TrimPrefix(line, "Exec=")
+					}
+
+					if strings.HasPrefix(line, "Categories=") {
 						if after, found := strings.CutPrefix(line, "Categories="); found {
 							categories := strings.Split(after, ";")
 
-							categories = slices.DeleteFunc(categories, func(s string) bool { // some end the line with ";"
+							// trims out empty value, some end the line with ";"
+							categories = slices.DeleteFunc(categories, func(s string) bool {
 								return strings.TrimSpace(s) == ""
 							})
-							return categories, nil
+
+							r.desktopCategories = categories
 						}
 					}
+					if r.cmdLine != "" && r.desktopCategories != nil {
+						return r, nil
+					}
+
 				}
+				// since there should be only one .desktop for a name
+				return r, nil // return anyone of 'em that has been set
 			}
 		}
 
 	} else if OperatingSytem == "windows" {
-		return nil, nil
+		return dotDesktopFileInfo{}, nil
 	}
 
-	return nil, errors.New("just an error")
+	return dotDesktopFileInfo{}, errors.New("just an error")
+}
+
+type dotDesktopFileInfo struct {
+	desktopCategories []string
+	cmdLine           string
 }

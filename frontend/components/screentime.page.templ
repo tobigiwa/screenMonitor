@@ -1,0 +1,19 @@
+package frontend
+
+import "html/template"
+import "pkg/types"
+
+templ WeekStatTempl(chart template.HTML, totalWeekUsage float64, appDetails []types.ApplicationDetail, anyDay string) {
+	@chartWrapper(chart, types.NoAppIconAndCategory)
+	if len(appDetails) == 0 {
+		<div class="chart-highlight" id="highlight" hx-swap-obb="true" style="min-height: calc(100vh - 37rem); display: flex; justify-content: center; align-items: center;">
+			<div style="color: white;">There seems to be no usage this week 😢</div>
+		</div>
+	} else {
+		@chartHighlight(appDetails, totalWeekUsage, anyDay)
+	}
+}
+
+templ AppStatTempl(chart template.HTML, info types.AppIconCategoryAndCmdLine) {
+	@chartWrapper(chart, info)
+}

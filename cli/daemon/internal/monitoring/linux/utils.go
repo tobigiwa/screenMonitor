@@ -49,13 +49,19 @@ func addWindowTocurSessionNamedWindowMap(windowID xproto.Window, name string) {
 
 func getWindowClassName(X *xgbutil.XUtil, win xproto.Window) (string, error) {
 
-	wmClass, err1 := xprop.PropValStrs(xprop.GetProperty(X, win, "WM_CLASS"))
-	if err1 == nil && (len(wmClass) == 2) {
-		return wmClass[1], nil
+	if window, ok := curSessionNamedWindow[win]; ok { // check we have if here first
+		return window, nil
 	}
 
+	wmClass, err1 := xprop.PropValStrs(xprop.GetProperty(X, win, "WM_CLASS"))
+	if err1 == nil && (len(wmClass) == 2) {
+		addWindowTocurSessionNamedWindowMap(win, wmClass[1]) // we got a name, so we add it
+		return wmClass[1], nil
+	}
+	
 	name, err2 := checkQueryTreeForParent(X, win)
 	if err2 == nil && (name != "") {
+		addWindowTocurSessionNamedWindowMap(win, wmClass[1]) // we got a name, so we add it
 		return name, nil
 	}
 

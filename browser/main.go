@@ -1,7 +1,7 @@
 package main
 
 import (
-	"browser/webserver"
+	webserver "browser/server"
 	"context"
 	"errors"
 	"fmt"
@@ -58,7 +58,7 @@ func main() {
 		}
 	}(done)
 
-	fmt.Println("Server is running on port http://127.0.0.1:8080/screentime")
+	fmt.Println("Server is running on port http://127.0.0.1:8080/index")
 	if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		log.Fatalln("Server error:", err)
 	}
