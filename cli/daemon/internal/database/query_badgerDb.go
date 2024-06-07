@@ -29,13 +29,11 @@ func (bs *BadgerDBStore) Close() error {
 	return bs.db.Close()
 }
 
-func (bs *BadgerDBStore) setNewEntryToDB(key, byteData []byte) error {
+func (bs *BadgerDBStore) updateKeyValue(key, byteData []byte) error {
 	err := bs.db.Update(func(txn *badger.Txn) error {
-		e := badger.NewEntry(key, byteData)
-		err := txn.SetEntry(e)
+		err := txn.Set(key, byteData)
 		return err
 	})
-
 	return err
 }
 

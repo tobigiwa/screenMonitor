@@ -16,7 +16,7 @@ func (bs *BadgerDBStore) getAllTasks() ([]types.Task, error) {
 	if err != nil {
 		if errors.Is(err, badger.ErrKeyNotFound) {
 			_ = bs.db.Update(func(txn *badger.Txn) error {
-				return txn.SetEntry(&badger.Entry{Key: dbTaskKey()})
+				return txn.Set(dbTaskKey(), []byte{})
 			})
 		}
 		return nil, err
@@ -27,18 +27,6 @@ func (bs *BadgerDBStore) getAllTasks() ([]types.Task, error) {
 
 func (bs *BadgerDBStore) GetAllTask() ([]types.Task, error) {
 	return bs.GetTaskByAppName("all")
-}
-
-func (bs *BadgerDBStore) RemoveTask(id uuid.UUID) error {
-	taskArry, err := bs.getAllTasks()
-	if err != nil {
-		return err
-	}
-	slices.DeleteFunc(taskArry, func(s types.Task) bool {
-		return s.UUID == id
-	})
-
-	return nil
 }
 
 func (bs *BadgerDBStore) GetTaskByAppName(appName string) ([]types.Task, error) {
@@ -62,4 +50,35 @@ func (bs *BadgerDBStore) GetTaskByAppName(appName string) ([]types.Task, error) 
 		}
 	}
 	return slices.Clip(requestedTaskArr), nil
+}
+
+func (bs *BadgerDBStore) AddTask(task types.Task) error {
+	taskArry, err := bs.getAllTasks()
+	if err != nil {
+		return err
+	}
+
+	taskArry = append(taskArry, task)
+
+	byteData, err := helperFuncs.EncodeJSON(taskArry)
+	if err != nil {
+		return err
+	}
+	return bs.updateKeyValue(dbTaskKey(), byteData)
+}
+
+func (bs *BadgerDBStore) RemoveTask(id uuid.UUID) error {
+	taskArry, err := bs.getAllTasks()
+	if err != nil {
+		return err
+	}
+	allTasks := slices.DeleteFunc(taskArry, func(s types.Task) bool {
+		return s.UUID == id
+	})
+
+	byteData, err := helperFuncs.EncodeJSON(allTasks)
+	if err != nil {
+		return err
+	}
+	return bs.updateKeyValue(dbTaskKey(), byteData)
 }

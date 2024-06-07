@@ -16,58 +16,71 @@ import (
 type TaskManagerDbRequirement interface {
 	GetTaskByAppName(appName string) ([]types.Task, error)
 	GetAllTask() ([]types.Task, error)
+	RemoveTask(id uuid.UUID) error
+	AddTask(task types.Task) error
 }
 
-func StartTaskManger(dbHandle TaskManagerDbRequirement) (chan<- types.Task, error) {
-	tm := NewTaskManger(dbHandle)
+func (tm *TaskManager) StartTaskManger() error {
 
 	tasks, err := tm.dbHandle.GetAllTask()
 	if err != nil {
-		return nil, fmt.Errorf("taskManager cannot be started: %w", err)
+		return fmt.Errorf("taskManager cannot be started: %w", err)
 	}
 
 	go tm.disperseTask()
 
 	for _, task := range tasks {
 		if task.TaskTime.StartTime.Before(time.Now()) {
-
+			if err := tm.dbHandle.RemoveTask(task.UUID); err != nil {
+				fmt.Printf("err deleting old task: %+v : %v\n\n", task, err)
+			}
 			continue
 		}
-		tm.Chan <- task
+		tm.Channel <- task
 	}
 
-	return tm.Chan, nil
+	return nil
+}
+
+func (tm *TaskManager) SendTaskToTaskManager(task types.Task) error {
+	if err := tm.dbHandle.AddTask(task); err != nil {
+		return fmt.Errorf("error adding task: %w", err)
+	}
+	tm.Channel <- task
+	return nil
 }
 
 type TaskManager struct {
 	dbHandle TaskManagerDbRequirement
 	gocron   gocron.Scheduler
-	Chan     chan types.Task
+	Channel  chan types.Task
 }
 
 func NewTaskManger(dbHandle TaskManagerDbRequirement) *TaskManager {
 	var tm TaskManager
 	tm.dbHandle = dbHandle
 	tm.gocron, _ = gocron.NewScheduler()
-	tm.Chan = make(chan types.Task)
+	tm.Channel = make(chan types.Task)
 	return &tm
 }
 
-func (tm *TaskManager) Close() {
+func (tm *TaskManager) CloseChan() error {
 	if err := tm.gocron.Shutdown(); err != nil {
 		fmt.Println("error shutting down gocron Scheduler:", err)
+		return err
 	}
-	tm.Chan <- types.Task{}
+	tm.Channel <- types.Task{}
+	return nil
 }
 
 func (tm *TaskManager) disperseTask() {
 
 	tm.gocron.Start()
 	for {
-		task := <-tm.Chan
+		task := <-tm.Channel
 
 		if reflect.ValueOf(task).IsZero() {
-			close(tm.Chan)
+			close(tm.Channel)
 			break
 		}
 

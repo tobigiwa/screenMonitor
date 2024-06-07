@@ -61,14 +61,9 @@ func DaemonServiceLinux() {
 		<-signal1
 		close(signal1)
 
-		// for _, v := range [2]string{"day", "week"} {
-		// 	fmt.Println("at", v)
-		// 	monitor.Db.DeleteBucket(v)
-		// }
-
-		// monitor.Db.UpdateOpertionOnBuCKET("app", database.DeleteCmdOnAppInfo)
 		xevent.Quit(monitor.X11Connection)
 		service.SocketConn.Close()
+		service.ServiceInstance.StopTaskManger()
 		monitor.Db.Close()
 
 		os.Exit(0)

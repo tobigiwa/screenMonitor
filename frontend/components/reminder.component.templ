@@ -1,6 +1,7 @@
 package frontend
 
 import "pkg/types"
+import "time"
 
 templ ReminderAndAlertPage(tasks []types.Task) {
 	<!DOCTYPE html>
@@ -42,174 +43,7 @@ templ reminderAndAlert(tasks []types.Task) {
 			@reminderList(tasks)
 		</div>
 	</div>
-	<dialog class="form">
-		<form class="new-reminder" method="dialog">
-			<div class="titles">
-				<div class="form-pair">
-					<label for="add-title">Title:</label>
-					<input
-						type="text"
-						id="add-title"
-						name="title"
-						required
-						minlength="4"
-						maxlength="35"
-						placeholder="minimun of 4 words"
-					/>
-				</div>
-				<div class="form-pair">
-					<label for="add-subtitle">Subtitle:</label>
-					<input
-						type="text"
-						id="add-subtitle"
-						name="subtitle"
-						maxlength="50"
-						placeholder="optional"
-					/>
-				</div>
-			</div>
-			<div class="reminder-time">
-				<div class="combine">
-					<div class="form-pair">
-						<label for="set-reminder">Set your reminder:</label>
-						<input
-							type="datetime-local"
-							id="set-reminder"
-							name="reminder"
-							value="2024-06-03T00:00"
-							min="2024-06-03T00:00"
-							max="2024-06-07T00:00"
-						/>
-					</div>
-					<div class="alert">
-						<input
-							type="checkbox"
-							value="true"
-							id="sound-notification-reminder"
-							name="soundNotificationReminder"
-							checked
-						/>
-						<label for="sound-notification-reminder">
-							<img
-								src="assets/svg/bell.svg"
-								alt="Notification Icon"
-							/>
-						</label>
-					</div>
-				</div>
-				<div class="combine">
-					<div class="form-pair ">
-						<label for="add-notification__first">
-							First
-							notification
-							(Mins):
-						</label>
-						<input
-							type="number"
-							id="add-notification__first"
-							name="firstNotification"
-							min="0"
-							max="10"
-							value="10"
-						/>
-					</div>
-					<div class="alert">
-						<input
-							type="checkbox"
-							value="true"
-							id="sound-notification-first"
-							name="soundNotificationFirst"
-							checked
-						/>
-						<label for="sound-notification-first">
-							<img
-								src="assets/svg/bell.svg"
-								alt="Notification Icon"
-							/>
-						</label>
-					</div>
-				</div>
-				<div class="combine">
-					<div class="form-pair">
-						<label for="add-notification__second">
-							Second
-							notification
-							(Mins):
-						</label>
-						<input
-							type="number"
-							id="add-notification__second"
-							name="secondNotification"
-							min="0"
-							max="10"
-							value="5"
-						/>
-					</div>
-					<div class="alert">
-						<input
-							type="checkbox"
-							value="true"
-							id="sound-notification-second"
-							name="soundNotificationSecond"
-							checked
-						/>
-						<label for="sound-notification-second">
-							<img
-								src="assets/svg/bell.svg"
-								alt="Notification Icon"
-							/>
-						</label>
-					</div>
-				</div>
-				<div class="out">
-					<div class="form-pair">
-						<label for="site-search">
-							App to be
-							launched:
-						</label>
-						<input
-							type="search"
-							id="site-search"
-							name="q"
-							list="food-list"
-						/>
-						<datalist id="food-list">
-							<option value="Pizza"></option>
-							<option value="Burger"></option>
-							<option value="Sushi"></option>
-							<option value="Pasta"></option>
-							<option value="Salad"></option>
-						</datalist>
-					</div>
-				</div>
-			</div>
-			<div class="form-pair">
-				<label for="add-note">Include Note:</label>
-				<textarea
-					id="add-note"
-					name="note"
-					rows="3"
-					cols="1"
-					placeholder="optional"
-				></textarea>
-			</div>
-			<div class="button-container">
-				<button type="submit" formmethod="dialog">Create Reminder</button>
-				<button class="close-modal" formnovalidate>Close</button>
-			</div>
-		</form>
-	</dialog>
-	<script>
-    const dialog = document.querySelector('dialog');
-    const showModalbutton = document.querySelector('button');
-    const closeModalButton = document.querySelector("close-modal");
-    showModalbutton.addEventListener('click', () => {
-        dialog.showModal();
-    });
-    closeModalButton.addEventListener("click", ()=> {
-        dialog.close();
-    });
-</script>
+	@createNewReminderDialog()
 }
 
 templ reminderList(task []types.Task) {
@@ -244,4 +78,162 @@ templ reminderList(task []types.Task) {
 			</li>
 		}
 	</ul>
+}
+
+templ createNewReminderDialog() {
+	<dialog class="form">
+		<form class="new-reminder" method="post" action="/createReminder">
+			<div class="titles">
+				<div class="form-pair">
+					<label for="add-title">Title:</label>
+					<input
+						type="text"
+						name="title"
+						minlength="4"
+						maxlength="35"
+						placeholder="minimun of 4 words"
+						required
+					/>
+				</div>
+				<div class="form-pair">
+					<label for="add-subtitle">Subtitle:</label>
+					<input
+						type="text"
+						name="subtitle"
+						maxlength="50"
+						placeholder="optional"
+					/>
+				</div>
+			</div>
+			<div class="reminder-time">
+				<div class="combine">
+					<div class="form-pair">
+						<label for="set-reminder">Set your reminder:</label>
+						<input
+							type="datetime-local"
+							name="reminder"
+							value={ FormatTimeTOHMTLDatetimeLocal(time.Now()) }
+							min={ FormatTimeTOHMTLDatetimeLocal(time.Now()) }
+							max={ FormatTimeTOHMTLDatetimeLocal(nextTwoWeeks()) }
+						/>
+					</div>
+					<div class="alert">
+						<input
+							type="checkbox"
+							name="soundNotification"
+							value="true"
+							checked
+						/>
+						<label for="sound-notification-reminder">
+							<img
+								src="assets/svg/bell.svg"
+								alt="Notification Icon"
+							/>
+						</label>
+					</div>
+				</div>
+				<div class="combine">
+					<div class="form-pair ">
+						<label for="add-notification__first">
+							First
+							notification
+							(Mins):
+						</label>
+						<input
+							type="number"
+							name="firstNotification"
+							min="0"
+							max="10"
+							value="10"
+						/>
+					</div>
+					<div class="alert">
+						<input
+							type="checkbox"
+							name="soundFirstNotification"
+							value="true"
+							checked
+						/>
+						<label for="sound-notification-first">
+							<img
+								src="assets/svg/bell.svg"
+								alt="Notification Icon"
+							/>
+						</label>
+					</div>
+				</div>
+				<div class="combine">
+					<div class="form-pair">
+						<label for="add-notification__second">
+							Second
+							notification
+							(Mins):
+						</label>
+						<input
+							type="number"
+							name="secondNotification"
+							min="0"
+							max="10"
+							value="5"
+						/>
+					</div>
+					<div class="alert">
+						<input
+							type="checkbox"
+							name="soundSecondNotification"
+							value="true"
+							checked
+						/>
+						<label for="sound-notification-second">
+							<img
+								src="assets/svg/bell.svg"
+								alt="Notification Icon"
+							/>
+						</label>
+					</div>
+				</div>
+				<div class="out">
+					<div class="form-pair">
+						<label for="site-search">
+							App to be
+							launched:
+						</label>
+						<input
+							type="search"
+							name="app"
+							list="app-list"
+							value="no-app"
+						/>
+						<datalist id="app-list">
+							<option value="Pizza"></option>
+							<option value="Burger"></option>
+							<option value="Sushi"></option>
+							<option value="Pasta"></option>
+							<option value="Salad"></option>
+						</datalist>
+					</div>
+				</div>
+			</div>
+			<div class="form-pair">
+				<label for="add-note">Include Note:</label>
+				<textarea
+					name="note"
+					rows="3"
+					cols="1"
+					placeholder="optional"
+				></textarea>
+			</div>
+			<div class="button-container">
+				<button type="submit">Create Reminder</button>
+				<button class="close-modal" formmethod="dialog" formnovalidate>Close</button>
+			</div>
+		</form>
+		<script>
+			const dialog = document.querySelector('dialog');
+			const showModalbutton = document.querySelector('button');
+			showModalbutton.addEventListener('click', () => {
+				dialog.showModal();
+			});
+		</script>
+	</dialog>
 }

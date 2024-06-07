@@ -101,7 +101,7 @@ func (bs *BadgerDBStore) getDailyAppStat(day types.Date) (DailyStat, error) {
 
 	if day != types.Date(formattedToDay().Format(types.TimeFormat)) {
 		byteData, _ := helperFuncs.EncodeJSON(result)
-		err := bs.setNewEntryToDB(dbDayKey(day), byteData)
+		err := bs.updateKeyValue(dbDayKey(day), byteData)
 		if err != nil {
 			fmt.Println("ERROR WRITING NEW DAY ENTRY", day, "ERROR IS:", err)
 		} else {

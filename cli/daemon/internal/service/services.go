@@ -2,13 +2,19 @@ package service
 
 import (
 	db "LiScreMon/cli/daemon/internal/database"
+	"LiScreMon/cli/daemon/internal/jobs"
 	"fmt"
 	helperFuncs "pkg/helper"
 	"pkg/types"
 )
 
 type Service struct {
-	db db.IRepository
+	db          db.IRepository
+	taskManager *jobs.TaskManager
+}
+
+func (s *Service) StopTaskManger() error {
+	return s.taskManager.CloseChan()
 }
 
 func (s *Service) getWeekStat(msg types.Message) types.WeekStatMessage {
@@ -45,7 +51,7 @@ func (s *Service) getWeekStat(msg types.Message) types.WeekStatMessage {
 		appNameInTheWeek = append(appNameInTheWeek, weekStat.EachApp[i].AppName)
 	}
 
-	if appsInfo, err = s.db.GetAppIconAndCategory(appNameInTheWeek); err != nil {
+	if appsInfo, err = s.db.GetAppIconCategoryAndCmdLine(appNameInTheWeek); err != nil {
 		return types.WeekStatMessage{
 			IsError: true,
 			Error:   fmt.Errorf("err with GetAppIconAndCategory:%w", err)}
@@ -108,6 +114,32 @@ func (s *Service) getAppStat(msg types.Message) types.AppStatMessage {
 		Year:             year,
 		TotalRangeUptime: appStat.TotalRange.Active,
 		AppInfo:          appStat.AppInfo,
+	}
+}
+
+func (s *Service) createReminder(msg types.Message) types.ReminderMessage {
+
+	task := msg.ReminderRequest
+
+	if task.Job == types.ReminderWithAction {
+		appInfo, err := s.db.GetAppIconCategoryAndCmdLine([]string{task.AppInfo.AppName})
+		if err != nil {
+			return types.ReminderMessage{
+				IsError: true,
+				Error:   err}
+		}
+		task.AppInfo = appInfo[0]
+	}
+
+	err := s.taskManager.SendTaskToTaskManager(task)
+	if err != nil {
+		return types.ReminderMessage{
+			IsError: true,
+			Error:   err}
+	}
+
+	return types.ReminderMessage{
+		CreatedNewTask: true,
 	}
 }
 

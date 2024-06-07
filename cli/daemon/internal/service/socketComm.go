@@ -2,6 +2,7 @@ package service
 
 import (
 	db "LiScreMon/cli/daemon/internal/database"
+	"LiScreMon/cli/daemon/internal/jobs"
 	"errors"
 	"fmt"
 	"io"
@@ -19,7 +20,15 @@ var (
 )
 
 func StartService(socketDir string, db *db.BadgerDBStore) {
+
 	ServiceInstance.db = db
+
+	ServiceInstance.taskManager = jobs.NewTaskManger(db)
+
+	if ServiceInstance.taskManager.StartTaskManger() != nil {
+		log.Fatal("error starting task manager")
+	}
+
 	SocketConn = domainSocket(socketDir)
 	handleConnection(SocketConn)
 }
@@ -111,6 +120,10 @@ func treatMessage(c net.Conn) {
 
 		case "appStat":
 			msg.AppStatResponse = ServiceInstance.getAppStat(msg)
+
+		case "createReminder":
+			msg.ReminderResponse = ServiceInstance.createReminder(msg)
+
 		}
 
 		bytes, err := helperFuncs.EncodeJSON(msg)

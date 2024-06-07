@@ -9,7 +9,7 @@ import (
 	badger "github.com/dgraph-io/badger/v4"
 )
 
-func (bs *BadgerDBStore) GetAppIconAndCategory(appNames []string) ([]types.AppIconCategoryAndCmdLine, error) {
+func (bs *BadgerDBStore) GetAppIconCategoryAndCmdLine(appNames []string) ([]types.AppIconCategoryAndCmdLine, error) {
 	result := make([]types.AppIconCategoryAndCmdLine, len(appNames))
 	bs.db.View(func(txn *badger.Txn) error {
 
@@ -122,7 +122,7 @@ func (bs *BadgerDBStore) appRangeStat(appName string, dateRange []types.Date) (t
 		stat.Open += dayStat.Open
 	}
 
-	a, _ := bs.GetAppIconAndCategory([]string{appName})
+	a, _ := bs.GetAppIconCategoryAndCmdLine([]string{appName})
 
 	result.AppInfo = a[0]
 	result.AppInfo.AppName = appName

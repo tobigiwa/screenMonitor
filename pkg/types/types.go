@@ -14,7 +14,17 @@ type Message struct {
 	WeekStatResponse WeekStatMessage `json:"weekStatResponse"`
 	AppStatRequest   AppStatRequest  `json:"appStatResquest"`
 	AppStatResponse  AppStatMessage  `json:"appStatResponse"`
+	ReminderRequest  Task            `json:"reminderRequest"`
+	ReminderResponse ReminderMessage `json:"reminderResponse"`
 }
+
+type ReminderMessage struct {
+	Task           Task  `json:"task"`
+	CreatedNewTask bool  `json:"createdNewTask"`
+	IsError        bool  `json:"isError"`
+	Error          error `json:"error"`
+}
+
 type WeekStatMessage struct {
 	Keys            [7]string           `json:"keys"`
 	FormattedDay    [7]string           `json:"formattedDay"`
@@ -123,6 +133,6 @@ type TaskType string
 type TaskTime struct {
 	StartTime           time.Time `json:"startTime"`
 	EndTime             time.Time `json:"endTime"`
-	AlertTimesInMinutes [3]int  `json:"alertTimesInMinutes"`
+	AlertTimesInMinutes [3]int    `json:"alertTimesInMinutes"`
 	AlertSound          [3]bool   `json:"alertSound"`
 }

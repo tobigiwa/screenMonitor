@@ -86,3 +86,11 @@ func formatTimeToHumanReadable(t time.Time) string {
 func intToDuration(minutes int) time.Duration {
 	return time.Duration(minutes) * time.Minute
 }
+
+func FormatTimeTOHMTLDatetimeLocal(t time.Time) string {
+	return t.Format("2006-01-02T15:04")
+}
+
+func nextTwoWeeks() time.Time {
+	return time.Now().AddDate(0, 0, 15)
+}
