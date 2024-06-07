@@ -122,6 +122,7 @@ func treatMessage(c net.Conn) {
 			msg.AppStatResponse = ServiceInstance.getAppStat(msg)
 
 		case "createReminder":
+			fmt.Println("create reminder message received")
 			msg.ReminderResponse = ServiceInstance.createReminder(msg)
 
 		}

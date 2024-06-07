@@ -61,6 +61,9 @@ func DaemonServiceLinux() {
 		<-signal1
 		close(signal1)
 
+		monitor.Db.DeleteBucket("tasks")
+
+		// monitor.Db.UpdateOpertionOnBuCKET("app", database.DeleteCmdOnAppInfo)
 		xevent.Quit(monitor.X11Connection)
 		service.SocketConn.Close()
 		service.ServiceInstance.StopTaskManger()

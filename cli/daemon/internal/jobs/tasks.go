@@ -34,9 +34,10 @@ func (tm *TaskManager) StartTaskManger() error {
 			if err := tm.dbHandle.RemoveTask(task.UUID); err != nil {
 				fmt.Printf("err deleting old task: %+v : %v\n\n", task, err)
 			}
+			fmt.Printf("task is in thhe past deleted: %+v\n\n", task)
 			continue
 		}
-		tm.Channel <- task
+		tm.channel <- task
 	}
 
 	return nil
@@ -46,21 +47,22 @@ func (tm *TaskManager) SendTaskToTaskManager(task types.Task) error {
 	if err := tm.dbHandle.AddTask(task); err != nil {
 		return fmt.Errorf("error adding task: %w", err)
 	}
-	tm.Channel <- task
+	fmt.Println("waiting for task to be added to task manager")
+	tm.channel <- task
 	return nil
 }
 
 type TaskManager struct {
 	dbHandle TaskManagerDbRequirement
 	gocron   gocron.Scheduler
-	Channel  chan types.Task
+	channel  chan types.Task
 }
 
 func NewTaskManger(dbHandle TaskManagerDbRequirement) *TaskManager {
 	var tm TaskManager
 	tm.dbHandle = dbHandle
 	tm.gocron, _ = gocron.NewScheduler()
-	tm.Channel = make(chan types.Task)
+	tm.channel = make(chan types.Task)
 	return &tm
 }
 
@@ -69,7 +71,7 @@ func (tm *TaskManager) CloseChan() error {
 		fmt.Println("error shutting down gocron Scheduler:", err)
 		return err
 	}
-	tm.Channel <- types.Task{}
+	tm.channel <- types.Task{}
 	return nil
 }
 
@@ -77,15 +79,18 @@ func (tm *TaskManager) disperseTask() {
 
 	tm.gocron.Start()
 	for {
-		task := <-tm.Channel
+		task := <-tm.channel
+		fmt.Printf("task received: %+v\n", task)
 
 		if reflect.ValueOf(task).IsZero() {
-			close(tm.Channel)
+			close(tm.channel)
+			fmt.Println("closing and cleaning TaskManager")
 			break
 		}
 
 		switch task.Job {
 		case types.ReminderWithNoAction:
+			fmt.Println("it got here")
 			tm.createRemidersWithNoAction(task)
 
 		case types.ReminderWithAction:
@@ -93,18 +98,23 @@ func (tm *TaskManager) disperseTask() {
 
 		case types.Limit:
 		}
+		tm.gocron.Start()
 	}
 
 }
 
 func (tm *TaskManager) createRemidersWithNoAction(task types.Task) {
 	tm.reminders(task)
+	fmt.Println("reminder fired")
 
-	tm.gocron.NewJob(
+	j, err := tm.gocron.NewJob(
 		gocron.OneTimeJob(gocron.OneTimeJobStartDateTime(task.TaskTime.StartTime)),
 		gocron.NewTask(reminderFunc, task.UI, true),
 	)
-
+	if err != nil {
+		fmt.Println("error creating job", err)
+	}
+	fmt.Println(j.ID())
 }
 
 func (tm *TaskManager) createRemidersWithAction(task types.Task) {
@@ -136,11 +146,16 @@ func (tm *TaskManager) reminders(task types.Task) {
 	for i := 0; i < 2; i++ {
 		notifyBeForeReminder, withSound := task.TaskTime.AlertTimesInMinutes[i], task.TaskTime.AlertSound[i]
 		t := task.TaskTime.StartTime.Add(-time.Duration(notifyBeForeReminder) * time.Minute)
+		fmt.Print(t.Date())
+		fmt.Print(t.Clock())
+		fmt.Println()
 
-		if j, err := tm.gocron.NewJob(
+		_, err := tm.gocron.NewJob(
 			gocron.OneTimeJob(gocron.OneTimeJobStartDateTime(t)),
-			gocron.NewTask(reminderFunc, task.UI, withSound)); err != nil {
-			fmt.Println("gocron failed to add notififcation", j.ID())
+			gocron.NewTask(reminderFunc, task.UI, withSound))
+
+		if err != nil {
+			fmt.Println("gocron failed to add notififcation")
 		}
 	}
 }
@@ -149,7 +164,9 @@ func reminderFunc(task types.UItextInfo, withSound bool) {
 	title := "Reminder: task.UI.Title"
 	if withSound {
 		beeep.Alert(title, task.Subtitle, "")
+		fmt.Println("OUR WORK WAS DONE")
 		return
 	}
 	beeep.Notify(title, task.Subtitle, "")
+	fmt.Println("OUR WORK WAS DONE")
 }

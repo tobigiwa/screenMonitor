@@ -4,6 +4,7 @@ import (
 	"fmt"
 	helperFuncs "pkg/helper"
 	"pkg/types"
+	"time"
 
 	"github.com/BurntSushi/xgb/xproto"
 	badger "github.com/dgraph-io/badger/v4"
@@ -41,7 +42,7 @@ func (bs *BadgerDBStore) WriteUsage(data types.ScreenTime) error {
 		}
 
 		updateAppInfoForOldApp(data.WindowID, &app)
-		fmt.Printf("Existing appName:%v, time so far is: %v:%v:%v:%v\n\n", data.AppName, app.ScreenStat[Key()].Active, app.ScreenStat[Key()].Open, app.IsCmdLineSet, app.IsCategorySet)
+		fmt.Printf("Existing appName:%v, time so far is: %v:%v:%v:%v\n\n", data.AppName, app.ScreenStat[today()].Active, app.ScreenStat[today()].Open, app.IsCmdLineSet, app.IsCategorySet)
 		return updateAppStats(data, &app, txn)
 
 	})
@@ -49,24 +50,51 @@ func (bs *BadgerDBStore) WriteUsage(data types.ScreenTime) error {
 
 func updateAppStats(data types.ScreenTime, app *AppInfo, txn *badger.Txn) error {
 
-	switch stat := app.ScreenStat[Key()]; data.Type {
-	case types.Active:
-		stat.Active += data.Duration
-		stat.ActiveTimeData = append(stat.ActiveTimeData, data.Interval)
-		app.ScreenStat[Key()] = stat
-	case types.Inactive:
-		stat.Inactive += data.Duration
-		app.ScreenStat[Key()] = stat
-	case types.Open:
-		stat.Open += data.Duration
-		app.ScreenStat[Key()] = stat
+	todayStat, ok := app.ScreenStat[today()]
+
+	if !ok { // we live to see a new day!!! 😎😎😎
+		now := time.Now()
+		midnight := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+		durationToday := now.Sub(midnight)
+		yesterdayDuration := data.Duration - durationToday.Hours()
+
+		if yesterdayDuration > 0 {
+			updateYesterday(data.Type, app, yesterdayDuration)
+			data.Duration -= yesterdayDuration
+		}
 	}
+
+	switch data.Type {
+	case types.Active:
+		todayStat.Active += data.Duration
+		todayStat.ActiveTimeData = append(todayStat.ActiveTimeData, data.Interval)
+	case types.Inactive:
+		todayStat.Inactive += data.Duration
+	case types.Open:
+		todayStat.Open += data.Duration
+	}
+
+	app.ScreenStat[today()] = todayStat
 
 	byteData, err := helperFuncs.EncodeJSON(app)
 	if err != nil {
 		return err
 	}
 	return txn.Set(dbAppKey(data.AppName), byteData)
+}
+
+func updateYesterday(screenType types.ScreenType, app *AppInfo, yesterdayDuration float64) {
+
+	yesterdayStat := app.ScreenStat[yesterday()]
+	switch screenType {
+	case types.Active:
+		yesterdayStat.Active += yesterdayDuration
+	case types.Inactive:
+		yesterdayStat.Inactive += yesterdayDuration
+	case types.Open:
+		yesterdayStat.Open += yesterdayDuration
+	}
+	app.ScreenStat[yesterday()] = yesterdayStat
 }
 
 func addAppInfoForNewApp(windowId xproto.Window, app *AppInfo) {

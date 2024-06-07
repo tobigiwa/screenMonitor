@@ -1,7 +1,6 @@
 package monitoring
 
 import (
-	"fmt"
 	"log"
 	"pkg/types"
 	"time"
@@ -49,8 +48,8 @@ func (x11 *X11Monitor) rootPropertyNotifyHandler(x11Conn *xgbutil.XUtil, ev xeve
 					Interval: types.TimeInterval{Start: formerActiveWindow.TimeStamp, End: time.Now()},
 				}
 
-				fmt.Printf("New active window ID =====> %v:%v\ntime elapsed for last window %v:%v was %vsecs\n",
-					currActiveWindow, curSessionNamedWindow[currActiveWindow], formerActiveWindow.WindowID, curSessionNamedWindow[formerActiveWindow.WindowID], time.Since(netActiveWindow.TimeStamp).Seconds())
+				// fmt.Printf("New active window ID =====> %v:%v\ntime elapsed for last window %v:%v was %vsecs\n",
+				// 	currActiveWindow, curSessionNamedWindow[currActiveWindow], formerActiveWindow.WindowID, curSessionNamedWindow[formerActiveWindow.WindowID], time.Since(netActiveWindow.TimeStamp).Seconds())
 
 				// SETTING THE NEW _NET_ACTIVE_WINDOW
 				netActiveWindow.WindowID = currActiveWindow                                   // SET THE WINDOW ID

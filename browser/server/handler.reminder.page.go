@@ -95,11 +95,18 @@ func (a *App) CreateReminderHandler(w http.ResponseWriter, r *http.Request) {
 
 	task.UUID = uuid.New()
 	msg := types.Message{
-		Endpoint: strings.TrimPrefix(r.URL.Path, "/"),
+		Endpoint:        strings.TrimPrefix(r.URL.Path, "/"),
 		ReminderRequest: task,
 	}
-	a.writeAndReadWithDaemonService(msg)
-
+	res, err := a.writeAndReadWithDaemonService(msg)
+	if err != nil {
+		a.serverError(w, err)
+		return
+	}
+	if !res.ReminderResponse.CreatedNewTask {
+		a.serverError(w, fmt.Errorf("error creating reminder"))
+		return
+	}
 	http.Redirect(w, r, "/reminder", http.StatusSeeOther)
 }
 
