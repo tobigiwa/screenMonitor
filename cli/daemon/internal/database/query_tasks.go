@@ -14,15 +14,16 @@ import (
 
 func (bs *BadgerDBStore) getAllTasks() ([]types.Task, error) {
 	byteData, err := bs.Get(dbTaskKey())
+
 	if err != nil {
 		if errors.Is(err, badger.ErrKeyNotFound) {
 			if err = bs.db.Update(func(txn *badger.Txn) error {
-				byteData, _ := helperFuncs.EncodeJSON([]types.Task{})
-				return txn.Set(dbTaskKey(), byteData)
+				return txn.Set(dbTaskKey(), []byte{})
 			}); err != nil {
 				return nil, err
 			}
 		}
+
 		return nil, err
 	}
 
@@ -67,6 +68,10 @@ func (bs *BadgerDBStore) AddTask(task types.Task) error {
 	}
 
 	taskArry = append(taskArry, task)
+
+	slices.SortFunc(taskArry, func(a, b types.Task) int {
+		return a.TaskTime.StartTime.Compare(b.TaskTime.StartTime)
+	})
 
 	byteData, err := helperFuncs.EncodeJSON(taskArry)
 	if err != nil {

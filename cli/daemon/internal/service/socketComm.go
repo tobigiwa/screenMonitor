@@ -124,7 +124,8 @@ func treatMessage(c net.Conn) {
 		case "createReminder":
 			fmt.Println("create reminder message received")
 			msg.ReminderResponse = ServiceInstance.createReminder(msg)
-
+		case "allReminderTask":
+			msg.ReminderResponse = ServiceInstance.allReminderTask(msg)
 		}
 
 		bytes, err := helperFuncs.EncodeJSON(msg)

@@ -29,6 +29,7 @@ func (x11 *X11Monitor) rootPropertyNotifyHandler(x11Conn *xgbutil.XUtil, ev xeve
 
 			if formerActiveWindow := netActiveWindow; formerActiveWindow.WindowID != currActiveWindow { // this helps takes care of noise from tabs switch
 
+				
 				if formerActiveWindow.WindowID == xevent.NoWindow { // at first run i.e on boot
 					netActiveWindow.WindowID = currActiveWindow                                   // SET THE WINDOW ID
 					netActiveWindow.TimeStamp = time.Now()                                        // SET THE TIME

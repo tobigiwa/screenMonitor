@@ -6,6 +6,8 @@ import (
 	"fmt"
 	helperFuncs "pkg/helper"
 	"pkg/types"
+	"slices"
+	"time"
 )
 
 type Service struct {
@@ -140,6 +142,33 @@ func (s *Service) createReminder(msg types.Message) types.ReminderMessage {
 
 	return types.ReminderMessage{
 		CreatedNewTask: true,
+	}
+}
+
+func (s *Service) allReminderTask(msg types.Message) types.ReminderMessage {
+	
+	tasks, err := s.db.GetAllTask()
+	if err != nil {
+		return types.ReminderMessage{
+			IsError: true,
+			Error:   err}
+	}
+
+	validTask := make([]types.Task, 0, len(tasks))
+	for _, task := range tasks {
+		now, taskStartTime := time.Now(), task.TaskTime.StartTime
+		if taskStartTime.Before(now) {
+			if err := s.db.RemoveTask(task.UUID); err != nil {
+				return types.ReminderMessage{
+					IsError: true,
+					Error:   err}
+			}
+		}
+		validTask = append(validTask, task)
+
+	}
+	return types.ReminderMessage{
+		AllTask: slices.Clip(validTask),
 	}
 }
 

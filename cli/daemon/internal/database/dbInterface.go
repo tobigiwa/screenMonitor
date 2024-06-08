@@ -1,6 +1,10 @@
 package database
 
-import "pkg/types"
+import (
+	"pkg/types"
+
+	"github.com/google/uuid"
+)
 
 type IRepository interface {
 	WriteUsage(types.ScreenTime) error
@@ -14,4 +18,8 @@ type IRepository interface {
 	AppDateRangeStat(appName string, start, end types.Date) (types.AppRangeStat, error)
 	GetAppIconCategoryAndCmdLine([]string) ([]types.AppIconCategoryAndCmdLine, error)
 	UpdateOpertionOnBuCKET(dbPrefix string, opsFunc func([]byte) ([]byte, error)) error
+	GetTaskByAppName(appName string) ([]types.Task, error)
+	GetAllTask() ([]types.Task, error)
+	RemoveTask(id uuid.UUID) error
+	AddTask(task types.Task) error
 }

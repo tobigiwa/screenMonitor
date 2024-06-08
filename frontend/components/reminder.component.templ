@@ -40,6 +40,9 @@ templ reminderAndAlert(tasks []types.Task) {
 					<img src="assets/svg/add.svg" alt=""/>
 				</button>
 			</div>
+			if len(tasks) == 0 {
+				<div class="cards-holder" style="min-height: calc(100vh - 8rem); display: flex; justify-content: center; align-items: center; color:white">No reminder</div>
+			}
 			@reminderList(tasks)
 		</div>
 	</div>
@@ -47,37 +50,39 @@ templ reminderAndAlert(tasks []types.Task) {
 }
 
 templ reminderList(task []types.Task) {
-	<ul>
-		for _, t := range task {
-			<li>
-				<div class="card">
-					<div class="info">
-						<p class="title"><span class="label"><i>title:</i></span> <span class="content">{ t.UI.Title }</span></p>
-						<p class="subtitle"><span class="label"><i>subtitle:</i></span> <span class="content">{ t.UI.Subtitle }</span></p>
-						<details>
-							<summary><span class="label"><i>See attached note</i></span></summary>
-							<p>{ t.UI.Notes }</p>
-						</details>
-						<div class="action">would launch: <img src={ getImageFilePath(t.AppInfo.AppName, t.AppInfo.Icon) } alt=""/> { t.AppInfo.AppName }</div>
+	<div class="cards-holder">
+		<ul>
+			for _, t := range task {
+				<li>
+					<div class="card">
+						<div class="info">
+							<p class="title"><span class="label"><i>title:</i></span> <span class="content">{ t.UI.Title }</span></p>
+							<p class="subtitle"><span class="label"><i>subtitle:</i></span> <span class="content">{ t.UI.Subtitle }</span></p>
+							<details>
+								<summary><span class="label"><i>See attached note</i></span></summary>
+								<p>{ t.UI.Notes }</p>
+							</details>
+							<div class="action">would launch: <img src={ getImageFilePath(t.AppInfo.AppName, t.AppInfo.Icon) } alt=""/> { t.AppInfo.AppName }</div>
+						</div>
+						<div class="spacing">
+							<button class="edit-button">Edit</button>
+						</div>
+						<div class="alert">
+							<p class="start"><span class="label"><i>Starts:</i></span> <span class="content">{ formatTimeToHumanReadable(t.TaskTime.StartTime) }</span></p>
+							<p class="remind">
+								<span class="label"><i>reminder:</i></span>
+								<span class="content">{ formatTimeToHumanReadable(t.TaskTime.StartTime.Add(intToDuration(-t.TaskTime.AlertTimesInMinutes[0]))) }</span>
+							</p>
+							<p class="remind">
+								<span class="label"><i>reminder:</i></span>
+								<span class="content">{ formatTimeToHumanReadable(t.TaskTime.StartTime.Add(intToDuration(-t.TaskTime.AlertTimesInMinutes[1]))) }</span>
+							</p>
+						</div>
 					</div>
-					<div class="spacing">
-						<button class="edit-button">Edit</button>
-					</div>
-					<div class="alert">
-						<p class="start"><span class="label"><i>Starts:</i></span> <span class="content">{ formatTimeToHumanReadable(t.TaskTime.StartTime) }</span></p>
-						<p class="remind">
-							<span class="label"><i>reminder:</i></span>
-							<span class="content">{ formatTimeToHumanReadable(t.TaskTime.StartTime.Add(intToDuration(-t.TaskTime.AlertTimesInMinutes[0]))) }</span>
-						</p>
-						<p class="remind">
-							<span class="label"><i>reminder:</i></span>
-							<span class="content">{ formatTimeToHumanReadable(t.TaskTime.StartTime.Add(intToDuration(-t.TaskTime.AlertTimesInMinutes[1]))) }</span>
-						</p>
-					</div>
-				</div>
-			</li>
-		}
-	</ul>
+				</li>
+			}
+		</ul>
+	</div>
 }
 
 templ createNewReminderDialog() {

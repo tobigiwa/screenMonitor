@@ -19,10 +19,11 @@ type Message struct {
 }
 
 type ReminderMessage struct {
-	Task           Task  `json:"task"`
-	CreatedNewTask bool  `json:"createdNewTask"`
-	IsError        bool  `json:"isError"`
-	Error          error `json:"error"`
+	Task           Task   `json:"task"`
+	CreatedNewTask bool   `json:"createdNewTask"`
+	AllTask        []Task `json:"allTask"`
+	IsError        bool   `json:"isError"`
+	Error          error  `json:"error"`
 }
 
 type WeekStatMessage struct {

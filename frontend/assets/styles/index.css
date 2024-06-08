@@ -228,4 +228,11 @@ a {
             color: var(--white-color);
         }
     }
+
+    @media (max-width: 700px) {
+
+        .header-btn {
+            display: none;
+        }
+    }
 }

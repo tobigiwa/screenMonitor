@@ -80,6 +80,8 @@ func (bs *BadgerDBStore) DeleteBucket(dbPrefix string) error {
 		prefix = dbWeekPrefix
 	case "app":
 		prefix = dbAppPrefix
+	case "tasks":
+		prefix = dbTaskKey()
 	default:
 		return fmt.Errorf("no bucket of such key prefix - %s in the db", dbPrefix)
 	}
