@@ -11,7 +11,7 @@ import (
 )
 
 type Service struct {
-	db          db.IRepository
+	db          DatabaseInterface
 	taskManager *jobs.TaskManager
 }
 
@@ -146,7 +146,7 @@ func (s *Service) createReminder(msg types.Message) types.ReminderMessage {
 }
 
 func (s *Service) allReminderTask(msg types.Message) types.ReminderMessage {
-	
+
 	tasks, err := s.db.GetAllTask()
 	if err != nil {
 		return types.ReminderMessage{

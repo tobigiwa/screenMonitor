@@ -1,18 +1,20 @@
-package database
+package service
 
 import (
 	"pkg/types"
 
+	db "LiScreMon/cli/daemon/internal/database"
+
 	"github.com/google/uuid"
 )
 
-type IRepository interface {
+type DatabaseInterface interface {
 	WriteUsage(types.ScreenTime) error
 	Close() error
 	DeleteKey([]byte) error
 	DeleteBucket(dbPrefix string) error
-	GetDay(types.Date) (DailyStat, error)
-	GetWeek(string) (WeeklyStat, error)
+	GetDay(types.Date) (db.DailyStat, error)
+	GetWeek(string) (db.WeeklyStat, error)
 	AppWeeklyStat(appName string, anyDayInTheWeek types.Date) (types.AppRangeStat, error)
 	AppMonthlyStat(appName, month, year string) (types.AppRangeStat, error)
 	AppDateRangeStat(appName string, start, end types.Date) (types.AppRangeStat, error)
