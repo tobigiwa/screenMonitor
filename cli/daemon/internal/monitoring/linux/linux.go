@@ -44,7 +44,7 @@ func InitMonitoring(db *db.BadgerDBStore) X11Monitor {
 		CancelFunc:     cancel,
 		X11Connection:  x11Conn,
 		Db:             db,
-		timer:          time.NewTimer(time.Duration(10) * time.Second),
+		timer:          time.NewTimer(time.Duration(1) * time.Minute),
 		windowChangeCh: make(chan struct{}, 1),
 	}
 
