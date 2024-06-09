@@ -7,14 +7,12 @@ import (
 )
 
 func today() types.Date {
-	return types.Date(fmt.Sprint(time.Now().Format(types.TimeFormat)))
+	return types.Date(time.Now().Format(types.TimeFormat))
 }
 func yesterday() types.Date {
 	return types.Date(time.Now().AddDate(0, 0, -1).Format(types.TimeFormat))
 }
-func ParseKey(key types.Date) (time.Time, error) {
-	return time.Parse(types.TimeFormat, string(key))
-}
+
 
 var (
 	dbAppPrefix  = []byte("app:")

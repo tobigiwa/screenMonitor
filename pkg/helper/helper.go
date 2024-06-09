@@ -137,3 +137,27 @@ func IsFutureDate(t time.Time) bool {
 func ReturnNexWeektSaturday(saturday time.Time) string {
 	return saturday.AddDate(0, 0, 7).Format(types.TimeFormat)
 }
+
+func FormattedToDay() time.Time {
+	t, _ := ParseKey(types.Date(time.Now().Format(types.TimeFormat)))
+	return t
+}
+
+func AllTheDaysInMonth(year, month string) ([]types.Date, error) {
+	t, err := time.Parse("2006 January", year+" "+month)
+	if err != nil {
+		return nil, fmt.Errorf("parse %w", err)
+	}
+
+	fmt.Println(t.Day(), t.Month(), t.Year())
+	lastDayOfTheGivenMonth := time.Date(t.Year(), t.Month()+1, 0, 0, 0, 0, 0, t.Location()).Day()
+
+	dates := make([]types.Date, 0, lastDayOfTheGivenMonth)
+
+	for day := 1; day <= lastDayOfTheGivenMonth; day++ {
+		dates = append(dates, types.Date(time.Date(t.Year(), t.Month(), day, 0, 0, 0, 0, t.Location()).Format(types.TimeFormat)))
+	}
+
+	return dates, nil
+}
+

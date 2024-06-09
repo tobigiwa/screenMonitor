@@ -56,13 +56,13 @@ func (bs *BadgerDBStore) GetAppIconCategoryAndCmdLine(appNames []string) ([]type
 }
 
 func (bs *BadgerDBStore) AppWeeklyStat(appName string, anyDayInTheWeek types.Date) (types.AppRangeStat, error) {
-	date, _ := ParseKey(anyDayInTheWeek)
+	date, _ := helperFuncs.ParseKey(anyDayInTheWeek)
 	days := daysInThatWeek(date)
 	return bs.appRangeStat(appName, days[:])
 }
 
 func (bs *BadgerDBStore) AppMonthlyStat(appName, month, year string) (types.AppRangeStat, error) {
-	dates, err := AllTheDaysInMonth(year, month)
+	dates, err := helperFuncs.AllTheDaysInMonth(year, month)
 	if err != nil {
 		return types.AppRangeStat{}, err
 	}
@@ -70,8 +70,8 @@ func (bs *BadgerDBStore) AppMonthlyStat(appName, month, year string) (types.AppR
 }
 
 func (bs *BadgerDBStore) AppDateRangeStat(appName string, start, end types.Date) (types.AppRangeStat, error) {
-	startDate, _ := ParseKey(start)
-	endDate, _ := ParseKey(end)
+	startDate, _ := helperFuncs.ParseKey(start)
+	endDate, _ := helperFuncs.ParseKey(end)
 
 	if !endDate.After(startDate) {
 		return types.AppRangeStat{}, errors.New("end date is not after start date")

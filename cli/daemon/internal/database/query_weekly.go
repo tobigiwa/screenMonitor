@@ -14,7 +14,7 @@ import (
 func (bs *BadgerDBStore) GetWeek(day string) (WeeklyStat, error) {
 
 	anyDayInTheWeek := types.Date(day)
-	date, _ := ParseKey(anyDayInTheWeek)
+	date, _ := helperFuncs.ParseKey(anyDayInTheWeek)
 	if IsFutureWeek(date) {
 		return ZeroValueWeeklyStat, ErrFutureWeek
 	}
@@ -47,7 +47,7 @@ func (bs *BadgerDBStore) getWeeklyAppStat(anyDayInTheWeek types.Date) (WeeklySta
 		tmpStorage = make(map[string]types.Stats, 20)
 	)
 
-	date, _ := ParseKey(anyDayInTheWeek)
+	date, _ := helperFuncs.ParseKey(anyDayInTheWeek)
 	allConcernedDays := daysInThatWeek(date)
 
 	err := bs.db.View(func(txn *badger.Txn) error {

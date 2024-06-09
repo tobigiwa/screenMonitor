@@ -13,7 +13,7 @@ import (
 
 func (bs *BadgerDBStore) GetDay(date types.Date) (DailyStat, error) {
 
-	if day, _ := ParseKey(date); day.After(formattedToDay()) {
+	if day, _ := helperFuncs.ParseKey(date); day.After(helperFuncs.FormattedToDay()) {
 		return ZeroValueDailyStat, ErrFutureDay
 	}
 
@@ -99,7 +99,7 @@ func (bs *BadgerDBStore) getDailyAppStat(day types.Date) (DailyStat, error) {
 	result.DayTotal.Open = dayTotalData.Open
 	result.EachApp = arr
 
-	if day != types.Date(formattedToDay().Format(types.TimeFormat)) {
+	if day != today() {
 		byteData, _ := helperFuncs.EncodeJSON(result)
 		err := bs.updateKeyValue(dbDayKey(day), byteData)
 		if err != nil {
