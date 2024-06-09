@@ -155,7 +155,7 @@ func (bs *BadgerDBStore) UpdateOpertionOnBuCKET(dbPrefix string, opsFunc func([]
 	return nil
 }
 
-func exampleOf_opsFunc(v []byte) ([]byte, error) {
+func ExampleOf_opsFunc(v []byte) ([]byte, error) {
 	var (
 		app AppInfo
 		err error
@@ -164,9 +164,9 @@ func exampleOf_opsFunc(v []byte) ([]byte, error) {
 	if app, err = helperFuncs.DecodeJSON[AppInfo](v); err != nil {
 		return nil, err
 	}
-	fmt.Println(app.AppName, "cmdLine-", app.CmdLine, "categories-", app.DesktopCategories)
-	app.IsCmdLineSet = false
-	app.CmdLine = ""
-
+	// fmt.Println(app.AppName, "cmdLine-", app.CmdLine, "categories-", app.DesktopCategories)
+	// app.IsIconSet = false
+	// app.Icon = nil
+	fmt.Println(app.AppName, app.IsIconSet)
 	return helperFuncs.EncodeJSON(app)
 }

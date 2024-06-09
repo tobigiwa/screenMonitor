@@ -45,27 +45,32 @@ func DaemonServiceLinux() {
 	slog.SetDefault(logger)
 
 	// database
-	db, err := db.NewBadgerDb(configDir + "/badgerDB/")
+	badgerDB, err := db.NewBadgerDb(configDir + "/badgerDB/")
 	if err != nil {
 		log.Fatal(err) // exit
 	}
 
-	monitor := monitoring.InitMonitoring(db)
+	monitor := monitoring.InitMonitoring(badgerDB)
 
 	signal1 := make(chan os.Signal, 1)
 	signal.Notify(signal1, os.Interrupt, syscall.SIGTERM)
 
-	go service.StartService(socketDir, db)
+	go service.StartService(socketDir, badgerDB)
 
 	go func() {
 		<-signal1
 		close(signal1)
 
-		// monitor.Db.DeleteBucket("tasks")
+		// err := monitor.Db.UpdateOpertionOnBuCKET("app", db.ExampleOf_opsFunc)
+		// if err != nil {
+		// 	fmt.Println("opt failed", err)
+		// }
 
-		xevent.Quit(monitor.X11Connection)
-		service.SocketConn.Close()
-		service.ServiceInstance.StopTaskManger()
+		xevent.Quit(monitor.X11Connection)       // this should always comes first
+		service.ServiceInstance.StopTaskManger() // a different goroutine for managing task fired from service
+		monitor.CancelFunc()                     // a different goroutine for managing backing up app usage every minute, fired from monitor
+		monitor.CloseWindowChangeCh()            // a different goroutine,closes a channel, this should be after monitor.CancelFunc()
+		// service.SocketConn.Close()
 		monitor.Db.Close()
 
 		os.Exit(0)

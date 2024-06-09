@@ -49,14 +49,15 @@ func writeImageToFile(imageData []byte, filename string) bool {
 		file      *os.File
 		err       error
 	)
-	if _, err = os.Stat(tmpFolder); err != nil {
-		if errors.Is(err, fs.ErrNotExist) {
-			if err = os.MkdirAll(tmpFolder, 0755); err != nil {
-				return false
-			}
-			return false
-		}
+	_, err = os.Stat(tmpFolder)
+	if err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return false
 	}
+
+	if err = os.MkdirAll(tmpFolder, 0755); err != nil {
+		return false
+	}
+	
 	if file, err = os.Create(tmpFolder + filename + ".png"); err != nil {
 		return false
 	}
@@ -71,7 +72,7 @@ func writeImageToFile(imageData []byte, filename string) bool {
 
 func getImageFilePath(filename string, imageData []byte) string {
 	if _, err := os.Stat("/tmp/LiScreMon/" + filename + ".png"); err != nil {
-		if writeImageToFile([]byte{}, filename) {
+		if writeImageToFile(imageData, filename) {
 			return "/tmp/LiScreMon/" + filename + ".png"
 		}
 		return "/assets/image/noAppImage.jpg"

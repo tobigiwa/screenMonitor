@@ -1,6 +1,7 @@
 package monitoring
 
 import (
+	"context"
 	"pkg/types"
 	"sync"
 	"time"
@@ -20,10 +21,15 @@ type DoNotCopy [0]sync.Mutex
 
 type x11DBInterface interface {
 	WriteUsage(types.ScreenTime) error
+	UpdateOpertionOnBuCKET(dbPrefix string, opsFunc func([]byte) ([]byte, error)) error
 	Close() error
 }
 
 type X11Monitor struct {
-	X11Connection *xgbutil.XUtil
-	Db            x11DBInterface
+	ctx            context.Context
+	timer          *time.Timer
+	windowChangeCh chan struct{}
+	CancelFunc     context.CancelFunc
+	X11Connection  *xgbutil.XUtil
+	Db             x11DBInterface
 }

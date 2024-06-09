@@ -1,7 +1,7 @@
 package monitoring
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
@@ -38,9 +38,14 @@ func InitMonitoring(db *db.BadgerDBStore) X11Monitor {
 		break
 	}
 
+	ctx, cancel := context.WithCancel(context.Background())
 	monitor = X11Monitor{
-		X11Connection: x11Conn,
-		Db:            db,
+		ctx:            ctx,
+		CancelFunc:     cancel,
+		X11Connection:  x11Conn,
+		Db:             db,
+		timer:          time.NewTimer(time.Duration(10) * time.Second),
+		windowChangeCh: make(chan struct{}, 1),
 	}
 
 	setRootEventMask(x11Conn)
@@ -52,19 +57,15 @@ func InitMonitoring(db *db.BadgerDBStore) X11Monitor {
 		log.Fatal(err)
 	}
 
-	fmt.Println("len(windows)=====>>>>>:", len(windows))
 	for _, window := range windows {
-		name, err := getWindowClassName(x11Conn, window)
-		if err != nil {
-			continue
-		}
-		fmt.Printf("Opened windows:%d ==========>%s\n", window, name)
-
+		getWindowClassName(x11Conn, window)
 		registerWindowForEvents(window)
 	}
 
 	netActiveWindowAtom, netClientStackingAtom = neededAtom()[0], neededAtom()[1]
 	netActiveWindow.WindowID = xevent.NoWindow
+
+	go monitor.windowChangeTimerFunc()
 
 	return monitor
 }

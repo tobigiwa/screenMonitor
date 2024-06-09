@@ -97,7 +97,7 @@ templ chartHighlight(appDetails []types.ApplicationDetail, totalWeekUsage float6
 		<ul>
 			for _, app := range appDetails {
 				<li class="card" tabindex="10" hx-get={ string(templ.URL("/appStat?range=week&appName=" + app.AppInfo.AppName + "&start=" + anyDay)) } hx-swap="none" hx-select-oob="#echart:outerHTML">
-					if app.AppInfo.IsIconSet && writeImageToFile(app.AppInfo.Icon, app.AppInfo.AppName) {
+					if app.AppInfo.IsIconSet {
 						<img src={ getImageFilePath(app.AppInfo.AppName, app.AppInfo.Icon) } alt={ app.AppInfo.AppName } class="app-icon"/>
 					} else {
 						<img src="/assets/image/noAppImage.jpg" alt="noImage" class="app-icon"/>

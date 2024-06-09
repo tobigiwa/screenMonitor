@@ -69,10 +69,6 @@ func (bs *BadgerDBStore) AddTask(task types.Task) error {
 
 	taskArry = append(taskArry, task)
 
-	slices.SortFunc(taskArry, func(a, b types.Task) int {
-		return a.TaskTime.StartTime.Compare(b.TaskTime.StartTime)
-	})
-
 	byteData, err := helperFuncs.EncodeJSON(taskArry)
 	if err != nil {
 		return err
