@@ -161,3 +161,6 @@ func AllTheDaysInMonth(year, month string) ([]types.Date, error) {
 	return dates, nil
 }
 
+func ValidDateType(s string) bool {
+	return types.DateTypeRegexPattern.MatchString(s)
+}

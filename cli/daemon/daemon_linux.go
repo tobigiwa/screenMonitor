@@ -67,15 +67,14 @@ func DaemonServiceLinux() {
 		// }
 
 		xevent.Quit(monitor.X11Connection)       // this should always comes first
-		service.ServiceInstance.StopTaskManger() // a different goroutine for managing task fired from service
 		monitor.CancelFunc()                     // a different goroutine for managing backing up app usage every minute, fired from monitor
 		monitor.CloseWindowChangeCh()            // a different goroutine,closes a channel, this should be after monitor.CancelFunc()
+		service.ServiceInstance.StopTaskManger() // a different goroutine for managing taskManager, fired from service
 		service.SocketConn.Close()
 		monitor.Db.Close()
 
 		os.Exit(0)
 	}()
 
-	// Start the event loop.
-	xevent.Main(monitor.X11Connection)
+	xevent.Main(monitor.X11Connection) // Start the event loop.
 }

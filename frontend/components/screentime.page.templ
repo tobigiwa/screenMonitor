@@ -17,3 +17,7 @@ templ WeekStatTempl(chart template.HTML, totalWeekUsage float64, appDetails []ty
 templ AppStatTempl(chart template.HTML, info types.AppIconCategoryAndCmdLine) {
 	@chartWrapper(chart, info)
 }
+
+templ DayStatTempl(chart template.HTML, data []types.AppStat) {
+	@chartWrapper(chart, types.NoAppIconCategoryAndCmdLine)
+}

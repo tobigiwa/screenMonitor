@@ -39,7 +39,7 @@ func (bs *BadgerDBStore) getDailyAppStat(day types.Date) (DailyStat, error) {
 	var (
 		result       DailyStat
 		dayTotalData types.Stats
-		arr          = make([]AppStat, 0, 20)
+		arr          = make([]types.AppStat, 0, 20)
 	)
 
 	err := bs.db.View(func(txn *badger.Txn) error {
@@ -55,7 +55,7 @@ func (bs *BadgerDBStore) getDailyAppStat(day types.Date) (DailyStat, error) {
 
 				var (
 					app            AppInfo
-					appStatArrData AppStat
+					appStatArrData types.AppStat
 					err            error
 				)
 
@@ -90,7 +90,7 @@ func (bs *BadgerDBStore) getDailyAppStat(day types.Date) (DailyStat, error) {
 		return ZeroValueDailyStat, err
 	}
 
-	slices.SortFunc(arr, func(a, b AppStat) int {
+	slices.SortFunc(arr, func(a, b types.AppStat) int {
 		return cmp.Compare(b.Usage.Active, a.Usage.Active)
 	})
 

@@ -42,7 +42,7 @@ func (bs *BadgerDBStore) WriteUsage(data types.ScreenTime) error {
 		}
 
 		updateAppInfoForOldApp(data.WindowID, &app)
-		fmt.Printf("Existing appName:%v, time so far is: %v:%v:%v:%v\n\n", data.AppName, app.ScreenStat[today()].Active, app.ScreenStat[today()].Open, app.IsCmdLineSet, app.IsCategorySet)
+		fmt.Printf("Existing appName:%v, time so far is: %v:%v, brought in %f\n\n", data.AppName, app.ScreenStat[today()].Active, app.ScreenStat[today()].Open, data.Duration)
 		return updateAppStats(data, &app, txn)
 
 	})

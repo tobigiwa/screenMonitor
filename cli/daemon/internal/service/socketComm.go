@@ -121,9 +121,12 @@ func treatMessage(c net.Conn) {
 		case "appStat":
 			msg.AppStatResponse = ServiceInstance.getAppStat(msg)
 
+		case "dayStat":
+			msg.DayStatResponse = ServiceInstance.getDayStat(msg)
+
 		case "createReminder":
-			fmt.Println("create reminder message received")
 			msg.ReminderResponse = ServiceInstance.createReminder(msg)
+
 		case "allReminderTask":
 			msg.ReminderResponse = ServiceInstance.allReminderTask(msg)
 		}

@@ -7,6 +7,7 @@ import (
 	helperFuncs "pkg/helper"
 	"pkg/types"
 	"slices"
+	"strings"
 	"time"
 )
 
@@ -27,9 +28,7 @@ func (s *Service) getWeekStat(msg types.Message) types.WeekStatMessage {
 	)
 
 	if weekStat, err = s.db.GetWeek(msg.WeekStatRequest); err != nil {
-		return types.WeekStatMessage{
-			IsError: true,
-			Error:   fmt.Errorf("error weekStat: %w", err)}
+		return types.WeekStatMessage{IsError: true, Error: fmt.Errorf("error weekStat: %w", err)}
 	}
 
 	var (
@@ -54,9 +53,7 @@ func (s *Service) getWeekStat(msg types.Message) types.WeekStatMessage {
 	}
 
 	if appsInfo, err = s.db.GetAppIconCategoryAndCmdLine(appNameInTheWeek); err != nil {
-		return types.WeekStatMessage{
-			IsError: true,
-			Error:   fmt.Errorf("err with GetAppIconAndCategory:%w", err)}
+		return types.WeekStatMessage{IsError: true, Error: fmt.Errorf("err with GetAppIconAndCategory:%w", err)}
 	}
 
 	for i := 0; i < sizeOfApps; i++ {
@@ -91,10 +88,7 @@ func (s *Service) getAppStat(msg types.Message) types.AppStatMessage {
 
 	if err != nil {
 		fmt.Println("error weekStat:", err)
-		return types.AppStatMessage{
-			IsError: true,
-			Error:   err,
-		}
+		return types.AppStatMessage{IsError: true, Error: err}
 	}
 
 	var (
@@ -126,18 +120,14 @@ func (s *Service) createReminder(msg types.Message) types.ReminderMessage {
 	if task.Job == types.ReminderWithAction {
 		appInfo, err := s.db.GetAppIconCategoryAndCmdLine([]string{task.AppInfo.AppName})
 		if err != nil {
-			return types.ReminderMessage{
-				IsError: true,
-				Error:   err}
+			return types.ReminderMessage{IsError: true, Error: err}
 		}
 		task.AppInfo = appInfo[0]
 	}
 
 	err := s.taskManager.SendTaskToTaskManager(task)
 	if err != nil {
-		return types.ReminderMessage{
-			IsError: true,
-			Error:   err}
+		return types.ReminderMessage{IsError: true, Error: err}
 	}
 
 	return types.ReminderMessage{
@@ -149,9 +139,7 @@ func (s *Service) allReminderTask(msg types.Message) types.ReminderMessage {
 
 	tasks, err := s.db.GetAllTask()
 	if err != nil {
-		return types.ReminderMessage{
-			IsError: true,
-			Error:   err}
+		return types.ReminderMessage{IsError: true, Error: err}
 	}
 
 	validTask := make([]types.Task, 0, len(tasks))
@@ -159,17 +147,25 @@ func (s *Service) allReminderTask(msg types.Message) types.ReminderMessage {
 		now, taskStartTime := time.Now(), task.TaskTime.StartTime
 		if taskStartTime.Before(now) {
 			if err := s.db.RemoveTask(task.UUID); err != nil {
-				return types.ReminderMessage{
-					IsError: true,
-					Error:   err}
+				return types.ReminderMessage{IsError: true, Error: err}
 			}
 		}
 		validTask = append(validTask, task)
 
 	}
-	return types.ReminderMessage{
-		AllTask: slices.Clip(validTask),
+	return types.ReminderMessage{AllTask: slices.Clip(validTask)}
+}
+
+func (s *Service) getDayStat(msg types.Message) types.DayStatMessage {
+	dayStat, err := s.db.GetDay(msg.DayStatRequest)
+	if err != nil {
+		return types.DayStatMessage{IsError: true, Error: err}
 	}
+	d, _ := helperFuncs.ParseKey(msg.DayStatRequest)
+	date := fmt.Sprintf("%s. %s %s, %d", strings.TrimSuffix(d.Weekday().String(), "day"), helperFuncs.AddOrdinalSuffix(d.Day()), d.Month().String(), d.Year())
+
+	return types.DayStatMessage{EachApp: dayStat.EachApp, DayTotal: dayStat.DayTotal, Date: date}
+
 }
 
 // func savePNGImage(filename string, bytes []byte) error {

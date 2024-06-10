@@ -12,7 +12,13 @@ import (
 func AppStatBarChart(data BarChartData) template.HTML {
 	bar := charts.NewBar()
 
-	bar.Renderer = newchartRenderer(bar, bar.Validate)
+	 
+
+	bar.Renderer = newchartRenderer(
+		bar, 
+		"appStat",
+		fmt.Sprintf(baseTpl, barChartOptions),
+		bar.Validate)
 
 	bar.SetGlobalOptions(charts.WithInitializationOpts(
 		opts.Initialization{AssetsHost: "/assets/libraries/"},
@@ -58,7 +64,7 @@ func AppStatBarChart(data BarChartData) template.HTML {
 		}),
 	)
 	bar.SetXAxis(data.XAxis).
-		AddSeries(fmt.Sprintf("%sUptime", data.AppName+" "), generateBarItems(data.YAxis, data.XAxis)).SetSeriesOptions()
+		AddSeries(fmt.Sprintf("%sUptime", data.AppName+" "), barItems(data.YAxis, data.XAxis)).SetSeriesOptions()
 
 	return renderToHtml(bar)
 }

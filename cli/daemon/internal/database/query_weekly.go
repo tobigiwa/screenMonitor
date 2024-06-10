@@ -93,12 +93,12 @@ func (bs *BadgerDBStore) getWeeklyAppStat(anyDayInTheWeek types.Date) (WeeklySta
 	}
 
 	size := len(tmpStorage)
-	eachAppSlice := make([]AppStat, 0, size)
+	eachAppSlice := make([]types.AppStat, 0, size)
 	for app, stat := range tmpStorage {
-		eachAppSlice = append(eachAppSlice, AppStat{app, stat})
+		eachAppSlice = append(eachAppSlice, types.AppStat{AppName: app, Usage: stat})
 	}
 
-	slices.SortFunc(eachAppSlice, func(a, b AppStat) int {
+	slices.SortFunc(eachAppSlice, func(a, b types.AppStat) int {
 		return cmp.Compare(b.Usage.Active, a.Usage.Active)
 	})
 

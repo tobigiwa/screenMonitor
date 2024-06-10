@@ -10,6 +10,8 @@ import (
 type Message struct {
 	Endpoint         string          `json:"endpoint"`
 	StatusCheck      string          `json:"statusCheck"`
+	DayStatRequest   Date            `json:"dayStatRequest"`
+	DayStatResponse  DayStatMessage  `json:"dayStatResponse"`
 	WeekStatRequest  string          `json:"weekStatRequest"`
 	WeekStatResponse WeekStatMessage `json:"weekStatResponse"`
 	AppStatRequest   AppStatRequest  `json:"appStatResquest"`
@@ -36,6 +38,14 @@ type WeekStatMessage struct {
 	AppDetail       []ApplicationDetail `json:"appDetail"`
 	IsError         bool                `json:"isError"`
 	Error           error               `json:"error"`
+}
+
+type DayStatMessage struct {
+	EachApp  []AppStat `json:"eachApp"`
+	DayTotal Stats     `json:"dayTotal"`
+	Date     string    `josn:"date"`
+	IsError  bool      `json:"isError"`
+	Error    error     `json:"error"`
 }
 
 type AppStatRequest struct {
@@ -84,6 +94,11 @@ type AppRangeStat struct {
 	AppInfo    AppIconCategoryAndCmdLine      `json:"appInfo"`
 	DaysRange  []GenericKeyValue[Date, Stats] `json:"daysRange"`
 	TotalRange Stats                          `json:"totalRange"`
+}
+
+type AppStat struct {
+	AppName string `json:"appName"`
+	Usage   Stats  `json:"usage"`
 }
 
 type (
