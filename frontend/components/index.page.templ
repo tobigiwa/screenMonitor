@@ -30,7 +30,7 @@ templ IndexPage() {
 templ screentime() {
 	<div class="main">
 		@Header()
-		@chartWrapper("", types.NoAppIconAndCategory)
+		@chartWrapper("", types.NoAppIconCategoryAndCmdLine)
 		@chartControls()
 		@chartHighlight(nil, 0, "")
 	</div>
@@ -41,7 +41,12 @@ templ chartWrapper(chart template.HTML, info types.AppIconCategoryAndCmdLine) {
 		<div id="echart" hx-swap-oob="true">
 			@templ.Raw(chart)
 			if !reflect.ValueOf(info).IsZero() {
-				<img src={ getImageFilePath(info.AppName, info.Icon) } alt={ info.AppName } class="appIcon"/>
+				// accounting for weekStat, which does not need an icon...
+				if info.IsIconSet {
+					<img src={ getImageFilePath(info.AppName, info.Icon) } alt={ info.AppName } class="appIcon"/>
+				} else {
+					<img src="/assets/image/noAppImage.jpg" alt="noImage" class="appIcon"/>
+				}
 			}
 		</div>
 	</div>

@@ -44,6 +44,10 @@ func monthDropDownSelectArray(n int) []string {
 }
 
 func writeImageToFile(imageData []byte, filename string) bool {
+
+	if len(imageData) == 0 {
+		return false
+	}
 	var (
 		tmpFolder = "/tmp/LiScreMon/"
 		file      *os.File
@@ -57,7 +61,7 @@ func writeImageToFile(imageData []byte, filename string) bool {
 	if err = os.MkdirAll(tmpFolder, 0755); err != nil {
 		return false
 	}
-	
+
 	if file, err = os.Create(tmpFolder + filename + ".png"); err != nil {
 		return false
 	}

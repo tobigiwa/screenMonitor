@@ -70,7 +70,7 @@ func DaemonServiceLinux() {
 		service.ServiceInstance.StopTaskManger() // a different goroutine for managing task fired from service
 		monitor.CancelFunc()                     // a different goroutine for managing backing up app usage every minute, fired from monitor
 		monitor.CloseWindowChangeCh()            // a different goroutine,closes a channel, this should be after monitor.CancelFunc()
-		// service.SocketConn.Close()
+		service.SocketConn.Close()
 		monitor.Db.Close()
 
 		os.Exit(0)

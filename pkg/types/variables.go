@@ -3,8 +3,8 @@ package types
 import "fmt"
 
 var (
-	NoMessage            = Message{}
-	NoAppIconAndCategory = AppIconCategoryAndCmdLine{}
+	NoMessage                   = Message{}
+	NoAppIconCategoryAndCmdLine = AppIconCategoryAndCmdLine{}
 )
 
 var (

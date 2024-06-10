@@ -3,6 +3,7 @@ package jobs
 import (
 	"fmt"
 	"log"
+	"os"
 	"os/exec"
 	"pkg/types"
 	"reflect"
@@ -12,6 +13,8 @@ import (
 	"github.com/go-co-op/gocron/v2"
 	"github.com/google/uuid"
 )
+
+var appLogo = ""
 
 type TaskManagerDbRequirement interface {
 	GetTaskByAppName(appName string) ([]types.Task, error)
@@ -76,10 +79,15 @@ func (tm *TaskManager) StartTaskManger() error {
 
 func (tm *TaskManager) disperseTask() {
 
+	// config directory
+	homeDir, _ := os.UserHomeDir()
+	configDir := homeDir + "/liScreMon/"
+	appLogo = configDir + "liscremon.jpeg"
+
 	tm.gocron.Start()
 	for {
 		task := <-tm.channel
-		fmt.Printf("task received: %+v\n", task)
+		fmt.Printf("task received   %+v\n\n", task)
 
 		if reflect.ValueOf(task).IsZero() {
 			close(tm.channel)
@@ -157,18 +165,18 @@ func taskReminderFunc(taskTitle string, durationbeforeTask int, withSound bool) 
 	title := fmt.Sprintf("%d Minutes to your task", durationbeforeTask)
 	if withSound {
 
-		beeep.Alert(title, taskTitle, "")
+		beeep.Alert(title, taskTitle, appLogo)
 		return
 	}
-	beeep.Notify(title, taskTitle, "")
+	beeep.Notify(title, taskTitle, appLogo)
 }
 
 func taskFunc(task types.UItextInfo, withSound bool) {
 	title := fmt.Sprintf("Reminder: %s", task.Title)
 	if withSound {
 
-		beeep.Alert(title, task.Subtitle, "")
+		beeep.Alert(title, task.Subtitle, appLogo)
 		return
 	}
-	beeep.Notify(title, task.Subtitle, "")
+	beeep.Notify(title, task.Subtitle, appLogo)
 }

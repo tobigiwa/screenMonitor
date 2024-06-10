@@ -164,9 +164,6 @@ func ExampleOf_opsFunc(v []byte) ([]byte, error) {
 	if app, err = helperFuncs.DecodeJSON[AppInfo](v); err != nil {
 		return nil, err
 	}
-	// fmt.Println(app.AppName, "cmdLine-", app.CmdLine, "categories-", app.DesktopCategories)
-	// app.IsIconSet = false
-	// app.Icon = nil
-	fmt.Println(app.AppName, app.IsIconSet)
+	fmt.Println(app.AppName, app.IsCategorySet, app.DesktopCategories)
 	return helperFuncs.EncodeJSON(app)
 }

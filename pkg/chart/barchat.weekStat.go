@@ -61,7 +61,6 @@ func WeekStatBarChart(data BarChartData) template.HTML {
 			},
 		}),
 	)
-	// bar.AddJSFuncStrs(opts.FuncOpts(aaa))
 	bar.SetXAxis(data.XAxis).
 		AddSeries("Daily uptime", generateBarItems(data.YAxis, data.XAxis)).SetSeriesOptions()
 	return renderToHtml(bar)

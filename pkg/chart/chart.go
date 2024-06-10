@@ -32,6 +32,12 @@ const baseTpl = `
 	});
 
 	goecharts_{{ .ChartID | safeJS }}.setOption(%s);
+
+	goecharts_{{ .ChartID | safeJS }}.on('click', function (params) {
+		const thatDay = goecharts_{{ .ChartID | safeJS }}.getOption().legend[0].data[params.dataIndex]
+		console.log(thatDay)
+	});
+	
 </script>`
 
 const firstOption = `{
