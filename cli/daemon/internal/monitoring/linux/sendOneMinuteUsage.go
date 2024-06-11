@@ -1,6 +1,7 @@
 package monitoring
 
 import (
+	"context"
 	"log"
 	"pkg/types"
 	"time"
@@ -8,26 +9,20 @@ import (
 	"github.com/BurntSushi/xgbutil/xevent"
 )
 
-func (x11 *X11Monitor) windowChangeTimerFunc() {
-	defer func() {
-		if !x11.timer.Stop() {
-			<-x11.timer.C
-		}
-	}()
-
+func (x11 *X11Monitor) WindowChangeTimerFunc(ctx context.Context, timer *time.Timer) {
 	for {
 		select {
-		case <-x11.ctx.Done():
+		case <-ctx.Done():
 			return
 
 		case <-x11.windowChangeCh:
-			if !x11.timer.Stop() {
-				<-x11.timer.C
+			if !timer.Stop() {
+				<-timer.C
 			}
-			x11.timer.Reset(time.Duration(1) * time.Minute)
+			timer.Reset(time.Duration(1) * time.Minute)
 
-		case <-x11.timer.C:
-			x11.timer.Reset(time.Duration(1) * time.Minute)
+		case <-timer.C:
+			timer.Reset(time.Duration(1) * time.Minute)
 			x11.SendOneMinuteUsage()
 		}
 	}
@@ -39,8 +34,8 @@ func (x11 *X11Monitor) SendOneMinuteUsage() {
 		return
 	}
 
-	timeSoFar := time.Since(netActiveWindow.TimeStamp).Hours()
-	timeStartTimeStamp := netActiveWindow.TimeStamp
+	oneMinuteUsage := time.Since(netActiveWindow.TimeStamp).Hours()
+	oneMinuteTimeStamp := netActiveWindow.TimeStamp
 
 	netActiveWindow.TimeStamp = time.Now()
 
@@ -48,8 +43,8 @@ func (x11 *X11Monitor) SendOneMinuteUsage() {
 		WindowID: netActiveWindow.WindowID,
 		AppName:  netActiveWindow.WindowName,
 		Type:     types.Active,
-		Duration: timeSoFar,
-		Interval: types.TimeInterval{Start: timeStartTimeStamp, End: time.Now()},
+		Duration: oneMinuteUsage,
+		Interval: types.TimeInterval{Start: oneMinuteTimeStamp, End: time.Now()},
 	}); err != nil {
 		log.Fatalf("write to db error:%v", err)
 	}

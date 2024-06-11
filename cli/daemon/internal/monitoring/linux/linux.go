@@ -1,7 +1,6 @@
 package monitoring
 
 import (
-	"context"
 	"log"
 	"time"
 
@@ -38,13 +37,9 @@ func InitMonitoring(db *db.BadgerDBStore) X11Monitor {
 		break
 	}
 
-	ctx, cancel := context.WithCancel(context.Background())
 	monitor = X11Monitor{
-		ctx:            ctx,
-		CancelFunc:     cancel,
 		X11Connection:  x11Conn,
 		Db:             db,
-		timer:          time.NewTimer(time.Duration(1) * time.Minute),
 		windowChangeCh: make(chan struct{}, 1),
 	}
 
@@ -64,8 +59,6 @@ func InitMonitoring(db *db.BadgerDBStore) X11Monitor {
 
 	netActiveWindowAtom, netClientStackingAtom = neededAtom()[0], neededAtom()[1]
 	netActiveWindow.WindowID = xevent.NoWindow
-
-	go monitor.windowChangeTimerFunc()
 
 	return monitor
 }

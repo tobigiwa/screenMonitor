@@ -87,7 +87,6 @@ func (tm *TaskManager) disperseTask() {
 	tm.gocron.Start()
 	for {
 		task := <-tm.channel
-		fmt.Printf("task received   %+v\n\n", task)
 
 		if reflect.ValueOf(task).IsZero() {
 			close(tm.channel)
@@ -95,6 +94,7 @@ func (tm *TaskManager) disperseTask() {
 			break
 		}
 
+		fmt.Printf("task received   %+v\n\n", task)
 		switch task.Job {
 		case types.ReminderWithNoAction:
 			tm.createRemidersWithNoAction(task)

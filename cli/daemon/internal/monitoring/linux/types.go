@@ -1,7 +1,6 @@
 package monitoring
 
 import (
-	"context"
 	"pkg/types"
 	"sync"
 	"time"
@@ -26,10 +25,7 @@ type x11DBInterface interface {
 }
 
 type X11Monitor struct {
-	ctx            context.Context
-	timer          *time.Timer
 	windowChangeCh chan struct{}
-	CancelFunc     context.CancelFunc
 	X11Connection  *xgbutil.XUtil
 	Db             x11DBInterface
 }

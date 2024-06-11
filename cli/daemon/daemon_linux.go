@@ -4,12 +4,14 @@ import (
 	db "LiScreMon/cli/daemon/internal/database"
 	monitoring "LiScreMon/cli/daemon/internal/monitoring/linux"
 	"LiScreMon/cli/daemon/internal/service"
+	"context"
 	"io"
 	"log"
 	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/BurntSushi/xgbutil/xevent"
 )
@@ -57,8 +59,17 @@ func DaemonServiceLinux() {
 
 	go service.StartService(socketDir, badgerDB)
 
-	go xevent.Main(monitor.X11Connection) // Start the x11 event loop.
+	ctx, cancel := context.WithCancel(context.Background())
+	timer := time.NewTimer(time.Duration(1) * time.Minute)
 
+	go monitor.WindowChangeTimerFunc(ctx, timer)
+	defer func() {
+		if !timer.Stop() {
+			<-timer.C
+		}
+	}()
+
+	go xevent.Main(monitor.X11Connection) // Start the x11 event loop.
 	<-sig
 	close(sig)
 
@@ -68,8 +79,8 @@ func DaemonServiceLinux() {
 	// }
 
 	xevent.Quit(monitor.X11Connection)       // this should always comes first
-	monitor.CancelFunc()                     // a different goroutine for managing backing up app usage every minute, fired from monitor
-	monitor.CloseWindowChangeCh()            // a different goroutine,closes a channel, this should be after monitor.CancelFunc()
+	cancel()                                 // a different goroutine for managing backing up app usage every minute, fired from monitor
+	monitor.CloseWindowChangeCh()            // a different goroutine,closes a channel, this should be after calling the CancelFunc passed to monitor.WindowChangeTimerFunc
 	service.ServiceInstance.StopTaskManger() // a different goroutine for managing taskManager, fired from service
 	service.SocketConn.Close()
 	monitor.Db.Close()
