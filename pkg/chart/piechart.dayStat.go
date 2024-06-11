@@ -64,7 +64,7 @@ func DayStatPieChart(data PieChartData) template.HTML {
 		charts.WithLabelOpts(
 			opts.Label{
 				Show:         opts.Bool(true),
-				BorderRadius: 8,
+				FontStyle: "italic",
 			}),
 
 		charts.WithPieChartOpts(opts.PieChart{

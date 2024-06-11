@@ -52,29 +52,27 @@ func DaemonServiceLinux() {
 
 	monitor := monitoring.InitMonitoring(badgerDB)
 
-	signal1 := make(chan os.Signal, 1)
-	signal.Notify(signal1, os.Interrupt, syscall.SIGTERM)
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, os.Interrupt, syscall.SIGTERM)
 
 	go service.StartService(socketDir, badgerDB)
 
-	go func() {
-		<-signal1
-		close(signal1)
+	go xevent.Main(monitor.X11Connection) // Start the x11 event loop.
 
-		// err := monitor.Db.UpdateOpertionOnBuCKET("app", db.ExampleOf_opsFunc)
-		// if err != nil {
-		// 	fmt.Println("opt failed", err)
-		// }
+	<-sig
+	close(sig)
 
-		xevent.Quit(monitor.X11Connection)       // this should always comes first
-		monitor.CancelFunc()                     // a different goroutine for managing backing up app usage every minute, fired from monitor
-		monitor.CloseWindowChangeCh()            // a different goroutine,closes a channel, this should be after monitor.CancelFunc()
-		service.ServiceInstance.StopTaskManger() // a different goroutine for managing taskManager, fired from service
-		service.SocketConn.Close()
-		monitor.Db.Close()
+	// err := monitor.Db.UpdateOpertionOnBuCKET("app", db.ExampleOf_opsFunc)
+	// if err != nil {
+	// 	fmt.Println("opt failed", err)
+	// }
 
-		os.Exit(0)
-	}()
+	xevent.Quit(monitor.X11Connection)       // this should always comes first
+	monitor.CancelFunc()                     // a different goroutine for managing backing up app usage every minute, fired from monitor
+	monitor.CloseWindowChangeCh()            // a different goroutine,closes a channel, this should be after monitor.CancelFunc()
+	service.ServiceInstance.StopTaskManger() // a different goroutine for managing taskManager, fired from service
+	service.SocketConn.Close()
+	monitor.Db.Close()
 
-	xevent.Main(monitor.X11Connection) // Start the event loop.
+	os.Exit(0)
 }
