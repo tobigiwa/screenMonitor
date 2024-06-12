@@ -129,6 +129,9 @@ func treatMessage(c net.Conn) {
 
 		case "allReminderTask":
 			msg.ReminderResponse = ServiceInstance.allReminderTask(msg)
+
+		case "setCategory":
+			msg.SetCategoryResponse = ServiceInstance.setAppCategory(msg.SetCategoryRequest)
 		}
 
 		bytes, err := helperFuncs.EncodeJSON(msg)

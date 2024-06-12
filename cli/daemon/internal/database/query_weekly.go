@@ -108,7 +108,7 @@ func (bs *BadgerDBStore) getWeeklyAppStat(anyDayInTheWeek types.Date) (WeeklySta
 	if IsPastWeek(date) {
 		byteData, _ := helperFuncs.EncodeJSON(result)
 		saturdayOfThatWeek := allConcernedDays[6]
-		err := bs.updateKeyValue(dbWeekKey(saturdayOfThatWeek), byteData)
+		err := bs.setOrUpdateKeyValue(dbWeekKey(saturdayOfThatWeek), byteData)
 		if err != nil {
 			fmt.Println("ERROR WRITING NEW WEEK ENTRY", saturdayOfThatWeek, "ERROR IS:", err)
 		} else {

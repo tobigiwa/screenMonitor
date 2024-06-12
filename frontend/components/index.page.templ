@@ -3,6 +3,7 @@ package frontend
 import "html/template"
 import "pkg/types"
 import "reflect"
+import "strings"
 import helperFuncs "pkg/helper"
 
 templ IndexPage() {
@@ -32,7 +33,7 @@ templ screentime() {
 		@Header()
 		@chartWrapper("", types.NoAppIconCategoryAndCmdLine)
 		@chartControls()
-		@chartHighlight(nil, 0, "")
+		@chartHighlight(nil, 0, nil, "")
 	</div>
 }
 
@@ -97,7 +98,7 @@ templ chartControls() {
 	</div>
 }
 
-templ chartHighlight(appDetails []types.ApplicationDetail, totalWeekUsage float64, anyDay string) {
+templ chartHighlight(appDetails []types.ApplicationDetail, totalWeekUsage float64, allCategory []types.Category, anyDay string) {
 	<div class="chart-highlight" id="highlight" hx-swap-obb="true">
 		<ul>
 			for _, app := range appDetails {
@@ -109,10 +110,15 @@ templ chartHighlight(appDetails []types.ApplicationDetail, totalWeekUsage float6
 					}
 					<div class="info">
 						<div class="appName" style="font-size:large;font-weight:bold;">{ app.AppInfo.AppName }</div>
-						if app.AppInfo.IsCategorySet {
-							<button class="category">Category: { app.AppInfo.Category }</button>
+						if app.AppInfo.IsCategorySet && app.AppInfo.Category.String() != "" {
+							<button disabled class="category" style="color:white;">{ app.AppInfo.Category.String() }</button>
 						} else {
-							<button class="category">Selct application catergory</button>
+							if helperFuncs.IsInCurrentWeekDate(types.Date(anyDay)) {
+								<button class="category" onclick="openCategoryDialog(event)">Selct application catergory</button>
+								@setCategoryDialog(app.AppInfo, allCategory)
+							} else {
+								<button class="category" disabled style="color:white;"><i>set category in "This Week" <b>OR</b> Settings page</i></button>
+							}
 						}
 					</div>
 					if percentageUse := helperFuncs.PercentagesString(app.Usage, totalWeekUsage); percentageUse == "NaN" {
@@ -123,5 +129,53 @@ templ chartHighlight(appDetails []types.ApplicationDetail, totalWeekUsage float6
 				</li>
 			}
 		</ul>
+		<script>
+			function openCategoryDialog(event) {
+			const dialog = document.getElementById('categoryDialog');
+				event.stopPropagation();
+				dialog.showModal();
+			};
+		</script>
 	</div>
+}
+
+templ setCategoryDialog(appInfo types.AppIconCategoryAndCmdLine, allCategory []types.Category) {
+	<dialog class="select-category" id="categoryDialog">
+		<form method="post" action="/setCategory">
+			<div class="head">
+				<p>This is what { appInfo.AppName } says it is:</p>
+				<img src={ getImageFilePath(appInfo.AppName, appInfo.Icon) } alt={ appInfo.AppName }/>
+			</div>
+			<div class="desktop-categories">{ strings.Join(appInfo.DesktopCategories, "  ") }</div>
+			<fieldset>
+				<legend>Select a category for { appInfo.AppName }:</legend>
+				for _, catergory := range allCategory {
+					<div>
+						<input
+							type="radio"
+							name="category"
+							value={ catergory.String() }
+						/>
+						<label for={ catergory.String() }>{ catergory.String() }</label>
+					</div>
+				}
+			</fieldset>
+			<input type="hidden" name="appName" value={ appInfo.AppName }/>
+			<p class="space">
+				OR
+			</p>
+			<p class="info">Create a new category in the Settings and update it here.</p>
+			<div class="button-container">
+				<button type="submit">Set category</button>
+				<button class=".close-modal" formmethod="dialog">Close</button>
+			</div>
+		</form>
+		<script>
+		const dialog = document.getElementById('categoryDialog');
+			const closeModalBtn = document.querySelector(".close-modal");
+			closeModalBtn.addEventListener('click', ()=> {
+				dialog.close()
+			})
+		</script>
+	</dialog>
 }

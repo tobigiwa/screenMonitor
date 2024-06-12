@@ -73,7 +73,7 @@ func DaemonServiceLinux() {
 	<-sig
 	close(sig)
 
-	// err := monitor.Db.UpdateOpertionOnBuCKET("app", db.ExampleOf_opsFunc)
+	// err = monitor.Db.UpdateOpertionOnBuCKET("app", db.ExampleOf_opsFunc)
 	// if err != nil {
 	// 	fmt.Println("opt failed", err)
 	// }

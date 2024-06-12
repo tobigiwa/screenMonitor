@@ -164,3 +164,16 @@ func AllTheDaysInMonth(year, month string) ([]types.Date, error) {
 func ValidDateType(s string) bool {
 	return types.DateTypeRegexPattern.MatchString(s)
 }
+
+func IsInCurrentWeekTime(t time.Time) bool {
+	now := time.Now()
+	_, currentWeek := now.ISOWeek()
+	_, tWeek := t.ISOWeek()
+
+	return currentWeek == tWeek && now.Year() == t.Year()
+}
+
+func IsInCurrentWeekDate(d types.Date) bool {
+	t, _ := d.ToTime()
+	return IsInCurrentWeekTime(t)
+}

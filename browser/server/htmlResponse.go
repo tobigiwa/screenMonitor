@@ -18,9 +18,9 @@ func prepareHtTMLResponse(msg types.Message) templ.Component {
 		return appStatResponse(msg.AppStatResponse)
 	case "dayStat":
 		return dayStatResponse(msg.DayStatResponse)
+	default:
+		return templ.NopComponent
 	}
-
-	return templ.NopComponent
 }
 
 func weekStatResponse(w types.WeekStatMessage) templ.Component {
@@ -38,6 +38,7 @@ func weekStatResponse(w types.WeekStatMessage) templ.Component {
 		}),
 		w.TotalWeekUptime,
 		w.AppDetail,
+		w.AllCategory,
 		w.Keys[6],
 	)
 }

@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"fmt"
 
-	helperFuncs "pkg/helper"
-
 	badger "github.com/dgraph-io/badger/v4"
 )
 
@@ -29,7 +27,7 @@ func (bs *BadgerDBStore) Close() error {
 	return bs.db.Close()
 }
 
-func (bs *BadgerDBStore) updateKeyValue(key, byteData []byte) error {
+func (bs *BadgerDBStore) setOrUpdateKeyValue(key, byteData []byte) error {
 	err := bs.db.Update(func(txn *badger.Txn) error {
 		err := txn.Set(key, byteData)
 		return err
@@ -80,8 +78,6 @@ func (bs *BadgerDBStore) DeleteBucket(dbPrefix string) error {
 		prefix = dbWeekPrefix
 	case "app":
 		prefix = dbAppPrefix
-	case "tasks":
-		prefix = dbTaskKey()
 	default:
 		return fmt.Errorf("no bucket of such key prefix - %s in the db", dbPrefix)
 	}
@@ -153,17 +149,4 @@ func (bs *BadgerDBStore) UpdateOpertionOnBuCKET(dbPrefix string, opsFunc func([]
 		return err
 	}
 	return nil
-}
-
-func ExampleOf_opsFunc(v []byte) ([]byte, error) {
-	var (
-		app AppInfo
-		err error
-	)
-
-	if app, err = helperFuncs.DecodeJSON[AppInfo](v); err != nil {
-		return nil, err
-	}
-	fmt.Println(app.AppName, app.IsCategorySet, app.DesktopCategories)
-	return helperFuncs.EncodeJSON(app)
 }

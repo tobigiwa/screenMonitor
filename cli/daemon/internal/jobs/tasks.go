@@ -69,6 +69,7 @@ func (tm *TaskManager) StartTaskManger() error {
 			if err := tm.dbHandle.RemoveTask(task.UUID); err != nil {
 				return fmt.Errorf("err deleting old task: %+v :err %v", task, err)
 			}
+			continue
 		}
 
 		tm.channel <- task

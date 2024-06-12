@@ -13,12 +13,12 @@ import (
 )
 
 func (bs *BadgerDBStore) getAllTasks() ([]types.Task, error) {
-	byteData, err := bs.Get(dbTaskKey())
+	byteData, err := bs.Get(dbTaskKey)
 
 	if err != nil {
 		if errors.Is(err, badger.ErrKeyNotFound) {
 			if err = bs.db.Update(func(txn *badger.Txn) error {
-				return txn.Set(dbTaskKey(), []byte{})
+				return txn.Set(dbTaskKey, []byte{})
 			}); err != nil {
 				return nil, err
 			}
@@ -73,7 +73,7 @@ func (bs *BadgerDBStore) AddTask(task types.Task) error {
 	if err != nil {
 		return err
 	}
-	return bs.updateKeyValue(dbTaskKey(), byteData)
+	return bs.setOrUpdateKeyValue(dbTaskKey, byteData)
 }
 
 func (bs *BadgerDBStore) RemoveTask(id uuid.UUID) error {
@@ -89,5 +89,5 @@ func (bs *BadgerDBStore) RemoveTask(id uuid.UUID) error {
 	if err != nil {
 		return err
 	}
-	return bs.updateKeyValue(dbTaskKey(), byteData)
+	return bs.setOrUpdateKeyValue(dbTaskKey, byteData)
 }

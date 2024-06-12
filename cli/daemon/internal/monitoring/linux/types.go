@@ -21,6 +21,7 @@ type DoNotCopy [0]sync.Mutex
 type x11DBInterface interface {
 	WriteUsage(types.ScreenTime) error
 	UpdateOpertionOnBuCKET(dbPrefix string, opsFunc func([]byte) ([]byte, error)) error
+	DeleteKey([]byte) error
 	Close() error
 }
 

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	helperFuncs "pkg/helper"
 	"pkg/types"
+	"strings"
 	"time"
 
 	"github.com/BurntSushi/xgb/xproto"
@@ -28,6 +29,7 @@ func (bs *BadgerDBStore) WriteUsage(data types.ScreenTime) error {
 
 			app.AppName = data.AppName
 			app.ScreenStat = make(dailyAppScreenTime)
+
 			addAppInfoForNewApp(data.WindowID, &app)
 			fmt.Printf("New appName:%v, time so far is: %v:%v\n\n", app.AppName, app.IsCategorySet, app.IsIconSet)
 			return updateAppStats(data, &app, txn)
@@ -55,12 +57,12 @@ func updateAppStats(data types.ScreenTime, app *AppInfo, txn *badger.Txn) error 
 	if !ok { // we live to see a new day!!! 😎😎😎
 		now := time.Now()
 		midnight := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
-		durationToday := now.Sub(midnight)
-		yesterdayDuration := data.Duration - durationToday.Hours()
+		newDay := now.Sub(midnight)
+		yesterdayDuration := data.Duration - newDay.Hours()
 
 		if yesterdayDuration > 0 {
 			updateYesterday(data.Type, app, yesterdayDuration)
-			data.Duration -= yesterdayDuration
+			data.Duration = newDay.Hours()
 		}
 	}
 
@@ -105,10 +107,19 @@ func addAppInfoForNewApp(windowId xproto.Window, app *AppInfo) {
 
 	if r, err := getDesktopCategoryAndCmd(app.AppName); err == nil {
 		app.DesktopCategories = r.desktopCategories
-		app.IsCategorySet = true
+		if len(r.desktopCategories) != 0 {
+			app.DesktopCategories = r.desktopCategories
+			for _, c := range r.desktopCategories {
+				if category, ok := types.CategoryMap[strings.ToLower(c)]; ok {
+					app.Category = category
+					app.IsCategorySet = true
+					break
+				}
+			}
+		}
 		app.CmdLine = r.cmdLine
-		fmt.Println("fetched cmdLine for new app", app.CmdLine)
 		app.IsCmdLineSet = true
+		fmt.Println("fetched info for new app", app.AppName, app.CmdLine, app.DesktopCategories)
 	}
 }
 
@@ -119,20 +130,46 @@ func updateAppInfoForOldApp(windowId xproto.Window, app *AppInfo) {
 			app.IsIconSet = true
 		}
 	}
-
-	if !app.IsCmdLineSet {
+	fmt.Println("this app got here", app.AppName, !app.IsCmdLineSet && !app.IsCategorySet, app.IsCategorySet, app.IsCmdLineSet)
+	if !app.IsCmdLineSet && !app.IsCategorySet {
 		if r, err := getDesktopCategoryAndCmd(app.AppName); err == nil {
-			if len(r.desktopCategories) != 0 {
-				app.DesktopCategories = r.desktopCategories
-				app.IsCategorySet = true
-			}
 			if r.cmdLine != "" {
 				app.CmdLine = r.cmdLine
 				app.IsCmdLineSet = true
-				fmt.Println("fetched cmdLine for old app", app.AppName, app.CmdLine, app.DesktopCategories)
 			}
+
+			if len(r.desktopCategories) != 0 {
+				app.DesktopCategories = r.desktopCategories
+				for _, c := range r.desktopCategories {
+					fmt.Printf("currently in category selection for app %s with c '%s'\n", app.AppName, strings.ToLower(c))
+					if category, ok := types.CategoryMap[strings.ToLower(c)]; ok {
+						app.Category = category
+						app.IsCategorySet = true
+						break
+					}
+				}
+			}
+			fmt.Println("fetched info for old app", app.AppName, app.CmdLine, app.DesktopCategories, app.Category)
 		}
 	}
+}
+
+func ExampleOf_opsFunc(v []byte) ([]byte, error) {
+	var (
+		app AppInfo
+		err error
+	)
+
+	if app, err = helperFuncs.DecodeJSON[AppInfo](v); err != nil {
+		return nil, err
+	}
+	// app.IsCategorySet = false
+	// app.IsCmdLineSet = false
+	// app.Category = ""
+	// app.DesktopCategories = nil
+	// app.CmdLine = ""
+	fmt.Println(app.AppName, app.IsCategorySet, app.DesktopCategories, "category-", app.Category, app.IsCmdLineSet, app.CmdLine)
+	return helperFuncs.EncodeJSON(app)
 }
 
 // func (bs *BadgerDBStore) BatchWriteUsage(data []ScreenTime) error {

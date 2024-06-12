@@ -13,11 +13,12 @@ func yesterday() types.Date {
 	return types.Date(time.Now().AddDate(0, 0, -1).Format(types.TimeFormat))
 }
 
-
 var (
-	dbAppPrefix  = []byte("app:")
-	dbDayPrefix  = []byte("day:")
-	dbWeekPrefix = []byte("week:")
+	dbAppPrefix   = []byte("app:")
+	dbDayPrefix   = []byte("day:")
+	dbWeekPrefix  = []byte("week:")
+	dbCategoryKey = []byte("category")
+	dbTaskKey     = []byte("tasks")
 )
 
 func dbAppKey(appName string) []byte {
@@ -29,6 +30,4 @@ func dbDayKey(date types.Date) []byte {
 func dbWeekKey(date types.Date) []byte {
 	return []byte(fmt.Sprintf("week:%v", string(date)))
 }
-func dbTaskKey() []byte {
-	return []byte("tasks")
-}
+

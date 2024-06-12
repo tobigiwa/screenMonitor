@@ -24,4 +24,6 @@ type DatabaseInterface interface {
 	GetAllTask() ([]types.Task, error)
 	RemoveTask(id uuid.UUID) error
 	AddTask(task types.Task) error
+	SetAppCategory(appName string, category types.Category) error
+	GetAllACategories() ([]types.Category, error)
 }

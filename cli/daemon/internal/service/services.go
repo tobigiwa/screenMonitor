@@ -22,9 +22,10 @@ func (s *Service) StopTaskManger() error {
 
 func (s *Service) getWeekStat(msg types.Message) types.WeekStatMessage {
 	var (
-		weekStat db.WeeklyStat
-		appsInfo []types.AppIconCategoryAndCmdLine
-		err      error
+		weekStat    db.WeeklyStat
+		appsInfo    []types.AppIconCategoryAndCmdLine
+		allCategory []types.Category
+		err         error
 	)
 
 	if weekStat, err = s.db.GetWeek(msg.WeekStatRequest); err != nil {
@@ -60,11 +61,16 @@ func (s *Service) getWeekStat(msg types.Message) types.WeekStatMessage {
 		appCard = append(appCard, types.ApplicationDetail{AppInfo: appsInfo[i], Usage: weekStat.EachApp[i].Usage.Active})
 	}
 
+	if allCategory, err = s.db.GetAllACategories(); err != nil {
+		return types.WeekStatMessage{IsError: true, Error: fmt.Errorf("err with GetAllCategories:%w", err)}
+	}
+
 	return types.WeekStatMessage{
 		Keys:            keys,
 		FormattedDay:    formattedDay,
 		Values:          values,
 		TotalWeekUptime: weekStat.WeekTotal.Active,
+		AllCategory:     allCategory,
 		Month:           month,
 		Year:            fmt.Sprint(year),
 		AppDetail:       appCard,
@@ -166,6 +172,13 @@ func (s *Service) getDayStat(msg types.Message) types.DayStatMessage {
 
 	return types.DayStatMessage{EachApp: dayStat.EachApp, DayTotal: dayStat.DayTotal, Date: date}
 
+}
+
+func (s *Service) setAppCategory(msg types.SetCategoryRequest) types.SetCategoryResponse {
+	if err := s.db.SetAppCategory(msg.AppName, msg.Category); err != nil {
+		return types.SetCategoryResponse{IsError: true, Error: err}
+	}
+	return types.SetCategoryResponse{IsCategorySet: true}
 }
 
 // func savePNGImage(filename string, bytes []byte) error {
