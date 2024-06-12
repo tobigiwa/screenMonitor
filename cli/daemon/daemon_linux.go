@@ -63,6 +63,7 @@ func DaemonServiceLinux() {
 	timer := time.NewTimer(time.Duration(1) * time.Minute)
 
 	go monitor.WindowChangeTimerFunc(ctx, timer)
+
 	defer func() {
 		if !timer.Stop() {
 			<-timer.C

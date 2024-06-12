@@ -44,6 +44,7 @@ func (bs *BadgerDBStore) WriteUsage(data types.ScreenTime) error {
 		}
 
 		updateAppInfoForOldApp(data.WindowID, &app)
+		app.AppName = data.AppName
 		fmt.Printf("Existing appName:%v, time so far is: %v:%v, brought in %f\n\n", data.AppName, app.ScreenStat[today()].Active, app.ScreenStat[today()].Open, data.Duration)
 		return updateAppStats(data, &app, txn)
 
@@ -163,12 +164,8 @@ func ExampleOf_opsFunc(v []byte) ([]byte, error) {
 	if app, err = helperFuncs.DecodeJSON[AppInfo](v); err != nil {
 		return nil, err
 	}
-	// app.IsCategorySet = false
-	// app.IsCmdLineSet = false
-	// app.Category = ""
-	// app.DesktopCategories = nil
-	// app.CmdLine = ""
-	fmt.Println(app.AppName, app.IsCategorySet, app.DesktopCategories, "category-", app.Category, app.IsCmdLineSet, app.CmdLine)
+	// app.AppIconCategoryAndCmdLine = types.NoAppIconCategoryAndCmdLine
+	fmt.Println(app.AppName, app.IsCategorySet, app.DesktopCategories, "category-", app.Category, app.IsCmdLineSet, app.CmdLine, app.IsIconSet)
 	return helperFuncs.EncodeJSON(app)
 }
 

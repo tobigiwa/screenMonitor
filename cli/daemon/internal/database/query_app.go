@@ -32,21 +32,7 @@ func (bs *BadgerDBStore) GetAppIconCategoryAndCmdLine(appNames []string) ([]type
 				continue
 			}
 
-			a := types.AppIconCategoryAndCmdLine{AppName: app.AppName}
-			if app.IsIconSet {
-				a.Icon = app.Icon
-				a.IsIconSet = true
-			}
-			if app.IsCategorySet {
-				a.Category = app.Category
-				a.IsCategorySet = true
-			} else {
-				a.DesktopCategories = app.DesktopCategories
-			}
-			if app.IsCmdLineSet {
-				a.CmdLine = app.CmdLine
-				a.IsCmdLineSet = true
-			}
+			a := app.AppIconCategoryAndCmdLine
 			result[i] = a
 		}
 		return nil
