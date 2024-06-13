@@ -30,16 +30,13 @@ templ reminderAndAlert(tasks []types.Task) {
 		<div class="reminder-page">
 			<div class="sticky-header">
 				<h2>Reminder and Alert</h2>
-				<button
-					hx-get="/addEvent"
-					hx-trigger="click"
-					data-bs-toggle="modal"
-					data-bs-target="#addEvent"
-					class="btn btn-modal"
-				>
+				<button>
 					<img src="assets/svg/add.svg" alt=""/>
 				</button>
 			</div>
+			if len(tasks) == 0 {
+				<div class="cards-holder" style="min-height: calc(100vh - 8rem); display: flex; justify-content: center; align-items: center; color:white">No reminder</div>
+			}
 			@reminderList(tasks)
 		</div>
 	</div>
@@ -47,37 +44,43 @@ templ reminderAndAlert(tasks []types.Task) {
 }
 
 templ reminderList(task []types.Task) {
-	<ul>
-		for _, t := range task {
-			<li>
-				<div class="card">
-					<div class="info">
-						<p class="title"><span class="label"><i>title:</i></span> <span class="content">{ t.UI.Title }</span></p>
-						<p class="subtitle"><span class="label"><i>subtitle:</i></span> <span class="content">{ t.UI.Subtitle }</span></p>
-						<details>
-							<summary><span class="label"><i>See attached note</i></span></summary>
-							<p>{ t.UI.Notes }</p>
-						</details>
-						<div class="action">would launch: <img src={ getImageFilePath(t.AppInfo.AppName, t.AppInfo.Icon) } alt=""/> { t.AppInfo.AppName }</div>
+	<div class="cards-holder">
+		<ul>
+			for _, t := range task {
+				<li>
+					<div class="card">
+						<div class="info">
+							<p class="title"><span class="label"><i>title:</i></span> <span class="content">{ t.UI.Title }</span></p>
+							<p class="subtitle"><span class="label"><i>subtitle:</i></span> <span class="content">{ t.UI.Subtitle }</span></p>
+							<details>
+								<summary><span class="label"><i>See attached note</i></span></summary>
+								<p>{ t.UI.Notes }</p>
+							</details>
+							<div class="action">would launch: <img src={ getImageFilePath(t.AppInfo.AppName, t.AppInfo.Icon) } alt=""/> { t.AppInfo.AppName }</div>
+						</div>
+						<div class="spacing">
+							<button class="edit-button">Edit</button>
+						</div>
+						<div class="alert">
+							<p class="start"><span class="label"><i>Starts at:</i></span> <span class="content">{ formatTimeToHumanReadable(t.TaskTime.StartTime) }</span></p>
+							if time.Now().Before(t.TaskTime.StartTime.Add(intToDuration(-t.TaskTime.AlertTimesInMinutes[0]))) {
+								<p class="remind">
+									<span class="label"><i>reminder at:</i></span>
+									<span class="content">{ formatTimeToHumanReadable(t.TaskTime.StartTime.Add(intToDuration(-t.TaskTime.AlertTimesInMinutes[0]))) }</span>
+								</p>
+							}
+							if time.Now().Before(t.TaskTime.StartTime.Add(intToDuration(-t.TaskTime.AlertTimesInMinutes[1]))) {
+								<p class="remind">
+									<span class="label"><i>reminder at:</i></span>
+									<span class="content">{ formatTimeToHumanReadable(t.TaskTime.StartTime.Add(intToDuration(-t.TaskTime.AlertTimesInMinutes[1]))) }</span>
+								</p>
+							}
+						</div>
 					</div>
-					<div class="spacing">
-						<button class="edit-button">Edit</button>
-					</div>
-					<div class="alert">
-						<p class="start"><span class="label"><i>Starts:</i></span> <span class="content">{ formatTimeToHumanReadable(t.TaskTime.StartTime) }</span></p>
-						<p class="remind">
-							<span class="label"><i>reminder:</i></span>
-							<span class="content">{ formatTimeToHumanReadable(t.TaskTime.StartTime.Add(intToDuration(-t.TaskTime.AlertTimesInMinutes[0]))) }</span>
-						</p>
-						<p class="remind">
-							<span class="label"><i>reminder:</i></span>
-							<span class="content">{ formatTimeToHumanReadable(t.TaskTime.StartTime.Add(intToDuration(-t.TaskTime.AlertTimesInMinutes[1]))) }</span>
-						</p>
-					</div>
-				</div>
-			</li>
-		}
-	</ul>
+				</li>
+			}
+		</ul>
+	</div>
 }
 
 templ createNewReminderDialog() {
@@ -112,8 +115,6 @@ templ createNewReminderDialog() {
 						<input
 							type="datetime-local"
 							name="reminder"
-							value={ FormatTimeTOHMTLDatetimeLocal(time.Now()) }
-							min={ FormatTimeTOHMTLDatetimeLocal(time.Now()) }
 							max={ FormatTimeTOHMTLDatetimeLocal(nextTwoWeeks()) }
 						/>
 					</div>
@@ -229,9 +230,19 @@ templ createNewReminderDialog() {
 			</div>
 		</form>
 		<script>
+			function getLocalDateTime() {
+				const now = new Date();
+				const timeZoneOffset = now.getTimezoneOffset() * 60000;
+				const localDateTime = new Date(now.getTime() - timeZoneOffset);
+				return localDateTime.toISOString().slice(0, 16);
+			}
+
 			const dialog = document.querySelector('dialog');
-			const showModalbutton = document.querySelector('button');
-			showModalbutton.addEventListener('click', () => {
+			document.querySelector('button').addEventListener('click', () => {
+				const dateTimeInput = document.querySelector('input[type="datetime-local"]');
+				dateTimeInput.value = getLocalDateTime()
+				dateTimeInput.min = getLocalDateTime()
+
 				dialog.showModal();
 			});
 		</script>

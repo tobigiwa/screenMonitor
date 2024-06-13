@@ -3,6 +3,7 @@ package frontend
 import "html/template"
 import "pkg/types"
 import "reflect"
+import "strings"
 import helperFuncs "pkg/helper"
 
 templ IndexPage() {
@@ -30,9 +31,9 @@ templ IndexPage() {
 templ screentime() {
 	<div class="main">
 		@Header()
-		@chartWrapper("", types.NoAppIconAndCategory)
+		@chartWrapper("", types.NoAppIconCategoryAndCmdLine)
 		@chartControls()
-		@chartHighlight(nil, 0, "")
+		@chartHighlight(nil, 0, nil, "")
 	</div>
 }
 
@@ -41,7 +42,12 @@ templ chartWrapper(chart template.HTML, info types.AppIconCategoryAndCmdLine) {
 		<div id="echart" hx-swap-oob="true">
 			@templ.Raw(chart)
 			if !reflect.ValueOf(info).IsZero() {
-				<img src={ getImageFilePath(info.AppName, info.Icon) } alt={ info.AppName } class="appIcon"/>
+				// accounting for weekStat, which does not need an icon...
+				if info.IsIconSet {
+					<img src={ getImageFilePath(info.AppName, info.Icon) } alt={ info.AppName } class="appIcon"/>
+				} else {
+					<img src="/assets/image/noAppImage.jpg" alt="noImage" class="appIcon"/>
+				}
 			}
 		</div>
 	</div>
@@ -76,10 +82,10 @@ templ chartControls() {
 			</button>
 		</div>
 		<div class="spacing"></div>
-		<div class="right-controls">
-			<button class="right-controls__btn text" href="#">Asce.</button>
-			<button class="right-controls__btn text" href="#">Desc.</button>
-		</div>
+		// <div class="right-controls">
+		// 	<button class="right-controls__btn text" href="#">Asce.</button>
+		// 	<button class="right-controls__btn text" href="#">Desc.</button>
+		// </div>
 		<script>
 		document.addEventListener( 'DOMContentLoaded', function ()
 		{
@@ -92,22 +98,26 @@ templ chartControls() {
 	</div>
 }
 
-templ chartHighlight(appDetails []types.ApplicationDetail, totalWeekUsage float64, anyDay string) {
+templ chartHighlight(appDetails []types.ApplicationDetail, totalWeekUsage float64, allCategory []types.Category, anyDay string) {
 	<div class="chart-highlight" id="highlight" hx-swap-obb="true">
 		<ul>
 			for _, app := range appDetails {
 				<li class="card" tabindex="10" hx-get={ string(templ.URL("/appStat?range=week&appName=" + app.AppInfo.AppName + "&start=" + anyDay)) } hx-swap="none" hx-select-oob="#echart:outerHTML">
-					if app.AppInfo.IsIconSet && writeImageToFile(app.AppInfo.Icon, app.AppInfo.AppName) {
+					if app.AppInfo.IsIconSet {
 						<img src={ getImageFilePath(app.AppInfo.AppName, app.AppInfo.Icon) } alt={ app.AppInfo.AppName } class="app-icon"/>
 					} else {
 						<img src="/assets/image/noAppImage.jpg" alt="noImage" class="app-icon"/>
 					}
 					<div class="info">
 						<div class="appName" style="font-size:large;font-weight:bold;">{ app.AppInfo.AppName }</div>
-						if app.AppInfo.IsCategorySet {
-							<button class="category">Category: { app.AppInfo.Category }</button>
+						<div class="desktopCategories" hidden>{ strings.Join(app.AppInfo.DesktopCategories, "  ") }</div>
+						if app.AppInfo.IsCategorySet && app.AppInfo.Category.String() != "" {
+							<button disabled class="category" style="color:white;">{ app.AppInfo.Category.String() }</button>
 						} else {
-							<button class="category">Selct application catergory</button>
+							if helperFuncs.IsInCurrentWeekDate(types.Date(anyDay)) {
+								<button class="category" onclick="openCategoryDialog(event)">Selct application catergory</button>
+								@setCategoryDialog(allCategory)
+							}
 						}
 					</div>
 					if percentageUse := helperFuncs.PercentagesString(app.Usage, totalWeekUsage); percentageUse == "NaN" {
@@ -118,5 +128,78 @@ templ chartHighlight(appDetails []types.ApplicationDetail, totalWeekUsage float6
 				</li>
 			}
 		</ul>
+		<script>
+			function openCategoryDialog(event) {
+				const trigger = event.target.parentElement.parentElement; // the li
+				const triggerIconElement = trigger.querySelector('img');
+				const icon = triggerIconElement.getAttribute('src');
+				const appName = trigger.querySelector('.appName').innerHTML;
+				const desktopCategories = trigger.querySelector('.desktopCategories').innerHTML;
+
+				event.stopPropagation();
+
+				// build the modal dialog
+				const dialog = document.getElementById('categoryDialog');
+				const formElement = dialog.querySelector('form').reset();
+				const imgElement = dialog.querySelector('form .head img');
+				const headerClassParagraph = dialog.querySelector('form .head p');
+				const dialogLegend = dialog.querySelector('form legend');
+				const dialogHiddenInput = dialog.querySelector('form fieldset+input');
+				const dialogDesktopCategoriesClass = dialog.querySelector('form div+div');
+				imgElement.setAttribute('src', icon);
+				imgElement.setAttribute('alt', appName);
+				dialogHiddenInput.setAttribute('value', appName);
+				headerClassParagraph.innerHTML = `<b>${appName}</b>`
+				dialogLegend.innerHTML = `Select a category for ${appName}:`
+				
+				if (desktopCategories === '' || desktopCategories.trim() === '') {
+					// dialogDesktopCategoriesClass.remove();
+					dialogDesktopCategoriesClass.style.display = 'none';
+				} else {
+					dialogDesktopCategoriesClass.innerHTML = `Application file category(s):\n${desktopCategories}`;
+				}
+
+				// show the modal dialog
+				dialog.showModal();
+			};
+		</script>
 	</div>
+}
+
+templ setCategoryDialog(allCategory []types.Category) {
+	<dialog class="select-category" id="categoryDialog">
+		<form method="post" action="/setCategory">
+			<div class="head">
+				<p></p>
+				<img src="" alt=""/>
+			</div>
+			<div class="desktop-categories">"</div>
+			<fieldset>
+				<legend></legend>
+				for _, catergory := range allCategory {
+					<div>
+						<input
+							type="radio"
+							name="category"
+							value={ catergory.String() }
+						/>
+						<label for={ catergory.String() }>{ catergory.String() }</label>
+					</div>
+				}
+			</fieldset>
+			<input type="hidden" name="appName" value=""/>
+			<p class="space">
+				OR
+			</p>
+			<p class="info">Create a new category in the Settings and update it here.</p>
+			<div class="button-container">
+				<button type="submit">Set category</button>
+				<button class=".close-modal" formmethod="dialog">Close</button>
+			</div>
+		</form>
+		<script>
+			const dialog = document.getElementById('categoryDialog');
+			dialog.addEventListener('click', (e) => e.stopPropagation());
+		</script>
+	</dialog>
 }

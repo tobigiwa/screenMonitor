@@ -1,10 +1,16 @@
 .reminder-page {
-    max-height: calc(100vh - 4rem);
-    min-height: auto;
     overflow-y: auto;
+    max-height: auto;
+    min-height: calc(100vh - 4rem);
+}
+
+.cards-holder {
+    max-height: calc(100vh - 8rem);
+    min-height: auto;
 }
 
 .sticky-header {
+    height: 4rem;
     position: sticky;
     top: 0;
     z-index: 10;
@@ -28,6 +34,7 @@
     }
 }
 
+
 ul {
     list-style-type: none;
     padding: 0;
@@ -37,6 +44,8 @@ ul {
 li+li {
     margin-top: 1rem;
 }
+
+
 
 .card {
     width: 100%;

@@ -13,7 +13,7 @@ import (
 
 func (bs *BadgerDBStore) GetDay(date types.Date) (DailyStat, error) {
 
-	if day, _ := ParseKey(date); day.After(formattedToDay()) {
+	if day, _ := helperFuncs.ParseKey(date); day.After(helperFuncs.FormattedToDay()) {
 		return ZeroValueDailyStat, ErrFutureDay
 	}
 
@@ -39,7 +39,7 @@ func (bs *BadgerDBStore) getDailyAppStat(day types.Date) (DailyStat, error) {
 	var (
 		result       DailyStat
 		dayTotalData types.Stats
-		arr          = make([]AppStat, 0, 20)
+		arr          = make([]types.AppStat, 0, 20)
 	)
 
 	err := bs.db.View(func(txn *badger.Txn) error {
@@ -55,7 +55,7 @@ func (bs *BadgerDBStore) getDailyAppStat(day types.Date) (DailyStat, error) {
 
 				var (
 					app            AppInfo
-					appStatArrData AppStat
+					appStatArrData types.AppStat
 					err            error
 				)
 
@@ -90,7 +90,7 @@ func (bs *BadgerDBStore) getDailyAppStat(day types.Date) (DailyStat, error) {
 		return ZeroValueDailyStat, err
 	}
 
-	slices.SortFunc(arr, func(a, b AppStat) int {
+	slices.SortFunc(arr, func(a, b types.AppStat) int {
 		return cmp.Compare(b.Usage.Active, a.Usage.Active)
 	})
 
@@ -99,9 +99,9 @@ func (bs *BadgerDBStore) getDailyAppStat(day types.Date) (DailyStat, error) {
 	result.DayTotal.Open = dayTotalData.Open
 	result.EachApp = arr
 
-	if day != types.Date(formattedToDay().Format(types.TimeFormat)) {
+	if day != today() {
 		byteData, _ := helperFuncs.EncodeJSON(result)
-		err := bs.updateKeyValue(dbDayKey(day), byteData)
+		err := bs.setOrUpdateKeyValue(dbDayKey(day), byteData)
 		if err != nil {
 			fmt.Println("ERROR WRITING NEW DAY ENTRY", day, "ERROR IS:", err)
 		} else {

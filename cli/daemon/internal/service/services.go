@@ -6,10 +6,13 @@ import (
 	"fmt"
 	helperFuncs "pkg/helper"
 	"pkg/types"
+	"slices"
+	"strings"
+	"time"
 )
 
 type Service struct {
-	db          db.IRepository
+	db          DatabaseInterface
 	taskManager *jobs.TaskManager
 }
 
@@ -19,15 +22,14 @@ func (s *Service) StopTaskManger() error {
 
 func (s *Service) getWeekStat(msg types.Message) types.WeekStatMessage {
 	var (
-		weekStat db.WeeklyStat
-		appsInfo []types.AppIconCategoryAndCmdLine
-		err      error
+		weekStat    db.WeeklyStat
+		appsInfo    []types.AppIconCategoryAndCmdLine
+		allCategory []types.Category
+		err         error
 	)
 
 	if weekStat, err = s.db.GetWeek(msg.WeekStatRequest); err != nil {
-		return types.WeekStatMessage{
-			IsError: true,
-			Error:   fmt.Errorf("error weekStat: %w", err)}
+		return types.WeekStatMessage{IsError: true, Error: fmt.Errorf("error weekStat: %w", err)}
 	}
 
 	var (
@@ -52,13 +54,15 @@ func (s *Service) getWeekStat(msg types.Message) types.WeekStatMessage {
 	}
 
 	if appsInfo, err = s.db.GetAppIconCategoryAndCmdLine(appNameInTheWeek); err != nil {
-		return types.WeekStatMessage{
-			IsError: true,
-			Error:   fmt.Errorf("err with GetAppIconAndCategory:%w", err)}
+		return types.WeekStatMessage{IsError: true, Error: fmt.Errorf("err with GetAppIconAndCategory:%w", err)}
 	}
 
 	for i := 0; i < sizeOfApps; i++ {
 		appCard = append(appCard, types.ApplicationDetail{AppInfo: appsInfo[i], Usage: weekStat.EachApp[i].Usage.Active})
+	}
+
+	if allCategory, err = s.db.GetAllACategories(); err != nil {
+		return types.WeekStatMessage{IsError: true, Error: fmt.Errorf("err with GetAllCategories:%w", err)}
 	}
 
 	return types.WeekStatMessage{
@@ -66,6 +70,7 @@ func (s *Service) getWeekStat(msg types.Message) types.WeekStatMessage {
 		FormattedDay:    formattedDay,
 		Values:          values,
 		TotalWeekUptime: weekStat.WeekTotal.Active,
+		AllCategory:     allCategory,
 		Month:           month,
 		Year:            fmt.Sprint(year),
 		AppDetail:       appCard,
@@ -89,10 +94,7 @@ func (s *Service) getAppStat(msg types.Message) types.AppStatMessage {
 
 	if err != nil {
 		fmt.Println("error weekStat:", err)
-		return types.AppStatMessage{
-			IsError: true,
-			Error:   err,
-		}
+		return types.AppStatMessage{IsError: true, Error: err}
 	}
 
 	var (
@@ -124,23 +126,59 @@ func (s *Service) createReminder(msg types.Message) types.ReminderMessage {
 	if task.Job == types.ReminderWithAction {
 		appInfo, err := s.db.GetAppIconCategoryAndCmdLine([]string{task.AppInfo.AppName})
 		if err != nil {
-			return types.ReminderMessage{
-				IsError: true,
-				Error:   err}
+			return types.ReminderMessage{IsError: true, Error: err}
 		}
 		task.AppInfo = appInfo[0]
 	}
 
 	err := s.taskManager.SendTaskToTaskManager(task)
 	if err != nil {
-		return types.ReminderMessage{
-			IsError: true,
-			Error:   err}
+		return types.ReminderMessage{IsError: true, Error: err}
 	}
 
 	return types.ReminderMessage{
 		CreatedNewTask: true,
 	}
+}
+
+func (s *Service) allReminderTask(msg types.Message) types.ReminderMessage {
+
+	tasks, err := s.db.GetAllTask()
+	if err != nil {
+		return types.ReminderMessage{IsError: true, Error: err}
+	}
+
+	validTask := make([]types.Task, 0, len(tasks))
+	for _, task := range tasks {
+		now, taskStartTime := time.Now(), task.TaskTime.StartTime
+		if taskStartTime.Before(now) {
+			if err := s.db.RemoveTask(task.UUID); err != nil {
+				return types.ReminderMessage{IsError: true, Error: err}
+			}
+		}
+		validTask = append(validTask, task)
+
+	}
+	return types.ReminderMessage{AllTask: slices.Clip(validTask)}
+}
+
+func (s *Service) getDayStat(msg types.Message) types.DayStatMessage {
+	dayStat, err := s.db.GetDay(msg.DayStatRequest)
+	if err != nil {
+		return types.DayStatMessage{IsError: true, Error: err}
+	}
+	d, _ := helperFuncs.ParseKey(msg.DayStatRequest)
+	date := fmt.Sprintf("%s. %s %s, %d", strings.TrimSuffix(d.Weekday().String(), "day"), helperFuncs.AddOrdinalSuffix(d.Day()), d.Month().String(), d.Year())
+
+	return types.DayStatMessage{EachApp: dayStat.EachApp, DayTotal: dayStat.DayTotal, Date: date}
+
+}
+
+func (s *Service) setAppCategory(msg types.SetCategoryRequest) types.SetCategoryResponse {
+	if err := s.db.SetAppCategory(msg.AppName, msg.Category); err != nil {
+		return types.SetCategoryResponse{IsError: true, Error: err}
+	}
+	return types.SetCategoryResponse{IsCategorySet: true}
 }
 
 // func savePNGImage(filename string, bytes []byte) error {

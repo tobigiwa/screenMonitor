@@ -43,8 +43,12 @@ func GetWmIcon(windowID xproto.Window) ([]byte, error) {
 
 	if len(icons) == 0 {
 		return nil, errors.New("no icon")
+	} else if len(icons) == 1 {
+		return wmIcon(icons[0])
+	} else {
+		lastIconIndex := len(icons) - 1 // it is usually more clear
+		return wmIcon(icons[lastIconIndex])
 	}
-	return wmIcon(icons[0])
 }
 
 func wmIcon(icon ewmh.WmIcon) ([]byte, error) {

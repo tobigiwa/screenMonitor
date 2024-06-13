@@ -1,7 +1,7 @@
 package monitoring
 
 import (
-	db "LiScreMon/cli/daemon/internal/database"
+	"pkg/types"
 	"sync"
 	"time"
 
@@ -18,7 +18,15 @@ type netActiveWindowInfo struct {
 
 type DoNotCopy [0]sync.Mutex
 
+type x11DBInterface interface {
+	WriteUsage(types.ScreenTime) error
+	UpdateOpertionOnBuCKET(dbPrefix string, opsFunc func([]byte) ([]byte, error)) error
+	DeleteKey([]byte) error
+	Close() error
+}
+
 type X11Monitor struct {
-	X11Connection *xgbutil.XUtil
-	Db            db.IRepository
+	windowChangeCh chan struct{}
+	X11Connection  *xgbutil.XUtil
+	Db             x11DBInterface
 }

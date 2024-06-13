@@ -2,6 +2,7 @@ package database
 
 import (
 	"errors"
+	"fmt"
 	helperFuncs "pkg/helper"
 	"pkg/types"
 
@@ -12,16 +13,23 @@ import (
 )
 
 func (bs *BadgerDBStore) getAllTasks() ([]types.Task, error) {
-	byteData, err := bs.Get(dbTaskKey())
+	byteData, err := bs.Get(dbTaskKey)
+
 	if err != nil {
 		if errors.Is(err, badger.ErrKeyNotFound) {
-			_ = bs.db.Update(func(txn *badger.Txn) error {
-				return txn.Set(dbTaskKey(), []byte{})
-			})
+			if err = bs.db.Update(func(txn *badger.Txn) error {
+				return txn.Set(dbTaskKey, []byte{})
+			}); err != nil {
+				return nil, err
+			}
 		}
+
 		return nil, err
 	}
 
+	if len(byteData) == 0 {
+		return []types.Task{}, nil
+	}
 	return helperFuncs.DecodeJSON[[]types.Task](byteData)
 }
 
@@ -36,6 +44,7 @@ func (bs *BadgerDBStore) GetTaskByAppName(appName string) ([]types.Task, error) 
 
 	taskArry, err := bs.getAllTasks()
 	if err != nil {
+		fmt.Println("error came from here:", err)
 		return nil, err
 	}
 
@@ -64,7 +73,7 @@ func (bs *BadgerDBStore) AddTask(task types.Task) error {
 	if err != nil {
 		return err
 	}
-	return bs.updateKeyValue(dbTaskKey(), byteData)
+	return bs.setOrUpdateKeyValue(dbTaskKey, byteData)
 }
 
 func (bs *BadgerDBStore) RemoveTask(id uuid.UUID) error {
@@ -80,5 +89,5 @@ func (bs *BadgerDBStore) RemoveTask(id uuid.UUID) error {
 	if err != nil {
 		return err
 	}
-	return bs.updateKeyValue(dbTaskKey(), byteData)
+	return bs.setOrUpdateKeyValue(dbTaskKey, byteData)
 }

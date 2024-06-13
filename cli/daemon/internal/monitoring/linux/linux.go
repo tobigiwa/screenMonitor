@@ -1,7 +1,6 @@
 package monitoring
 
 import (
-	"fmt"
 	"log"
 	"time"
 
@@ -39,8 +38,9 @@ func InitMonitoring(db *db.BadgerDBStore) X11Monitor {
 	}
 
 	monitor = X11Monitor{
-		X11Connection: x11Conn,
-		Db:            db,
+		X11Connection:  x11Conn,
+		Db:             db,
+		windowChangeCh: make(chan struct{}, 1),
 	}
 
 	setRootEventMask(x11Conn)
@@ -52,14 +52,8 @@ func InitMonitoring(db *db.BadgerDBStore) X11Monitor {
 		log.Fatal(err)
 	}
 
-	fmt.Println("len(windows)=====>>>>>:", len(windows))
 	for _, window := range windows {
-		name, err := getWindowClassName(x11Conn, window)
-		if err != nil {
-			continue
-		}
-		fmt.Printf("Opened windows:%d ==========>%s\n", window, name)
-
+		getWindowClassName(x11Conn, window)
 		registerWindowForEvents(window)
 	}
 

@@ -6,17 +6,19 @@ import (
 	"time"
 )
 
-func Key() types.Date {
-	return types.Date(fmt.Sprint(time.Now().Format(types.TimeFormat)))
+func today() types.Date {
+	return types.Date(time.Now().Format(types.TimeFormat))
 }
-func ParseKey(key types.Date) (time.Time, error) {
-	return time.Parse(types.TimeFormat, string(key))
+func yesterday() types.Date {
+	return types.Date(time.Now().AddDate(0, 0, -1).Format(types.TimeFormat))
 }
 
 var (
-	dbAppPrefix  = []byte("app:")
-	dbDayPrefix  = []byte("day:")
-	dbWeekPrefix = []byte("week:")
+	dbAppPrefix   = []byte("app:")
+	dbDayPrefix   = []byte("day:")
+	dbWeekPrefix  = []byte("week:")
+	dbCategoryKey = []byte("category")
+	dbTaskKey     = []byte("tasks")
 )
 
 func dbAppKey(appName string) []byte {
@@ -28,6 +30,4 @@ func dbDayKey(date types.Date) []byte {
 func dbWeekKey(date types.Date) []byte {
 	return []byte(fmt.Sprintf("week:%v", string(date)))
 }
-func dbTaskKey() []byte {
-	return []byte("tasks")
-}
+

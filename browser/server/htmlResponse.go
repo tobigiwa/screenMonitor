@@ -16,9 +16,11 @@ func prepareHtTMLResponse(msg types.Message) templ.Component {
 		return weekStatResponse(msg.WeekStatResponse)
 	case "appStat":
 		return appStatResponse(msg.AppStatResponse)
+	case "dayStat":
+		return dayStatResponse(msg.DayStatResponse)
+	default:
+		return templ.NopComponent
 	}
-
-	return templ.NopComponent
 }
 
 func weekStatResponse(w types.WeekStatMessage) templ.Component {
@@ -36,6 +38,7 @@ func weekStatResponse(w types.WeekStatMessage) templ.Component {
 		}),
 		w.TotalWeekUptime,
 		w.AppDetail,
+		w.AllCategory,
 		w.Keys[6],
 	)
 }
@@ -55,4 +58,16 @@ func appStatResponse(w types.AppStatMessage) templ.Component {
 				TotalUptime: w.TotalRangeUptime,
 			}),
 		w.AppInfo)
+}
+
+func dayStatResponse(w types.DayStatMessage) templ.Component {
+	return views.DayStatTempl(
+		chart.DayStatPieChart(
+			chart.PieChartData{
+				PieData:  w.EachApp,
+				DayTotal: w.DayTotal,
+				Date:     w.Date,
+			}),
+		nil,
+	)
 }

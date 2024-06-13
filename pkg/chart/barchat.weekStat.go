@@ -16,7 +16,11 @@ func WeekStatBarChart(data BarChartData) template.HTML {
 		opts.Initialization{AssetsHost: "/assets/libraries/"},
 	))
 
-	bar.Renderer = newchartRenderer(bar, bar.Validate)
+	bar.Renderer = newchartRenderer(
+		bar,
+		"weekStat",
+		fmt.Sprintf(baseTpl, barChartOptions),
+		bar.Validate)
 
 	bar.SetGlobalOptions(
 		charts.WithTitleOpts(opts.Title{
@@ -61,25 +65,7 @@ func WeekStatBarChart(data BarChartData) template.HTML {
 			},
 		}),
 	)
-	// bar.AddJSFuncStrs(opts.FuncOpts(aaa))
 	bar.SetXAxis(data.XAxis).
-		AddSeries("Daily uptime", generateBarItems(data.YAxis, data.XAxis)).SetSeriesOptions()
+		AddSeries("Daily uptime", barItems(data.YAxis, data.XAxis)).SetSeriesOptions()
 	return renderToHtml(bar)
 }
-
-var aaa = `
-function(){
-    const myChart = %MY_ECHARTS%;
-    var dataLen = myChart.getOption().legend.data;
-    console.log(dataLen);
-}
-`
-
-var TooltipFormatter = `
-function(params) {
-	var params = params.value
-	var hours = Math.floor(value);
-	var minutes = Math.round((value - hours) * 60);
-	var v = hours + 'Hrs:' + minutes + 'Mins' 
-	return {b}:<br />{a}: ${v};
-}`

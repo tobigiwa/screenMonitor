@@ -30,7 +30,6 @@ When this command is invoked, it prints "stop called" to the standard output and
 			return
 		}
 
-		fmt.Println(strings.TrimSpace(string(result)))
 		arrayOfpidByte := bytes.Split(result, []byte(" "))
 
 		if len(arrayOfpidByte) > 1 {
@@ -46,14 +45,12 @@ When this command is invoked, it prints "stop called" to the standard output and
 						log.Println("this should not happen2", err)
 						continue
 					}
-					fmt.Println(otherProcess)
 					err = syscall.Kill(otherProcess, syscall.SIGINT)
 					if err != nil {
 						log.Println("err killing", err)
 					}
 
 				}
-				fmt.Println("success")
 				return
 			}
 

@@ -18,29 +18,17 @@ var (
 type dailyAppScreenTime map[types.Date]types.Stats
 
 type AppInfo struct {
-	AppName           string             `json:"appName"`
-	IsIconSet         bool               `json:"isIconSet"`
-	IsCmdLineSet      bool               `json:"isCmdLine"`
-	IsCategorySet     bool               `json:"isCategorySet"`
-	CmdLine           string             `json:"cmdLine"`
-	Icon              []byte             `json:"icon"`
-	DesktopCategories []string           `json:"desktopCategories"`
-	Category          types.Category     `json:"category"`
-	ScreenStat        dailyAppScreenTime `json:"screenStat"`
-}
-
-type AppStat struct {
-	AppName string      `json:"appName"`
-	Usage   types.Stats `json:"usage"`
+	types.AppIconCategoryAndCmdLine
+	ScreenStat dailyAppScreenTime `json:"screenStat"`
 }
 
 type DailyStat struct {
-	EachApp  []AppStat   `json:"eachApp"`
-	DayTotal types.Stats `json:"dayTotal"`
+	EachApp  []types.AppStat `json:"eachApp"`
+	DayTotal types.Stats     `json:"dayTotal"`
 }
 
 type WeeklyStat struct {
-	EachApp       []AppStat                                         `json:"eachApp"`
+	EachApp       []types.AppStat                                   `json:"eachApp"`
 	WeekTotal     types.Stats                                       `json:"weekTotal"`
 	DayByDayTotal [7]types.GenericKeyValue[types.Date, types.Stats] `json:"dayByDayTotal"`
 }

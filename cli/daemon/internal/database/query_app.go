@@ -32,21 +32,7 @@ func (bs *BadgerDBStore) GetAppIconCategoryAndCmdLine(appNames []string) ([]type
 				continue
 			}
 
-			a := types.AppIconCategoryAndCmdLine{AppName: app.AppName}
-			if app.IsIconSet {
-				a.Icon = app.Icon
-				a.IsIconSet = true
-			}
-			if app.IsCategorySet {
-				a.Category = string(app.Category)
-				a.IsCategorySet = true
-			} else {
-				a.DesktopCategories = app.DesktopCategories
-			}
-			if app.IsCmdLineSet {
-				a.CmdLine = app.CmdLine
-				a.IsCmdLineSet = true
-			}
+			a := app.AppIconCategoryAndCmdLine
 			result[i] = a
 		}
 		return nil
@@ -56,13 +42,13 @@ func (bs *BadgerDBStore) GetAppIconCategoryAndCmdLine(appNames []string) ([]type
 }
 
 func (bs *BadgerDBStore) AppWeeklyStat(appName string, anyDayInTheWeek types.Date) (types.AppRangeStat, error) {
-	date, _ := ParseKey(anyDayInTheWeek)
+	date, _ := helperFuncs.ParseKey(anyDayInTheWeek)
 	days := daysInThatWeek(date)
 	return bs.appRangeStat(appName, days[:])
 }
 
 func (bs *BadgerDBStore) AppMonthlyStat(appName, month, year string) (types.AppRangeStat, error) {
-	dates, err := AllTheDaysInMonth(year, month)
+	dates, err := helperFuncs.AllTheDaysInMonth(year, month)
 	if err != nil {
 		return types.AppRangeStat{}, err
 	}
@@ -70,8 +56,8 @@ func (bs *BadgerDBStore) AppMonthlyStat(appName, month, year string) (types.AppR
 }
 
 func (bs *BadgerDBStore) AppDateRangeStat(appName string, start, end types.Date) (types.AppRangeStat, error) {
-	startDate, _ := ParseKey(start)
-	endDate, _ := ParseKey(end)
+	startDate, _ := helperFuncs.ParseKey(start)
+	endDate, _ := helperFuncs.ParseKey(end)
 
 	if !endDate.After(startDate) {
 		return types.AppRangeStat{}, errors.New("end date is not after start date")
@@ -129,4 +115,47 @@ func (bs *BadgerDBStore) appRangeStat(appName string, dateRange []types.Date) (t
 	result.DaysRange = arr
 	result.TotalRange = stat
 	return result, nil
+}
+
+func (bs *BadgerDBStore) SetAppCategory(appName string, category types.Category) error {
+	byteData, err := bs.Get(dbAppKey(appName))
+	if err != nil {
+		return err
+	}
+	appInfo, err := helperFuncs.DecodeJSON[AppInfo](byteData)
+	if err != nil {
+		return err
+	}
+	appInfo.Category = category
+	appInfo.IsCategorySet = true
+
+	byteData, err = helperFuncs.EncodeJSON(appInfo)
+	if err != nil {
+		return err
+	}
+
+	return bs.setOrUpdateKeyValue(dbAppKey(appName), byteData)
+}
+func (bs *BadgerDBStore) GetAllACategories() ([]types.Category, error) {
+	byteData, err := bs.Get(dbCategoryKey)
+
+	if err != nil {
+		if !errors.Is(err, badger.ErrKeyNotFound) {
+			return nil, err
+		}
+
+		byteData, err := helperFuncs.EncodeJSON(types.DefalutCategory)
+		if err != nil {
+			return nil, err
+		}
+
+		if err = bs.setOrUpdateKeyValue(dbCategoryKey, byteData); err != nil {
+			return nil, err
+		}
+
+		return types.DefalutCategory, nil
+	}
+
+	return helperFuncs.DecodeJSON[[]types.Category](byteData)
+
 }

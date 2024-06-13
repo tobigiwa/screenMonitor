@@ -1,6 +1,7 @@
 package types
 
 import (
+	"errors"
 	"time"
 
 	"github.com/BurntSushi/xgb/xproto"
@@ -8,21 +9,37 @@ import (
 )
 
 type Message struct {
-	Endpoint         string          `json:"endpoint"`
-	StatusCheck      string          `json:"statusCheck"`
-	WeekStatRequest  string          `json:"weekStatRequest"`
-	WeekStatResponse WeekStatMessage `json:"weekStatResponse"`
-	AppStatRequest   AppStatRequest  `json:"appStatResquest"`
-	AppStatResponse  AppStatMessage  `json:"appStatResponse"`
-	ReminderRequest  Task            `json:"reminderRequest"`
-	ReminderResponse ReminderMessage `json:"reminderResponse"`
+	Endpoint            string              `json:"endpoint"`
+	StatusCheck         string              `json:"statusCheck"`
+	SetCategoryRequest  SetCategoryRequest  `json:"setCategoryRequest"`
+	SetCategoryResponse SetCategoryResponse `json:"setCategoryResponse"`
+	DayStatRequest      Date                `json:"dayStatRequest"`
+	DayStatResponse     DayStatMessage      `json:"dayStatResponse"`
+	WeekStatRequest     string              `json:"weekStatRequest"`
+	WeekStatResponse    WeekStatMessage     `json:"weekStatResponse"`
+	AppStatRequest      AppStatRequest      `json:"appStatResquest"`
+	AppStatResponse     AppStatMessage      `json:"appStatResponse"`
+	ReminderRequest     Task                `json:"reminderRequest"`
+	ReminderResponse    ReminderMessage     `json:"reminderResponse"`
+}
+
+type SetCategoryRequest struct {
+	AppName  string   `json:"appName"`
+	Category Category `json:"category"`
+}
+
+type SetCategoryResponse struct {
+	IsCategorySet bool  `json:"isCategorySet"`
+	IsError       bool  `json:"isError"`
+	Error         error `json:"error"`
 }
 
 type ReminderMessage struct {
-	Task           Task  `json:"task"`
-	CreatedNewTask bool  `json:"createdNewTask"`
-	IsError        bool  `json:"isError"`
-	Error          error `json:"error"`
+	Task           Task   `json:"task"`
+	CreatedNewTask bool   `json:"createdNewTask"`
+	AllTask        []Task `json:"allTask"`
+	IsError        bool   `json:"isError"`
+	Error          error  `json:"error"`
 }
 
 type WeekStatMessage struct {
@@ -33,8 +50,17 @@ type WeekStatMessage struct {
 	Month           string              `json:"month"`
 	Year            string              `json:"year"`
 	AppDetail       []ApplicationDetail `json:"appDetail"`
+	AllCategory     []Category          `json:"allCategory"`
 	IsError         bool                `json:"isError"`
 	Error           error               `json:"error"`
+}
+
+type DayStatMessage struct {
+	EachApp  []AppStat `json:"eachApp"`
+	DayTotal Stats     `json:"dayTotal"`
+	Date     string    `josn:"date"`
+	IsError  bool      `json:"isError"`
+	Error    error     `json:"error"`
 }
 
 type AppStatRequest struct {
@@ -63,7 +89,7 @@ type AppIconCategoryAndCmdLine struct {
 	IsIconSet         bool     `json:"isIconSet"`
 	IsCmdLineSet      bool     `json:"isCmdLine"`
 	CmdLine           string   `json:"cmdLine"`
-	Category          string   `json:"category"`
+	Category          Category `json:"category"`
 	IsCategorySet     bool     `json:"isCategorySet"`
 	DesktopCategories []string `json:"desktopCategories"`
 }
@@ -85,6 +111,11 @@ type AppRangeStat struct {
 	TotalRange Stats                          `json:"totalRange"`
 }
 
+type AppStat struct {
+	AppName string `json:"appName"`
+	Usage   Stats  `json:"usage"`
+}
+
 type (
 
 	// date underneath is a
@@ -93,6 +124,16 @@ type (
 	ScreenType string
 	Category   string
 )
+
+func (d Date) ToTime() (time.Time, error) {
+	if !DateTypeRegexPattern.MatchString(string(d)) {
+		return time.Time{}, errors.New("invalid date format")
+	}
+	return time.Parse(TimeFormat, string(d))
+}
+func (c Category) String() string {
+	return string(c)
+}
 
 type Stats struct {
 	Active         float64        `json:"active"`

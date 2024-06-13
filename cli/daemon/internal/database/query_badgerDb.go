@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"fmt"
 
-	helperFuncs "pkg/helper"
-
 	badger "github.com/dgraph-io/badger/v4"
 )
 
@@ -29,7 +27,7 @@ func (bs *BadgerDBStore) Close() error {
 	return bs.db.Close()
 }
 
-func (bs *BadgerDBStore) updateKeyValue(key, byteData []byte) error {
+func (bs *BadgerDBStore) setOrUpdateKeyValue(key, byteData []byte) error {
 	err := bs.db.Update(func(txn *badger.Txn) error {
 		err := txn.Set(key, byteData)
 		return err
@@ -151,20 +149,4 @@ func (bs *BadgerDBStore) UpdateOpertionOnBuCKET(dbPrefix string, opsFunc func([]
 		return err
 	}
 	return nil
-}
-
-func exampleOf_opsFunc(v []byte) ([]byte, error) {
-	var (
-		app AppInfo
-		err error
-	)
-
-	if app, err = helperFuncs.DecodeJSON[AppInfo](v); err != nil {
-		return nil, err
-	}
-	fmt.Println(app.AppName, "cmdLine-", app.CmdLine, "categories-", app.DesktopCategories)
-	app.IsCmdLineSet = false
-	app.CmdLine = ""
-
-	return helperFuncs.EncodeJSON(app)
 }
