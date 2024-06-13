@@ -47,6 +47,7 @@ func (a *App) CreateReminderHandler(w http.ResponseWriter, r *http.Request) {
 
 		case "reminder":
 			startTime, err := time.ParseInLocation("2006-01-02T15:04", value[0], time.Local)
+			fmt.Println(startTime, value[0])
 			if err != nil {
 				a.clientError(w, http.StatusBadRequest, err)
 				return

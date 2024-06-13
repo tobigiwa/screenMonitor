@@ -1,8 +1,8 @@
 package frontend
 
 import "pkg/types"
-import "time"
 
+// import "time"
 templ ReminderAndAlertPage(tasks []types.Task) {
 	<!DOCTYPE html>
 	<html lang="en">
@@ -111,8 +111,6 @@ templ createNewReminderDialog() {
 						<input
 							type="datetime-local"
 							name="reminder"
-							value={ FormatTimeTOHMTLDatetimeLocal(time.Now()) }
-							min={ FormatTimeTOHMTLDatetimeLocal(time.Now()) }
 							max={ FormatTimeTOHMTLDatetimeLocal(nextTwoWeeks()) }
 						/>
 					</div>
@@ -228,9 +226,19 @@ templ createNewReminderDialog() {
 			</div>
 		</form>
 		<script>
+			function getLocalDateTime() {
+				const now = new Date();
+				const timeZoneOffset = now.getTimezoneOffset() * 60000;
+				const localDateTime = new Date(now.getTime() - timeZoneOffset);
+				return localDateTime.toISOString().slice(0, 16);
+			}
+
 			const dialog = document.querySelector('dialog');
-			const showModalbutton = document.querySelector('button');
-			showModalbutton.addEventListener('click', () => {
+			document.querySelector('button').addEventListener('click', () => {
+				const dateTimeInput = document.querySelector('input[type="datetime-local"]');
+				dateTimeInput.value = getLocalDateTime()
+				dateTimeInput.min = getLocalDateTime()
+
 				dialog.showModal();
 			});
 		</script>
