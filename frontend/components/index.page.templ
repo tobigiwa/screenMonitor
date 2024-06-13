@@ -110,14 +110,13 @@ templ chartHighlight(appDetails []types.ApplicationDetail, totalWeekUsage float6
 					}
 					<div class="info">
 						<div class="appName" style="font-size:large;font-weight:bold;">{ app.AppInfo.AppName }</div>
+						<div class="desktopCategories" hidden>{ strings.Join(app.AppInfo.DesktopCategories, "  ") }</div>
 						if app.AppInfo.IsCategorySet && app.AppInfo.Category.String() != "" {
 							<button disabled class="category" style="color:white;">{ app.AppInfo.Category.String() }</button>
 						} else {
 							if helperFuncs.IsInCurrentWeekDate(types.Date(anyDay)) {
 								<button class="category" onclick="openCategoryDialog(event)">Selct application catergory</button>
-								@setCategoryDialog(app.AppInfo, allCategory)
-							} else {
-								<button class="category" disabled style="color:white;"><i>set category in "This Week" <b>OR</b> Settings page</i></button>
+								@setCategoryDialog(allCategory)
 							}
 						}
 					</div>
@@ -131,24 +130,52 @@ templ chartHighlight(appDetails []types.ApplicationDetail, totalWeekUsage float6
 		</ul>
 		<script>
 			function openCategoryDialog(event) {
-			const dialog = document.getElementById('categoryDialog');
+				const trigger = event.target.parentElement.parentElement; // the li
+				const triggerIconElement = trigger.querySelector('img');
+				const icon = triggerIconElement.getAttribute('src');
+				const appName = trigger.querySelector('.appName').innerHTML;
+				const desktopCategories = trigger.querySelector('.desktopCategories').innerHTML;
+
 				event.stopPropagation();
+
+				// build the modal dialog
+				const dialog = document.getElementById('categoryDialog');
+				const formElement = dialog.querySelector('form').reset();
+				const imgElement = dialog.querySelector('form .head img');
+				const headerClassParagraph = dialog.querySelector('form .head p');
+				const dialogLegend = dialog.querySelector('form legend');
+				const dialogHiddenInput = dialog.querySelector('form fieldset+input');
+				const dialogDesktopCategoriesClass = dialog.querySelector('form div+div');
+				imgElement.setAttribute('src', icon);
+				imgElement.setAttribute('alt', appName);
+				dialogHiddenInput.setAttribute('value', appName);
+				headerClassParagraph.innerHTML = `<b>${appName}</b>`
+				dialogLegend.innerHTML = `Select a category for ${appName}:`
+				
+				if (desktopCategories === '' || desktopCategories.trim() === '') {
+					// dialogDesktopCategoriesClass.remove();
+					dialogDesktopCategoriesClass.style.display = 'none';
+				} else {
+					dialogDesktopCategoriesClass.innerHTML = `Application file category(s):\n${desktopCategories}`;
+				}
+
+				// show the modal dialog
 				dialog.showModal();
 			};
 		</script>
 	</div>
 }
 
-templ setCategoryDialog(appInfo types.AppIconCategoryAndCmdLine, allCategory []types.Category) {
+templ setCategoryDialog(allCategory []types.Category) {
 	<dialog class="select-category" id="categoryDialog">
 		<form method="post" action="/setCategory">
 			<div class="head">
-				<p>This is what { appInfo.AppName } says it is:</p>
-				<img src={ getImageFilePath(appInfo.AppName, appInfo.Icon) } alt={ appInfo.AppName }/>
+				<p></p>
+				<img src="" alt=""/>
 			</div>
-			<div class="desktop-categories">{ strings.Join(appInfo.DesktopCategories, "  ") }</div>
+			<div class="desktop-categories">"</div>
 			<fieldset>
-				<legend>Select a category for { appInfo.AppName }:</legend>
+				<legend></legend>
 				for _, catergory := range allCategory {
 					<div>
 						<input
@@ -160,7 +187,7 @@ templ setCategoryDialog(appInfo types.AppIconCategoryAndCmdLine, allCategory []t
 					</div>
 				}
 			</fieldset>
-			<input type="hidden" name="appName" value={ appInfo.AppName }/>
+			<input type="hidden" name="appName" value=""/>
 			<p class="space">
 				OR
 			</p>
@@ -171,11 +198,8 @@ templ setCategoryDialog(appInfo types.AppIconCategoryAndCmdLine, allCategory []t
 			</div>
 		</form>
 		<script>
-		const dialog = document.getElementById('categoryDialog');
-			const closeModalBtn = document.querySelector(".close-modal");
-			closeModalBtn.addEventListener('click', ()=> {
-				dialog.close()
-			})
+			const dialog = document.getElementById('categoryDialog');
+			dialog.addEventListener('click', (e) => e.stopPropagation());
 		</script>
 	</dialog>
 }

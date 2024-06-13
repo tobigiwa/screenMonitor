@@ -44,7 +44,7 @@ func (bs *BadgerDBStore) WriteUsage(data types.ScreenTime) error {
 		}
 
 		updateAppInfoForOldApp(data.WindowID, &app)
-		app.AppName = data.AppName
+		app.AppName = data.AppName // !!!needs removing...
 		fmt.Printf("Existing appName:%v, time so far is: %v:%v, brought in %f\n\n", data.AppName, app.ScreenStat[today()].Active, app.ScreenStat[today()].Open, data.Duration)
 		return updateAppStats(data, &app, txn)
 
@@ -164,63 +164,10 @@ func ExampleOf_opsFunc(v []byte) ([]byte, error) {
 	if app, err = helperFuncs.DecodeJSON[AppInfo](v); err != nil {
 		return nil, err
 	}
+	// a := app.AppName
 	// app.AppIconCategoryAndCmdLine = types.NoAppIconCategoryAndCmdLine
+	// app.AppName = a
 	fmt.Println(app.AppName, app.IsCategorySet, app.DesktopCategories, "category-", app.Category, app.IsCmdLineSet, app.CmdLine, app.IsIconSet)
+
 	return helperFuncs.EncodeJSON(app)
 }
-
-// func (bs *BadgerDBStore) BatchWriteUsage(data []ScreenTime) error {
-// 	wb := bs.db.NewWriteBatch()
-// 	defer wb.Cancel()
-
-// 	for _, d := range data {
-// 		item, err := bs.db.NewTransaction(false).Get([]byte(d.AppName))
-// 		var newApp bool
-// 		if newApp = errors.Is(err, badger.ErrKeyNotFound); err != nil && !newApp {
-// 			return err
-// 		}
-
-// 		var appInfo appInfo
-
-// 		if newApp {
-// 			fmt.Printf("new app :%v\n\n", d.AppName)
-// 			appInfo.AppName = d.AppName
-// 			appInfo.ScreenStat = make(dailyAppScreenTime)
-// 		}
-
-// 		if err == nil {
-// 			valCopy, err := item.ValueCopy(nil)
-// 			if err != nil {
-// 				return err
-// 			}
-// 			if err := appInfo.deserialize(valCopy); err != nil {
-// 				return err
-// 			}
-// 			if d.AppName != appInfo.AppName {
-// 				return ErrAppKeyMismatch
-// 			}
-// 			fmt.Printf("existing appName:%v, time so far is: %v:%v\n\n", d.AppName, appInfo.ScreenStat[Key()].Active, appInfo.ScreenStat[Key()].Inactive)
-// 		}
-
-// 		if d.Type == Active {
-// 			stat := appInfo.ScreenStat[Key()]
-// 			stat.Active += d.Duration
-// 			appInfo.ScreenStat[Key()] = stat
-// 		} else {
-// 			stat := appInfo.ScreenStat[Key()]
-// 			stat.Inactive += d.Duration
-// 			appInfo.ScreenStat[Key()] = stat
-// 		}
-
-// 		ser, err := appInfo.serialize()
-// 		if err != nil {
-// 			return err
-// 		}
-
-// 		if err := wb.Set([]byte(d.AppName), ser); err != nil {
-// 			return err
-// 		}
-// 	}
-
-// 	return wb.Flush()
-// }
