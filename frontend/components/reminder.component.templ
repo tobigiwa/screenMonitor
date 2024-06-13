@@ -1,8 +1,8 @@
 package frontend
 
 import "pkg/types"
+import "time"
 
-// import "time"
 templ ReminderAndAlertPage(tasks []types.Task) {
 	<!DOCTYPE html>
 	<html lang="en">
@@ -62,15 +62,19 @@ templ reminderList(task []types.Task) {
 							<button class="edit-button">Edit</button>
 						</div>
 						<div class="alert">
-							<p class="start"><span class="label"><i>Starts:</i></span> <span class="content">{ formatTimeToHumanReadable(t.TaskTime.StartTime) }</span></p>
-							<p class="remind">
-								<span class="label"><i>reminder:</i></span>
-								<span class="content">{ formatTimeToHumanReadable(t.TaskTime.StartTime.Add(intToDuration(-t.TaskTime.AlertTimesInMinutes[0]))) }</span>
-							</p>
-							<p class="remind">
-								<span class="label"><i>reminder:</i></span>
-								<span class="content">{ formatTimeToHumanReadable(t.TaskTime.StartTime.Add(intToDuration(-t.TaskTime.AlertTimesInMinutes[1]))) }</span>
-							</p>
+							<p class="start"><span class="label"><i>Starts at:</i></span> <span class="content">{ formatTimeToHumanReadable(t.TaskTime.StartTime) }</span></p>
+							if time.Now().Before(t.TaskTime.StartTime.Add(intToDuration(-t.TaskTime.AlertTimesInMinutes[0]))) {
+								<p class="remind">
+									<span class="label"><i>reminder at:</i></span>
+									<span class="content">{ formatTimeToHumanReadable(t.TaskTime.StartTime.Add(intToDuration(-t.TaskTime.AlertTimesInMinutes[0]))) }</span>
+								</p>
+							}
+							if time.Now().Before(t.TaskTime.StartTime.Add(intToDuration(-t.TaskTime.AlertTimesInMinutes[1]))) {
+								<p class="remind">
+									<span class="label"><i>reminder at:</i></span>
+									<span class="content">{ formatTimeToHumanReadable(t.TaskTime.StartTime.Add(intToDuration(-t.TaskTime.AlertTimesInMinutes[1]))) }</span>
+								</p>
+							}
 						</div>
 					</div>
 				</li>
