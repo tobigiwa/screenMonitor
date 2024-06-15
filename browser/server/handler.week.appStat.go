@@ -50,8 +50,8 @@ func (a *App) AppStatHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if msg, err = a.writeAndReadWithDaemonService(msg); err != nil {
-		a.serverError(w, fmt.Errorf("error occurred in writeAndReadWithDaemonService:%w", err))
+	if msg, err = a.commWithDaemonService(msg); err != nil {
+		a.serverError(w, fmt.Errorf("error occurred in commWithDaemonService:%w", err))
 		return
 	}
 

@@ -2,6 +2,7 @@ package monitoring
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/BurntSushi/xgbutil"
 	"github.com/BurntSushi/xgbutil/ewmh"
@@ -18,7 +19,23 @@ func registerRootWindowForEvents(x11Conn *xgbutil.XUtil) {
 	xevent.PropertyNotifyFun(propertyNotifyEventFuncRoot).Connect(x11Conn, x11Conn.RootWin())
 }
 func propertyNotifyEventFuncRoot(x11Conn *xgbutil.XUtil, ev xevent.PropertyNotifyEvent) {
-	monitor.rootPropertyNotifyHandler(x11Conn, ev, netActiveWindowAtom, netClientStackingAtom)
+
+	if ev.Atom == netActiveWindowAtom { // window has changed
+		if currActiveWindow, err := ewmh.ActiveWindowGet(x11Conn); (err == nil) && (currActiveWindow != 0) { // 0 is root, to much noise
+			
+			if netActiveWindow.WindowID == xevent.NoWindow { // at first run i.e on new x11 session(on boot), this means it does not track 'until your first launched application'/'your screensaver' until first app launch
+				netActiveWindow.WindowID = ev.Window                                   // SET THE WINDOW ID
+				netActiveWindow.TimeStamp = time.Now()                                 // SET THE TIME
+				netActiveWindow.WindowName, _ = getWindowClassName(x11Conn, ev.Window) // SET THE NAME
+				return
+			}
+
+			if netActiveWindow.WindowID != currActiveWindow { // this helps takes care of noise from tabs switch
+				monitor.windowChanged(x11Conn, currActiveWindow)
+			}
+		}
+	}
+
 }
 
 func mapNotifyEventFuncRoot(x11Conn *xgbutil.XUtil, ev xevent.MapNotifyEvent) {

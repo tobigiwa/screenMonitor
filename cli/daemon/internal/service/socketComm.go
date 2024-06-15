@@ -116,22 +116,28 @@ func treatMessage(c net.Conn) {
 			return
 
 		case "weekStat":
-			msg.WeekStatResponse = ServiceInstance.getWeekStat(msg)
+			msg.WeekStatResponse = ServiceInstance.getWeekStat(msg.WeekStatRequest)
 
 		case "appStat":
-			msg.AppStatResponse = ServiceInstance.getAppStat(msg)
+			msg.AppStatResponse = ServiceInstance.getAppStat(msg.AppStatRequest)
 
 		case "dayStat":
-			msg.DayStatResponse = ServiceInstance.getDayStat(msg)
+			msg.DayStatResponse = ServiceInstance.getDayStat(msg.DayStatRequest)
 
 		case "createReminder":
-			msg.ReminderResponse = ServiceInstance.createReminder(msg)
+			msg.ReminderAndLimitResponse = ServiceInstance.addNewReminder(msg.ReminderAndLimitRequest)
 
 		case "allReminderTask":
-			msg.ReminderResponse = ServiceInstance.allReminderTask(msg)
+			msg.ReminderAndLimitResponse = ServiceInstance.allReminderTask()
+
+		case "allLimitTask":
+			msg.ReminderAndLimitResponse = ServiceInstance.allReminderTask()
 
 		case "setCategory":
 			msg.SetCategoryResponse = ServiceInstance.setAppCategory(msg.SetCategoryRequest)
+
+		case "createLimit":
+			msg.ReminderAndLimitResponse = ServiceInstance.addNewLimitApp(msg.ReminderAndLimitRequest)
 		}
 
 		bytes, err := helperFuncs.EncodeJSON(msg)

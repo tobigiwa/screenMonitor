@@ -58,10 +58,10 @@ func (a *App) CheckDaemonService() (types.Message, error) {
 		Endpoint:    "startConnection",
 		StatusCheck: "I wish this project prospered.",
 	}
-	return a.writeAndReadWithDaemonService(msg)
+	return a.commWithDaemonService(msg)
 }
 
-func (a *App) writeAndReadWithDaemonService(msg types.Message) (types.Message, error) {
+func (a *App) commWithDaemonService(msg types.Message) (types.Message, error) {
 	bytesData, err := helperFuncs.EncodeJSON(msg) // encode message in byte
 	if err != nil {
 		return types.NoMessage, fmt.Errorf("encode %w", err)

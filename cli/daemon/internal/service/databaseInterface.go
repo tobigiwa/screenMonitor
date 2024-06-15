@@ -26,4 +26,5 @@ type DatabaseInterface interface {
 	AddTask(task types.Task) error
 	SetAppCategory(appName string, category types.Category) error
 	GetAllACategories() ([]types.Category, error)
+	UpdateAppInfoManually(key []byte, opsFunc func([]byte) ([]byte, error)) error
 }

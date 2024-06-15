@@ -17,6 +17,7 @@ func (a *App) Routes() *http.ServeMux {
 	mux.HandleFunc("GET /dayStat", a.DayStatHandler)
 	mux.HandleFunc("GET /reminder", a.ReminderAndAlertPageHandler)
 	mux.HandleFunc("POST /createReminder", a.CreateReminderHandler)
+	mux.HandleFunc("POST /createLimit", a.CreateLimitHandler)
 	mux.HandleFunc("POST /setCategory", a.SetCategory)
 
 	return mux

@@ -54,7 +54,7 @@ func (bs *BadgerDBStore) GetTaskByAppName(appName string) ([]types.Task, error) 
 
 	requestedTaskArr := make([]types.Task, 0, len(taskArry))
 	for i := 0; i < len(taskArry); i++ {
-		if taskArry[i].AppInfo.AppName == appName {
+		if taskArry[i].AppName == appName {
 			requestedTaskArr = append(requestedTaskArr, taskArry[i])
 		}
 	}

@@ -4,28 +4,45 @@
     min-height: calc(100vh - 4rem);
 }
 
+.reminder,
+.limit {
+    display: inline-flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 50%;
+    padding-left: 10px;
+}
+
+.limit {
+    background-color: red;
+}
+
+.reminder {
+    background-color: green;
+}
+
+
 .cards-holder {
     max-height: calc(100vh - 8rem);
     min-height: auto;
 }
 
 .sticky-header {
-    height: 4rem;
+    height: 3rem;
     position: sticky;
     top: 0;
     z-index: 10;
     display: inline-flex;
     justify-content: space-between;
-    align-items: center;
     width: 100%;
     background-color: var(--primary-color2);
     color: white;
+    margin-bottom: 5px;
 
     & button {
         width: 3rem;
         height: 3rem;
         border-radius: 5px;
-        /* margin-right: 10px; */
     }
 
     & img {
@@ -105,9 +122,6 @@ li+li {
         }
     }
 
-
-    .content {}
-
     .spacing {
         flex: 1;
         position: relative;
@@ -120,53 +134,78 @@ li+li {
     }
 }
 
-.new-reminder {
-    width: 98%;
-    padding: 0 10px;
-}
 
-.form-pair {
-    display: flex;
-    flex-direction: column;
-}
+.reminder-dialog {
 
-.titles {
-    width: 100%;
-    display: inline-flex;
-    justify-content: space-between;
-}
+    .new-reminder {
+        width: 98%;
+        padding: 0 10px;
+    }
 
-.reminder-time {
-    width: 100%;
-    display: inline-flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
+    .form-pair {
+        display: flex;
+        flex-direction: column;
+    }
 
-    & img {
-        width: 1rem;
+    .titles {
+        width: 100%;
+        display: inline-flex;
+        justify-content: space-between;
+    }
+
+    .reminder-time {
+        width: 100%;
+        display: inline-flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+
+        & img {
+            width: 1rem;
+        }
+    }
+
+    .combine {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    label {
+        margin-bottom: 5px;
+        font-style: italic;
+        font-size: 90%;
+    }
+
+    input[type="text"],
+    input[type="datetime-local"],
+    input[type="number"],
+    input[type="search"],
+    textarea {
+        padding: 5px;
+        font-size: 0.8rem;
+        margin-bottom: 10px;
     }
 }
 
-.combine {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
 
-label {
-    margin-bottom: 5px;
-    font-style: italic;
-    font-size: 90%;
-}
+.limit-dialog {
+    height: 30vh;
 
-input[type="text"],
-input[type="datetime-local"],
-input[type="number"],
-input[type="search"],
-textarea {
-    padding: 5px;
-    font-size: 0.8rem;
-    margin-bottom: 10px;
+    input[type="number"] {
+        margin-top: 0.8rem;
+        width: 8rem;
+        height: 2rem;
+    }
+
+    .inline {
+        margin-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    label {
+        font-style: italic;
+    }
 }
 
 .button-container {
@@ -191,4 +230,64 @@ button {
             dodgerblue,
             green);
     opacity: 0.75;
+}
+
+.limit-apps {
+    display: inline-flex;
+    width: 100%;
+    padding: 0 5px;
+    justify-content: space-between;
+    background-color: var(--primary-color2);
+    color: var(--white-color);
+
+
+    .appInfo {
+        display: inline-flex;
+        justify-content: start;
+        align-items: center;
+        line-height: 3rem;
+        gap: 5px;
+        width: 50%;
+        padding: 0 5px;
+
+    }
+
+    .limitInfo {
+        display: inline-flex;
+        justify-content: end;
+        align-items: center;
+        gap: 30px;
+        width: 50%;
+        padding: 0 5px;
+    }
+
+    img {
+        height: 2rem;
+        width: 2rem;
+        vertical-align: middle;
+    }
+
+    button {
+        padding: 10px;
+        background-color: #161d1d;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    p {
+        margin: 0;
+        padding: 0;
+    }
+
+    .shade {
+        background-color: #9c6767;
+        font-weight: bold;
+        font-style: italic;
+        height: 2rem;
+        width: 10rem;
+        text-align: center;
+        padding-top: 7px;
+    }
 }

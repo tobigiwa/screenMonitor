@@ -1,6 +1,7 @@
 package jobs
 
 import (
+	monitoring "LiScreMon/cli/daemon/internal/monitoring/linux"
 	"fmt"
 	"log"
 	"os"
@@ -104,6 +105,9 @@ func (tm *TaskManager) disperseTask() {
 			tm.createRemidersWithAction(task)
 
 		case types.Limit:
+			fmt.Printf("this tasks got here \n+%v\n\n", task)
+			monitoring.AddNewLimit(task)
+
 		}
 	}
 
@@ -129,7 +133,7 @@ func (tm *TaskManager) createRemidersWithAction(task types.Task) {
 		gocron.WithEventListeners(
 			gocron.AfterJobRuns(
 				func(jobID uuid.UUID, jobName string) {
-					cmd := exec.Command("bash", "-c", task.AppInfo.CmdLine)
+					cmd := exec.Command("bash", "-c", task.CmdLine)
 					err := cmd.Start()
 					if err != nil {
 						log.Println(err)

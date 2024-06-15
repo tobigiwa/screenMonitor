@@ -20,7 +20,7 @@ func (s *Service) StopTaskManger() error {
 	return s.taskManager.CloseChan()
 }
 
-func (s *Service) getWeekStat(msg types.Message) types.WeekStatMessage {
+func (s *Service) getWeekStat(msg string) types.WeekStatMessage {
 	var (
 		weekStat    db.WeeklyStat
 		appsInfo    []types.AppIconCategoryAndCmdLine
@@ -28,7 +28,7 @@ func (s *Service) getWeekStat(msg types.Message) types.WeekStatMessage {
 		err         error
 	)
 
-	if weekStat, err = s.db.GetWeek(msg.WeekStatRequest); err != nil {
+	if weekStat, err = s.db.GetWeek(msg); err != nil {
 		return types.WeekStatMessage{IsError: true, Error: fmt.Errorf("error weekStat: %w", err)}
 	}
 
@@ -77,19 +77,19 @@ func (s *Service) getWeekStat(msg types.Message) types.WeekStatMessage {
 	}
 }
 
-func (s *Service) getAppStat(msg types.Message) types.AppStatMessage {
+func (s *Service) getAppStat(msg types.AppStatRequest) types.AppStatMessage {
 	var (
 		appStat types.AppRangeStat
 		err     error
 	)
 
-	switch msg.AppStatRequest.StatRange {
+	switch msg.StatRange {
 	case "week":
-		appStat, err = s.db.AppWeeklyStat(msg.AppStatRequest.AppName, msg.AppStatRequest.Start)
+		appStat, err = s.db.AppWeeklyStat(msg.AppName, msg.Start)
 	case "month":
-		appStat, err = s.db.AppMonthlyStat(msg.AppStatRequest.AppName, msg.AppStatRequest.Month, msg.AppStatRequest.Year)
+		appStat, err = s.db.AppMonthlyStat(msg.AppName, msg.Month, msg.Year)
 	case "range":
-		appStat, err = s.db.AppDateRangeStat(msg.AppStatRequest.AppName, msg.AppStatRequest.Start, msg.AppStatRequest.End)
+		appStat, err = s.db.AppDateRangeStat(msg.AppName, msg.Start, msg.End)
 	}
 
 	if err != nil {
@@ -119,16 +119,14 @@ func (s *Service) getAppStat(msg types.Message) types.AppStatMessage {
 	}
 }
 
-func (s *Service) createReminder(msg types.Message) types.ReminderMessage {
-
-	task := msg.ReminderRequest
+func (s *Service) addNewReminder(task types.Task) types.ReminderMessage {
 
 	if task.Job == types.ReminderWithAction {
-		appInfo, err := s.db.GetAppIconCategoryAndCmdLine([]string{task.AppInfo.AppName})
+		appInfo, err := s.db.GetAppIconCategoryAndCmdLine([]string{task.AppName})
 		if err != nil {
 			return types.ReminderMessage{IsError: true, Error: err}
 		}
-		task.AppInfo = appInfo[0]
+		task.AppIconCategoryAndCmdLine = appInfo[0]
 	}
 
 	err := s.taskManager.SendTaskToTaskManager(task)
@@ -141,7 +139,7 @@ func (s *Service) createReminder(msg types.Message) types.ReminderMessage {
 	}
 }
 
-func (s *Service) allReminderTask(msg types.Message) types.ReminderMessage {
+func (s *Service) allReminderTask() types.ReminderMessage {
 
 	tasks, err := s.db.GetAllTask()
 	if err != nil {
@@ -162,12 +160,12 @@ func (s *Service) allReminderTask(msg types.Message) types.ReminderMessage {
 	return types.ReminderMessage{AllTask: slices.Clip(validTask)}
 }
 
-func (s *Service) getDayStat(msg types.Message) types.DayStatMessage {
-	dayStat, err := s.db.GetDay(msg.DayStatRequest)
+func (s *Service) getDayStat(msg types.Date) types.DayStatMessage {
+	dayStat, err := s.db.GetDay(msg)
 	if err != nil {
 		return types.DayStatMessage{IsError: true, Error: err}
 	}
-	d, _ := helperFuncs.ParseKey(msg.DayStatRequest)
+	d, _ := helperFuncs.ParseKey(msg)
 	date := fmt.Sprintf("%s. %s %s, %d", strings.TrimSuffix(d.Weekday().String(), "day"), helperFuncs.AddOrdinalSuffix(d.Day()), d.Month().String(), d.Year())
 
 	return types.DayStatMessage{EachApp: dayStat.EachApp, DayTotal: dayStat.DayTotal, Date: date}
@@ -181,19 +179,12 @@ func (s *Service) setAppCategory(msg types.SetCategoryRequest) types.SetCategory
 	return types.SetCategoryResponse{IsCategorySet: true}
 }
 
-// func savePNGImage(filename string, bytes []byte) error {
-// 	// Create a new file
-// 	file, err := os.Create(filename)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	defer file.Close()
+func (s *Service) addNewLimitApp(msg types.Task) types.ReminderMessage {
 
-// 	// Write the byte slice to the file
-// 	_, err = file.Write(bytes)
-// 	if err != nil {
-// 		return err
-// 	}
+	err := s.taskManager.SendTaskToTaskManager(msg)
+	if err != nil {
+		return types.ReminderMessage{IsError: true, Error: err}
+	}
 
-// 	return nil
-// }
+	return types.ReminderMessage{CreatedNewTask: true}
+}

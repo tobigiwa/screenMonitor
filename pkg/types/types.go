@@ -9,18 +9,18 @@ import (
 )
 
 type Message struct {
-	Endpoint            string              `json:"endpoint"`
-	StatusCheck         string              `json:"statusCheck"`
-	SetCategoryRequest  SetCategoryRequest  `json:"setCategoryRequest"`
-	SetCategoryResponse SetCategoryResponse `json:"setCategoryResponse"`
-	DayStatRequest      Date                `json:"dayStatRequest"`
-	DayStatResponse     DayStatMessage      `json:"dayStatResponse"`
-	WeekStatRequest     string              `json:"weekStatRequest"`
-	WeekStatResponse    WeekStatMessage     `json:"weekStatResponse"`
-	AppStatRequest      AppStatRequest      `json:"appStatResquest"`
-	AppStatResponse     AppStatMessage      `json:"appStatResponse"`
-	ReminderRequest     Task                `json:"reminderRequest"`
-	ReminderResponse    ReminderMessage     `json:"reminderResponse"`
+	Endpoint                 string              `json:"endpoint"`
+	StatusCheck              string              `json:"statusCheck"`
+	SetCategoryRequest       SetCategoryRequest  `json:"setCategoryRequest"`
+	SetCategoryResponse      SetCategoryResponse `json:"setCategoryResponse"`
+	DayStatRequest           Date                `json:"dayStatRequest"`
+	DayStatResponse          DayStatMessage      `json:"dayStatResponse"`
+	WeekStatRequest          string              `json:"weekStatRequest"`
+	WeekStatResponse         WeekStatMessage     `json:"weekStatResponse"`
+	AppStatRequest           AppStatRequest      `json:"appStatResquest"`
+	AppStatResponse          AppStatMessage      `json:"appStatResponse"`
+	ReminderAndLimitRequest  Task                `json:"reminderAndLimitRequest"`
+	ReminderAndLimitResponse ReminderMessage     `json:"reminderAndLimitResponse"`
 }
 
 type SetCategoryRequest struct {
@@ -156,11 +156,17 @@ type ScreenTime struct {
 }
 
 type Task struct {
-	UUID     uuid.UUID                 `json:"uuid"`
-	AppInfo  AppIconCategoryAndCmdLine `json:"appInfo"`
-	TaskTime TaskTime                  `json:"taskTime"`
-	UI       UItextInfo                `json:"ui"`
-	Job      TaskType                  `json:"job"`
+	AppIconCategoryAndCmdLine
+	UUID     uuid.UUID  `json:"uuid"`
+	TaskTime TaskTime   `json:"taskTime"`
+	UI       UItextInfo `json:"ui"`
+	Job      TaskType   `json:"job"`
+}
+
+type AppLimit struct {
+	Limit    float64 `json:"limit"`
+	EveryDay bool    `json:"oneTime"`
+	ExitApp  bool    `json:"exitApp"`
 }
 
 type UItextInfo struct {
@@ -176,4 +182,5 @@ type TaskTime struct {
 	EndTime             time.Time `json:"endTime"`
 	AlertTimesInMinutes [3]int    `json:"alertTimesInMinutes"`
 	AlertSound          [3]bool   `json:"alertSound"`
+	AppLimit
 }
