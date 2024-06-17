@@ -15,7 +15,7 @@ type Message struct {
 	SetCategoryResponse      SetCategoryResponse `json:"setCategoryResponse"`
 	DayStatRequest           Date                `json:"dayStatRequest"`
 	DayStatResponse          DayStatMessage      `json:"dayStatResponse"`
-	WeekStatRequest          string              `json:"weekStatRequest"`
+	WeekStatRequest          Date                `json:"weekStatRequest"`
 	WeekStatResponse         WeekStatMessage     `json:"weekStatResponse"`
 	AppStatRequest           AppStatRequest      `json:"appStatResquest"`
 	AppStatResponse          AppStatMessage      `json:"appStatResponse"`
@@ -35,11 +35,12 @@ type SetCategoryResponse struct {
 }
 
 type ReminderMessage struct {
-	Task           Task   `json:"task"`
-	CreatedNewTask bool   `json:"createdNewTask"`
-	AllTask        []Task `json:"allTask"`
-	IsError        bool   `json:"isError"`
-	Error          error  `json:"error"`
+	Task           Task                        `json:"task"`
+	CreatedNewTask bool                        `json:"createdNewTask"`
+	AllTask        []Task                      `json:"allTask"`
+	AllApps        []AppIconCategoryAndCmdLine `json:"allApps"`
+	IsError        bool                        `json:"isError"`
+	Error          error                       `json:"error"`
 }
 
 type WeekStatMessage struct {

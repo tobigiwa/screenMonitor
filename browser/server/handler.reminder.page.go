@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"pkg/types"
-	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -16,19 +15,28 @@ import (
 )
 
 func (a *App) ReminderAndAlertPageHandler(w http.ResponseWriter, r *http.Request) {
-	msg := types.Message{
-		Endpoint: "allReminderTask",
+
+	queryParam := r.URL.Query().Get("which")
+	var msg types.Message
+
+	if queryParam == "limit" {
+		msg = types.Message{Endpoint: "allLimitTask"}
+	} else {
+		msg = types.Message{Endpoint: "allReminderTask"}
 	}
+
 	msg, err := a.commWithDaemonService(msg)
 	if err != nil {
 		a.serverError(w, err)
 		return
 	}
 
-	slices.SortFunc(msg.ReminderAndLimitResponse.AllTask, func(a, b types.Task) int {
-		return a.TaskTime.StartTime.Compare(b.TaskTime.StartTime)
-	})
-	views.ReminderAndAlertPage(true, msg.ReminderAndLimitResponse.AllTask).Render(context.TODO(), w)
+	if queryParam == "limit" {
+		views.ReminderAndAlertPage("limit", msg.ReminderAndLimitResponse.AllTask, msg.ReminderAndLimitResponse.AllApps).Render(context.TODO(), w)
+		return
+	}
+
+	views.ReminderAndAlertPage("reminder", msg.ReminderAndLimitResponse.AllTask, msg.ReminderAndLimitResponse.AllApps).Render(context.TODO(), w)
 }
 
 func (a *App) CreateReminderHandler(w http.ResponseWriter, r *http.Request) {
@@ -116,7 +124,7 @@ func (a *App) CreateReminderHandler(w http.ResponseWriter, r *http.Request) {
 		a.serverError(w, fmt.Errorf("error creating reminder"))
 		return
 	}
-	http.Redirect(w, r, "/reminder", http.StatusSeeOther)
+	http.Redirect(w, r, "/task?which=reminder", http.StatusSeeOther)
 }
 
 func (a *App) CreateLimitHandler(w http.ResponseWriter, r *http.Request) {
@@ -133,18 +141,21 @@ func (a *App) CreateLimitHandler(w http.ResponseWriter, r *http.Request) {
 		switch key {
 		case "app":
 			task.AppName = value[0]
+
 		case "hrs":
 			hrs, err = strconv.Atoi(value[0])
 			if err != nil {
 				a.clientError(w, http.StatusBadRequest, fmt.Errorf("error parsing formData:%w", err))
 				return
 			}
+
 		case "min":
 			min, err = strconv.Atoi(value[0])
 			if err != nil {
 				a.clientError(w, http.StatusBadRequest, fmt.Errorf("error parsing formData:%w", err))
 				return
 			}
+
 		case "recurring":
 			val, err := strconv.ParseBool(value[0])
 			if err != nil {
@@ -155,6 +166,7 @@ func (a *App) CreateLimitHandler(w http.ResponseWriter, r *http.Request) {
 				task.TaskTime.EveryDay = true
 				task.Job = types.Limit
 			}
+
 		case "exitApp":
 			val, err := strconv.ParseBool(value[0])
 			if err != nil {
@@ -190,5 +202,5 @@ func (a *App) CreateLimitHandler(w http.ResponseWriter, r *http.Request) {
 		a.serverError(w, fmt.Errorf("error creating reminder"))
 		return
 	}
-	http.Redirect(w, r, "/reminder", http.StatusSeeOther)
+	http.Redirect(w, r, "/task?which=limit", http.StatusSeeOther)
 }

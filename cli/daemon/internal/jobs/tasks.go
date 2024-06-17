@@ -65,12 +65,18 @@ func (tm *TaskManager) StartTaskManger() error {
 	go tm.disperseTask()
 
 	for _, task := range tasks {
-		now, taskStartTime := time.Now(), task.TaskTime.StartTime
-		if taskStartTime.Before(now) {
-			if err := tm.dbHandle.RemoveTask(task.UUID); err != nil {
-				return fmt.Errorf("err deleting old task: %+v :err %v", task, err)
+
+		if task.Job == types.ReminderWithAction || task.Job == types.ReminderWithNoAction {
+			now, taskStartTime := time.Now(), task.TaskTime.StartTime
+			if taskStartTime.Before(now) {
+				if err := tm.dbHandle.RemoveTask(task.UUID); err != nil {
+					return fmt.Errorf("err deleting old task: %+v :err %v", task, err)
+				}
 			}
-			continue
+		}
+
+		if task.Job == types.Limit {
+
 		}
 
 		tm.channel <- task

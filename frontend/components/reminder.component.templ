@@ -4,7 +4,7 @@ import "pkg/types"
 import "time"
 import helperFuncs "pkg/helper"
 
-templ ReminderAndAlertPage(reminder bool, tasks []types.Task) {
+templ ReminderAndAlertPage(task string, tasks []types.Task, allApps []types.AppIconCategoryAndCmdLine) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
@@ -21,30 +21,34 @@ templ ReminderAndAlertPage(reminder bool, tasks []types.Task) {
 		<body>
 			<div class="page">
 				@menu()
-				@reminderAndAlert(reminder, tasks)
+				@reminderAndAlert(task, tasks, allApps)
 			</div>
 		</body>
 	</html>
 }
 
-templ reminderAndAlert(reminder bool, tasks []types.Task) {
+templ reminderAndAlert(task string, tasks []types.Task, allApps []types.AppIconCategoryAndCmdLine) {
 	<div class="main">
 		@Header()
 		<div class="reminder-page">
 			<div class="sticky-header">
-				<div class="reminder">
-					<h2>Reminder and Alert</h2>
+				<div class="reminder" style="cursor:pointer;">
+					<a href="/task?which=reminder">
+						<h2>Reminder and Alert</h2>
+					</a>
 					<button class="reminder-dialog__btn"><img src="assets/svg/add.svg" alt=""/></button>
 				</div>
-				<div class="limit">
-					<h2>Limit</h2>
+				<div class="limit" style="cursor:pointer;">
+					<a href="/task?which=limit">
+						<h2>Limit</h2>
+					</a>
 					<button class="limit-dialog__btn"><img src="assets/svg/add.svg" alt=""/></button>
 				</div>
 			</div>
 			if len(tasks) == 0 {
 				<div class="cards-holder" style="min-height: calc(100vh - 8rem); display: flex; justify-content: center; align-items: center; color:white">No reminder</div>
 			}
-			if reminder {
+			if task == "reminder" {
 				@reminderList(tasks)
 			} else {
 				@limitList(tasks)
@@ -52,7 +56,7 @@ templ reminderAndAlert(reminder bool, tasks []types.Task) {
 		</div>
 	</div>
 	@reminderDialog()
-	@limitDialog()
+	@limitDialog(allApps)
 }
 
 templ reminderList(task []types.Task) {
@@ -261,7 +265,7 @@ templ reminderDialog() {
 	</dialog>
 }
 
-templ limitDialog() {
+templ limitDialog(allApp []types.AppIconCategoryAndCmdLine) {
 	<dialog class="limit-dialog">
 		<form class="" method="post" action="/createLimit">
 			<select
@@ -271,9 +275,12 @@ templ limitDialog() {
 				required
 			>
 				<option
-					value
+					value=""
 					data-description="select app to limit"
 				>Apps</option>
+				for _, app := range allApp {
+					<option value={ app.AppName } data-image={ getImageFilePath(app.AppName, app.Icon) } data-description={ app.Category.String() }>{ app.AppName }</option>
+				}
 			</select>
 			<div class="inline">
 				<input

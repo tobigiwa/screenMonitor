@@ -129,9 +129,9 @@ func treatMessage(c net.Conn) {
 
 		case "allReminderTask":
 			msg.ReminderAndLimitResponse = ServiceInstance.allReminderTask()
-
+			
 		case "allLimitTask":
-			msg.ReminderAndLimitResponse = ServiceInstance.allReminderTask()
+			msg.ReminderAndLimitResponse = ServiceInstance.allLimitTask()
 
 		case "setCategory":
 			msg.SetCategoryResponse = ServiceInstance.setAppCategory(msg.SetCategoryRequest)

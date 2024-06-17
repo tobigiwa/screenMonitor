@@ -3,6 +3,7 @@ package service
 import (
 	db "LiScreMon/cli/daemon/internal/database"
 	"LiScreMon/cli/daemon/internal/jobs"
+	"cmp"
 	"fmt"
 	helperFuncs "pkg/helper"
 	"pkg/types"
@@ -20,7 +21,7 @@ func (s *Service) StopTaskManger() error {
 	return s.taskManager.CloseChan()
 }
 
-func (s *Service) getWeekStat(msg string) types.WeekStatMessage {
+func (s *Service) getWeekStat(msg types.Date) types.WeekStatMessage {
 	var (
 		weekStat    db.WeeklyStat
 		appsInfo    []types.AppIconCategoryAndCmdLine
@@ -146,20 +147,59 @@ func (s *Service) allReminderTask() types.ReminderMessage {
 		return types.ReminderMessage{IsError: true, Error: err}
 	}
 
+	allApps, err := s.db.GetAllApp()
+	if err != nil {
+		return types.ReminderMessage{IsError: true, Error: err}
+	}
+
 	validTask := make([]types.Task, 0, len(tasks))
 	for _, task := range tasks {
+
+		if task.Job == types.Limit {
+			continue
+		}
+
 		now, taskStartTime := time.Now(), task.TaskTime.StartTime
+
 		if taskStartTime.Before(now) {
 			if err := s.db.RemoveTask(task.UUID); err != nil {
 				return types.ReminderMessage{IsError: true, Error: err}
 			}
 		}
 		validTask = append(validTask, task)
-
 	}
-	return types.ReminderMessage{AllTask: slices.Clip(validTask)}
+
+	slices.SortFunc(validTask, func(a, b types.Task) int {
+		return a.TaskTime.StartTime.Compare(b.TaskTime.StartTime)
+	})
+
+	return types.ReminderMessage{AllTask: slices.Clip(validTask), AllApps: allApps}
 }
 
+func (s *Service) allLimitTask() types.ReminderMessage {
+	tasks, err := s.db.GetAllTask()
+	if err != nil {
+		return types.ReminderMessage{IsError: true, Error: err}
+	}
+
+	allApps, err := s.db.GetAllApp()
+	if err != nil {
+		return types.ReminderMessage{IsError: true, Error: err}
+	}
+
+	limitTask := make([]types.Task, 0, len(tasks))
+	for _, task := range tasks {
+		if task.Job == types.Limit {
+			limitTask = append(limitTask, task)
+		}
+	}
+
+	slices.SortFunc(limitTask, func(a, b types.Task) int {
+		return cmp.Compare(a.TaskTime.Limit, b.TaskTime.Limit)
+	})
+
+	return types.ReminderMessage{AllTask: slices.Clip(limitTask), AllApps: allApps}
+}
 func (s *Service) getDayStat(msg types.Date) types.DayStatMessage {
 	dayStat, err := s.db.GetDay(msg)
 	if err != nil {

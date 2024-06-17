@@ -37,7 +37,8 @@ func (a *App) WeekStatHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 	case "month":
-		var firstSaturdayOfTheMonth, q string
+		var firstSaturdayOfTheMonth types.Date
+		var q string
 		if q = r.URL.Query().Get("month"); q == "" {
 			a.clientError(w, http.StatusBadRequest, errors.New("query param:month: cannot be empty"))
 			return

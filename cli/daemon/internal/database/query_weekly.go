@@ -11,7 +11,7 @@ import (
 	badger "github.com/dgraph-io/badger/v4"
 )
 
-func (bs *BadgerDBStore) GetWeek(day string) (WeeklyStat, error) {
+func (bs *BadgerDBStore) GetWeek(day types.Date) (WeeklyStat, error) {
 
 	anyDayInTheWeek := types.Date(day)
 	date, _ := helperFuncs.ParseKey(anyDayInTheWeek)
@@ -21,7 +21,7 @@ func (bs *BadgerDBStore) GetWeek(day string) (WeeklyStat, error) {
 
 	saturdayOfThatWeek := helperFuncs.SaturdayOfTheWeek(date)
 
-	byteData, err := bs.Get(dbWeekKey(types.Date(saturdayOfThatWeek)))
+	byteData, err := bs.Get(dbWeekKey(saturdayOfThatWeek))
 	errKeyNotFound := errors.Is(err, badger.ErrKeyNotFound)
 
 	if err != nil && !errKeyNotFound {
