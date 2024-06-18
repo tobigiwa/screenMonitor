@@ -22,6 +22,8 @@ type x11DBInterface interface {
 	WriteUsage(types.ScreenTime) error
 	UpdateOpertionOnBuCKET(dbPrefix string, opsFunc func([]byte) ([]byte, error)) error
 	UpdateAppInfoManually(key []byte, opsFunc func([]byte) ([]byte, error)) error
+	GetTaskByUUID(taskID uuid.UUID) (types.Task, error)
+	RemoveTask(id uuid.UUID) error
 	DeleteKey([]byte) error
 	Close() error
 }

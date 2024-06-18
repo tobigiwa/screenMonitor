@@ -1,10 +1,8 @@
 package frontend
 
 import "pkg/types"
-import "time"
-import helperFuncs "pkg/helper"
 
-templ ReminderAndAlertPage(task string, tasks []types.Task, allApps []types.AppIconCategoryAndCmdLine) {
+templ ReminderAndAlertPage(allApps []types.AppIconCategoryAndCmdLine) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
@@ -21,81 +19,73 @@ templ ReminderAndAlertPage(task string, tasks []types.Task, allApps []types.AppI
 		<body>
 			<div class="page">
 				@menu()
-				@reminderAndAlert(task, tasks, allApps)
+				@reminderAndLimitPage(allApps)
 			</div>
 		</body>
 	</html>
 }
 
-templ reminderAndAlert(task string, tasks []types.Task, allApps []types.AppIconCategoryAndCmdLine) {
+templ reminderAndLimitPage(allApps []types.AppIconCategoryAndCmdLine) {
 	<div class="main">
 		@Header()
-		<div class="reminder-page">
-			<div class="sticky-header">
-				<div class="reminder" style="cursor:pointer;">
-					<a href="/task?which=reminder">
-						<h2>Reminder and Alert</h2>
-					</a>
-					<button class="reminder-dialog__btn"><img src="assets/svg/add.svg" alt=""/></button>
-				</div>
-				<div class="limit" style="cursor:pointer;">
-					<a href="/task?which=limit">
-						<h2>Limit</h2>
-					</a>
-					<button class="limit-dialog__btn"><img src="assets/svg/add.svg" alt=""/></button>
-				</div>
-			</div>
-			if len(tasks) == 0 {
-				<div class="cards-holder" style="min-height: calc(100vh - 8rem); display: flex; justify-content: center; align-items: center; color:white">No reminder</div>
-			}
-			if task == "reminder" {
-				@reminderList(tasks)
-			} else {
-				@limitList(tasks)
-			}
+		@reminderAndLimitHeaderSection()
+		<div class="reminder-limit__page">
+			@RenderTasks(true, templ.NopComponent)
 		</div>
+		@reminderAndLimitDialog(allApps)
 	</div>
+}
+
+templ RenderTasks(isEmpty bool, taskType templ.Component) {
+	if isEmpty {
+		<div id="task-holder" hx-swap-oob="true" style="min-height: calc(100vh - 8rem); display: flex; justify-content: center; align-items: center; color:white">No reminder</div>
+	} else {
+		<div id="task-holder" hx-swap-oob="true">
+			<ul>
+				@taskType
+			</ul>
+		</div>
+	}
+}
+
+templ reminderAndLimitDialog(allApps []types.AppIconCategoryAndCmdLine) {
 	@reminderDialog()
 	@limitDialog(allApps)
 }
 
-templ reminderList(task []types.Task) {
-	<div class="cards-holder">
-		<ul>
-			for _, t := range task {
-				<li>
-					<div class="card">
-						<div class="info">
-							<p class="title"><span class="label"><i>title:</i></span> <span class="content">{ t.UI.Title }</span></p>
-							<p class="subtitle"><span class="label"><i>subtitle:</i></span> <span class="content">{ t.UI.Subtitle }</span></p>
-							<details>
-								<summary><span class="label"><i>See attached note</i></span></summary>
-								<p>{ t.UI.Notes }</p>
-							</details>
-							<div class="action">would launch: <img src={ getImageFilePath(t.AppName, t.Icon) } alt=""/> { t.AppName }</div>
-						</div>
-						<div class="spacing">
-							<button class="edit-button">Edit</button>
-						</div>
-						<div class="alert">
-							<p class="start"><span class="label"><i>Starts at:</i></span> <span class="content">{ formatTimeToHumanReadable(t.TaskTime.StartTime) }</span></p>
-							if time.Now().Before(t.TaskTime.StartTime.Add(intToDuration(-t.TaskTime.AlertTimesInMinutes[0]))) {
-								<p class="remind">
-									<span class="label"><i>reminder at:</i></span>
-									<span class="content">{ formatTimeToHumanReadable(t.TaskTime.StartTime.Add(intToDuration(-t.TaskTime.AlertTimesInMinutes[0]))) }</span>
-								</p>
-							}
-							if time.Now().Before(t.TaskTime.StartTime.Add(intToDuration(-t.TaskTime.AlertTimesInMinutes[1]))) {
-								<p class="remind">
-									<span class="label"><i>reminder at:</i></span>
-									<span class="content">{ formatTimeToHumanReadable(t.TaskTime.StartTime.Add(intToDuration(-t.TaskTime.AlertTimesInMinutes[1]))) }</span>
-								</p>
-							}
-						</div>
-					</div>
-				</li>
-			}
-		</ul>
+templ reminderAndLimitHeaderSection() {
+	<div class="sticky-header">
+		<div class="reminder-request">
+			<h2 class="reminderRequest" hx-get="/reminderTasks" hx-swap="none" hx-select-oob="#task-holder:outerHTML">Reminder and Alert</h2>
+			<button
+				class="reminder-dialog__btn"
+				title="add new reminder task"
+			>
+				<img
+					src="assets/svg/add.svg"
+				/>
+			</button>
+		</div>
+		<div class="limit-request">
+			<h2 hx-get="/limitTasks">Limit</h2>
+			<button
+				class="limit-dialog__btn"
+				title="add new app limit"
+			>
+				<img
+					src="assets/svg/add.svg"
+				/>
+			</button>
+		</div>
+		<script>
+			document.addEventListener( 'DOMContentLoaded', function ()
+			{
+				const remiderRequestBtn = document.querySelector( '.reminderRequest' );
+				if ( remiderRequestBtn ) {
+					remiderRequestBtn.click();
+				}	
+			});
+		</script>
 	</div>
 }
 
@@ -339,20 +329,4 @@ templ limitDialog(allApp []types.AppIconCategoryAndCmdLine) {
 				});
 		</script>
 	</dialog>
-}
-
-templ limitList(tasks []types.Task) {
-	for _, task := range  tasks {
-		<div class="limit-apps">
-			<div class="appInfo">
-				<img src={ getImageFilePath(task.AppName, task.Icon) } alt={ task.AppName }/>
-				<p>{ task.AppName }</p>
-			</div>
-			<div class="limitInfo">
-				<p class="shade">{ helperFuncs.UsageTimeInHrsMin(task.TaskTime.Limit) }</p>
-				<p hidden class="uuid">{ task.UUID.String() }</p>
-				<button>Edit</button>
-			</div>
-		</div>
-	}
 }

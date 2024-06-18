@@ -124,17 +124,20 @@ func treatMessage(c net.Conn) {
 		case "dayStat":
 			msg.DayStatResponse = ServiceInstance.getDayStat(msg.DayStatRequest)
 
-		case "createReminder":
-			msg.ReminderAndLimitResponse = ServiceInstance.addNewReminder(msg.ReminderAndLimitRequest)
-
-		case "allReminderTask":
-			msg.ReminderAndLimitResponse = ServiceInstance.allReminderTask()
-			
-		case "allLimitTask":
-			msg.ReminderAndLimitResponse = ServiceInstance.allLimitTask()
-
 		case "setCategory":
 			msg.SetCategoryResponse = ServiceInstance.setAppCategory(msg.SetCategoryRequest)
+
+		case "tasks":
+			msg.ReminderAndLimitResponse = ServiceInstance.tasks()
+
+		case "reminderTasks":
+			msg.ReminderAndLimitResponse = ServiceInstance.reminderTasks()
+
+		case "limitTasks":
+			msg.ReminderAndLimitResponse = ServiceInstance.limitTasks()
+
+		case "createReminder":
+			msg.ReminderAndLimitResponse = ServiceInstance.addNewReminder(msg.ReminderAndLimitRequest)
 
 		case "createLimit":
 			msg.ReminderAndLimitResponse = ServiceInstance.addNewLimitApp(msg.ReminderAndLimitRequest)

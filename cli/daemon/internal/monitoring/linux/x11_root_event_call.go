@@ -22,11 +22,11 @@ func propertyNotifyEventFuncRoot(x11Conn *xgbutil.XUtil, ev xevent.PropertyNotif
 
 	if ev.Atom == netActiveWindowAtom { // window has changed
 		if currActiveWindow, err := ewmh.ActiveWindowGet(x11Conn); (err == nil) && (currActiveWindow != 0) { // 0 is root, to much noise
-			
+
 			if netActiveWindow.WindowID == xevent.NoWindow { // at first run i.e on new x11 session(on boot), this means it does not track 'until your first launched application'/'your screensaver' until first app launch
-				netActiveWindow.WindowID = ev.Window                                   // SET THE WINDOW ID
-				netActiveWindow.TimeStamp = time.Now()                                 // SET THE TIME
-				netActiveWindow.WindowName, _ = getWindowClassName(x11Conn, ev.Window) // SET THE NAME
+				netActiveWindow.WindowID = currActiveWindow                                   // SET THE WINDOW ID
+				netActiveWindow.TimeStamp = time.Now()                                        // SET THE TIME
+				netActiveWindow.WindowName, _ = getWindowClassName(x11Conn, currActiveWindow) // SET THE NAME
 				return
 			}
 

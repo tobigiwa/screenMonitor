@@ -120,34 +120,36 @@ func (s *Service) getAppStat(msg types.AppStatRequest) types.AppStatMessage {
 	}
 }
 
-func (s *Service) addNewReminder(task types.Task) types.ReminderMessage {
-
-	if task.Job == types.ReminderWithAction {
-		appInfo, err := s.db.GetAppIconCategoryAndCmdLine([]string{task.AppName})
-		if err != nil {
-			return types.ReminderMessage{IsError: true, Error: err}
-		}
-		task.AppIconCategoryAndCmdLine = appInfo[0]
-	}
-
-	err := s.taskManager.SendTaskToTaskManager(task)
+func (s *Service) getDayStat(msg types.Date) types.DayStatMessage {
+	dayStat, err := s.db.GetDay(msg)
 	if err != nil {
-		return types.ReminderMessage{IsError: true, Error: err}
+		return types.DayStatMessage{IsError: true, Error: err}
 	}
+	d, _ := helperFuncs.ParseKey(msg)
+	date := fmt.Sprintf("%s. %s %s, %d", strings.TrimSuffix(d.Weekday().String(), "day"), helperFuncs.AddOrdinalSuffix(d.Day()), d.Month().String(), d.Year())
 
-	return types.ReminderMessage{
-		CreatedNewTask: true,
-	}
+	return types.DayStatMessage{EachApp: dayStat.EachApp, DayTotal: dayStat.DayTotal, Date: date}
 }
 
-func (s *Service) allReminderTask() types.ReminderMessage {
+func (s *Service) setAppCategory(msg types.SetCategoryRequest) types.SetCategoryResponse {
+	if err := s.db.SetAppCategory(msg.AppName, msg.Category); err != nil {
+		return types.SetCategoryResponse{IsError: true, Error: err}
+	}
+	return types.SetCategoryResponse{IsCategorySet: true}
+}
 
-	tasks, err := s.db.GetAllTask()
+func (s *Service) tasks() types.ReminderMessage {
+
+	allApps, err := s.db.GetAllApp()
 	if err != nil {
 		return types.ReminderMessage{IsError: true, Error: err}
 	}
+	return types.ReminderMessage{AllApps: allApps}
+}
 
-	allApps, err := s.db.GetAllApp()
+func (s *Service) reminderTasks() types.ReminderMessage {
+
+	tasks, err := s.db.GetAllTask()
 	if err != nil {
 		return types.ReminderMessage{IsError: true, Error: err}
 	}
@@ -173,16 +175,11 @@ func (s *Service) allReminderTask() types.ReminderMessage {
 		return a.TaskTime.StartTime.Compare(b.TaskTime.StartTime)
 	})
 
-	return types.ReminderMessage{AllTask: slices.Clip(validTask), AllApps: allApps}
+	return types.ReminderMessage{AllTask: slices.Clip(validTask)}
 }
 
-func (s *Service) allLimitTask() types.ReminderMessage {
+func (s *Service) limitTasks() types.ReminderMessage {
 	tasks, err := s.db.GetAllTask()
-	if err != nil {
-		return types.ReminderMessage{IsError: true, Error: err}
-	}
-
-	allApps, err := s.db.GetAllApp()
 	if err != nil {
 		return types.ReminderMessage{IsError: true, Error: err}
 	}
@@ -198,25 +195,27 @@ func (s *Service) allLimitTask() types.ReminderMessage {
 		return cmp.Compare(a.TaskTime.Limit, b.TaskTime.Limit)
 	})
 
-	return types.ReminderMessage{AllTask: slices.Clip(limitTask), AllApps: allApps}
+	return types.ReminderMessage{AllTask: slices.Clip(limitTask)}
 }
-func (s *Service) getDayStat(msg types.Date) types.DayStatMessage {
-	dayStat, err := s.db.GetDay(msg)
+
+func (s *Service) addNewReminder(task types.Task) types.ReminderMessage {
+
+	if task.Job == types.ReminderWithAction {
+		appInfo, err := s.db.GetAppIconCategoryAndCmdLine([]string{task.AppName})
+		if err != nil {
+			return types.ReminderMessage{IsError: true, Error: err}
+		}
+		task.AppIconCategoryAndCmdLine = appInfo[0]
+	}
+
+	err := s.taskManager.SendTaskToTaskManager(task)
 	if err != nil {
-		return types.DayStatMessage{IsError: true, Error: err}
+		return types.ReminderMessage{IsError: true, Error: err}
 	}
-	d, _ := helperFuncs.ParseKey(msg)
-	date := fmt.Sprintf("%s. %s %s, %d", strings.TrimSuffix(d.Weekday().String(), "day"), helperFuncs.AddOrdinalSuffix(d.Day()), d.Month().String(), d.Year())
 
-	return types.DayStatMessage{EachApp: dayStat.EachApp, DayTotal: dayStat.DayTotal, Date: date}
-
-}
-
-func (s *Service) setAppCategory(msg types.SetCategoryRequest) types.SetCategoryResponse {
-	if err := s.db.SetAppCategory(msg.AppName, msg.Category); err != nil {
-		return types.SetCategoryResponse{IsError: true, Error: err}
+	return types.ReminderMessage{
+		CreatedNewTask: true,
 	}
-	return types.SetCategoryResponse{IsCategorySet: true}
 }
 
 func (s *Service) addNewLimitApp(msg types.Task) types.ReminderMessage {

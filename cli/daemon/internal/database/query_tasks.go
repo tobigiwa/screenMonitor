@@ -61,6 +61,23 @@ func (bs *BadgerDBStore) GetTaskByAppName(appName string) ([]types.Task, error) 
 	return slices.Clip(requestedTaskArr), nil
 }
 
+func (bs *BadgerDBStore) GetTaskByUUID(taskID uuid.UUID) (types.Task, error) {
+
+	taskArry, err := bs.getAllTasks()
+	if err != nil {
+		fmt.Println("error came from here:", err)
+		return types.Task{}, err
+	}
+	
+	for _, task := range taskArry {
+		if task.UUID == taskID {
+			return task, nil
+		}
+	}
+	
+	return types.Task{}, errors.New("task does not exist")
+}
+
 func (bs *BadgerDBStore) AddTask(task types.Task) error {
 	taskArry, err := bs.getAllTasks()
 	if err != nil {

@@ -4,11 +4,15 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
+	helperFuncs "pkg/helper"
 	"pkg/types"
 	"time"
 
 	"github.com/BurntSushi/xgb/xproto"
 	"github.com/BurntSushi/xgbutil/xevent"
+	"github.com/gen2brain/beeep"
+	"github.com/google/uuid"
 )
 
 func (x11 *X11Monitor) WindowChangeTimerFunc(ctx context.Context, timer *time.Timer) {
@@ -37,18 +41,24 @@ func (x11 *X11Monitor) WindowChangeTimerFunc(ctx context.Context, timer *time.Ti
 }
 
 func (x11 *X11Monitor) watchLimit(windowID xproto.Window, duration float64) {
-	if windowName, ok := curSessionNamedWindow[windowID]; ok {
-		if limitApp, ok := LimitApp[windowName]; ok {
-			limitApp.timeSofar += duration
+	// if windowName, ok := curSessionNamedWindow[windowID]; ok {
+	// 	if limitApp, ok := LimitApp[windowName]; ok {
 
-			if limitApp.timeSofar >= limitApp.limit {
-				fmt.Printf("we have reached limit for this application\n%+v\n\n", limitApp)
-			} else {
-				LimitApp[windowName] = limitApp
-				fmt.Printf("\nthis so far %f for app %s...limit at %f\n\n", limitApp.timeSofar, windowName, limitApp.limit)
-			}
-		}
-	}
+	// 		limitApp.timeSofar += duration
+
+	// 		if limitApp.timeSofar >= limitApp.limit {
+	// 			fmt.Printf("we have reached limit for this application\n%+v\n\n", limitApp)
+	// 			if err := x11.NotifyLimitReached(limitApp.taskUUID); err != nil {
+	// 				fmt.Println("error from notifyLimitReached", err)
+	// 			}
+
+	// 		} else {
+
+	// 			LimitApp[windowName] = limitApp
+	// 			fmt.Printf("\nthis so far %f for app %s...limit at %f\n\n", limitApp.timeSofar, windowName, limitApp.limit)
+	// 		}
+	// 	}
+	// }
 }
 
 func (x11 *X11Monitor) sendOneMinuteUsage() {
@@ -81,4 +91,28 @@ func AddNewLimit(t types.Task) {
 
 func (x11 *X11Monitor) CloseWindowChangeCh() {
 	close(x11.windowChangeCh)
+}
+
+func (x11 *X11Monitor) NotifyLimitReached(taskID uuid.UUID) error {
+
+	homeDir, _ := os.UserHomeDir()
+	configDir := homeDir + "/liScreMon/"
+	appLogo := configDir + "liscremon.jpeg"
+
+	task, err := x11.Db.GetTaskByUUID(taskID)
+	if err != nil {
+		return err
+	}
+	title := fmt.Sprintf("Usage Limit reached for %s", task.AppName)
+	subtitle := fmt.Sprintf("App: %s Usage Limit: %s", task.AppName, helperFuncs.UsageTimeInHrsMin(task.TaskTime.Limit))
+
+	beeep.Alert(title, subtitle, appLogo)
+
+	if !task.TaskTime.EveryDay {
+		err := x11.Db.RemoveTask(taskID)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

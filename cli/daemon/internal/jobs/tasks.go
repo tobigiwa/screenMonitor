@@ -69,6 +69,7 @@ func (tm *TaskManager) StartTaskManger() error {
 		if task.Job == types.ReminderWithAction || task.Job == types.ReminderWithNoAction {
 			now, taskStartTime := time.Now(), task.TaskTime.StartTime
 			if taskStartTime.Before(now) {
+				fmt.Printf("removing task %+v\n\n", task)
 				if err := tm.dbHandle.RemoveTask(task.UUID); err != nil {
 					return fmt.Errorf("err deleting old task: %+v :err %v", task, err)
 				}
@@ -76,7 +77,15 @@ func (tm *TaskManager) StartTaskManger() error {
 		}
 
 		if task.Job == types.Limit {
-
+			if !task.TaskTime.EveryDay {
+				a := task.CreatedAt.Add(time.Duration(task.TaskTime.Limit) * time.Hour)
+				if a.Before(time.Now()) {
+					fmt.Printf("removing task %+v\n\n", task)
+					if err := tm.dbHandle.RemoveTask(task.UUID); err != nil {
+						return fmt.Errorf("err deleting old task: %+v :err %v", task, err)
+					}
+				}
+			}
 		}
 
 		tm.channel <- task
@@ -111,7 +120,6 @@ func (tm *TaskManager) disperseTask() {
 			tm.createRemidersWithAction(task)
 
 		case types.Limit:
-			fmt.Printf("this tasks got here \n+%v\n\n", task)
 			monitoring.AddNewLimit(task)
 
 		}

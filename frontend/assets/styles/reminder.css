@@ -1,30 +1,7 @@
-.reminder-page {
-    overflow-y: auto;
+.reminder-limit__page {
     max-height: auto;
-    min-height: calc(100vh - 4rem);
-}
-
-.reminder,
-.limit {
-    display: inline-flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 50%;
-    padding-left: 10px;
-}
-
-.limit {
-    background-color: red;
-}
-
-.reminder {
-    background-color: green;
-}
-
-
-.cards-holder {
-    max-height: calc(100vh - 8rem);
-    min-height: auto;
+    min-height: calc(100vh - 7rem);
+    background-color: rgba(226, 208, 208, 0.034);
 }
 
 .sticky-header {
@@ -32,12 +9,33 @@
     position: sticky;
     top: 0;
     z-index: 10;
-    display: inline-flex;
-    justify-content: space-between;
-    width: 100%;
-    background-color: var(--primary-color2);
+    background-color: var(--black-color);
     color: white;
     margin-bottom: 5px;
+    border-radius: 10px 10px 0 0;
+}
+
+
+
+.reminder-request,
+.limit-request {
+    display: inline-flex;
+    justify-content: start;
+    align-items: center;
+    width: 50%;
+    padding: 0 20px;
+    cursor: pointer;
+
+    & h2 {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+
+        &:hover {
+            background-color: rgba(0, 0, 0, 0.2);
+            transform: scale(0.9);
+        }
+    }
 
     & button {
         width: 3rem;
@@ -52,6 +50,75 @@
 }
 
 
+#task-holder {
+    overflow-y: auto;
+    max-height: calc(100vh - 7rem);
+    min-height: auto;
+}
+
+.limit-tasks {
+    display: inline-flex;
+    width: 100%;
+    padding: 0 5px;
+    justify-content: space-between;
+    background-color: var(--primary-color2);
+    color: var(--white-color);
+
+
+    .appInfo {
+        display: inline-flex;
+        justify-content: start;
+        align-items: center;
+        line-height: 3rem;
+        gap: 5px;
+        width: 50%;
+        padding: 0 5px;
+
+    }
+
+    .limitInfo {
+        display: inline-flex;
+        justify-content: end;
+        align-items: center;
+        gap: 30px;
+        width: 50%;
+        padding: 0 5px;
+    }
+
+    img {
+        height: 2rem;
+        width: 2rem;
+        vertical-align: middle;
+    }
+
+    button {
+        padding: 10px;
+        background-color: #161d1d;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    p {
+        margin: 0;
+        padding: 0;
+    }
+
+    .shade {
+        background-color: #9c6767;
+        font-weight: bold;
+        font-style: italic;
+        height: 2rem;
+        width: 10rem;
+        text-align: center;
+        padding-top: 7px;
+    }
+}
+
+
+
+
 ul {
     list-style-type: none;
     padding: 0;
@@ -63,8 +130,7 @@ li+li {
 }
 
 
-
-.card {
+.remainder-tasks {
     width: 100%;
     background-color: wheat;
     display: inline-flex;
@@ -136,7 +202,6 @@ li+li {
 
 
 .reminder-dialog {
-
     .new-reminder {
         width: 98%;
         padding: 0 10px;
@@ -230,64 +295,4 @@ button {
             dodgerblue,
             green);
     opacity: 0.75;
-}
-
-.limit-apps {
-    display: inline-flex;
-    width: 100%;
-    padding: 0 5px;
-    justify-content: space-between;
-    background-color: var(--primary-color2);
-    color: var(--white-color);
-
-
-    .appInfo {
-        display: inline-flex;
-        justify-content: start;
-        align-items: center;
-        line-height: 3rem;
-        gap: 5px;
-        width: 50%;
-        padding: 0 5px;
-
-    }
-
-    .limitInfo {
-        display: inline-flex;
-        justify-content: end;
-        align-items: center;
-        gap: 30px;
-        width: 50%;
-        padding: 0 5px;
-    }
-
-    img {
-        height: 2rem;
-        width: 2rem;
-        vertical-align: middle;
-    }
-
-    button {
-        padding: 10px;
-        background-color: #161d1d;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-
-    p {
-        margin: 0;
-        padding: 0;
-    }
-
-    .shade {
-        background-color: #9c6767;
-        font-weight: bold;
-        font-style: italic;
-        height: 2rem;
-        width: 10rem;
-        text-align: center;
-        padding-top: 7px;
-    }
 }

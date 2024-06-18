@@ -158,10 +158,11 @@ type ScreenTime struct {
 
 type Task struct {
 	AppIconCategoryAndCmdLine
-	UUID     uuid.UUID  `json:"uuid"`
-	TaskTime TaskTime   `json:"taskTime"`
-	UI       UItextInfo `json:"ui"`
-	Job      TaskType   `json:"job"`
+	UUID      uuid.UUID  `json:"uuid"`
+	TaskTime  TaskTime   `json:"taskTime"`
+	UI        UItextInfo `json:"ui"`
+	Job       TaskType   `json:"job"`
+	CreatedAt time.Time  `json:"createdAt"`
 }
 
 type AppLimit struct {

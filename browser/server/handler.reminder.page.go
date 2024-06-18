@@ -11,32 +11,70 @@ import (
 
 	views "views/components"
 
+	"github.com/a-h/templ"
 	"github.com/google/uuid"
 )
 
 func (a *App) ReminderAndAlertPageHandler(w http.ResponseWriter, r *http.Request) {
 
-	queryParam := r.URL.Query().Get("which")
-	var msg types.Message
-
-	if queryParam == "limit" {
-		msg = types.Message{Endpoint: "allLimitTask"}
-	} else {
-		msg = types.Message{Endpoint: "allReminderTask"}
+	var err error
+	msg := types.Message{
+		Endpoint: strings.TrimPrefix(r.URL.Path, "/"),
 	}
 
-	msg, err := a.commWithDaemonService(msg)
+	msg, err = a.commWithDaemonService(msg)
 	if err != nil {
 		a.serverError(w, err)
 		return
 	}
 
-	if queryParam == "limit" {
-		views.ReminderAndAlertPage("limit", msg.ReminderAndLimitResponse.AllTask, msg.ReminderAndLimitResponse.AllApps).Render(context.TODO(), w)
+	views.ReminderAndAlertPage(msg.ReminderAndLimitResponse.AllApps).Render(context.TODO(), w)
+}
+
+func (a *App) AllReminderTask(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	msg := types.Message{
+		Endpoint: strings.TrimPrefix(r.URL.Path, "/"),
+	}
+
+	msg, err = a.commWithDaemonService(msg)
+	if err != nil {
+		a.serverError(w, err)
 		return
 	}
 
-	views.ReminderAndAlertPage("reminder", msg.ReminderAndLimitResponse.AllTask, msg.ReminderAndLimitResponse.AllApps).Render(context.TODO(), w)
+	reminderTasks := msg.ReminderAndLimitResponse.AllTask
+	if len(reminderTasks) == 0 {
+		views.RenderTasks(true, templ.NopComponent).Render(context.TODO(), w)
+		return
+	}
+
+	c := views.ReminderTasks(reminderTasks)
+	views.RenderTasks(false, c).Render(context.TODO(), w)
+}
+
+func (a *App) AllLimitTask(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	msg := types.Message{
+		Endpoint: strings.TrimPrefix(r.URL.Path, "/"),
+	}
+
+	msg, err = a.commWithDaemonService(msg)
+	if err != nil {
+		a.serverError(w, err)
+		return
+	}
+
+	reminderTasks := msg.ReminderAndLimitResponse.AllTask
+	if len(reminderTasks) == 0 {
+		views.RenderTasks(true, templ.NopComponent).Render(context.TODO(), w)
+		return
+	}
+	
+	c := views.LimitTasks(reminderTasks)
+	views.RenderTasks(false, c).Render(context.TODO(), w)
 }
 
 func (a *App) CreateReminderHandler(w http.ResponseWriter, r *http.Request) {
@@ -124,7 +162,7 @@ func (a *App) CreateReminderHandler(w http.ResponseWriter, r *http.Request) {
 		a.serverError(w, fmt.Errorf("error creating reminder"))
 		return
 	}
-	http.Redirect(w, r, "/task?which=reminder", http.StatusSeeOther)
+	http.Redirect(w, r, "/tasks", http.StatusSeeOther)
 }
 
 func (a *App) CreateLimitHandler(w http.ResponseWriter, r *http.Request) {
@@ -183,6 +221,8 @@ func (a *App) CreateLimitHandler(w http.ResponseWriter, r *http.Request) {
 	hours, minutes := time.Duration(hrs)*time.Hour, time.Duration(min)*time.Minute
 
 	task.TaskTime.Limit = hours.Hours() + minutes.Hours()
+
+	task.CreatedAt = time.Now()
 
 	task.UUID = uuid.New()
 
