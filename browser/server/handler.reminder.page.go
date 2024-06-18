@@ -224,8 +224,6 @@ func (a *App) CreateLimitHandler(w http.ResponseWriter, r *http.Request) {
 	task.CreatedAt = time.Now()
 	task.UUID = uuid.New()
 
-	fmt.Printf("\n%+v\n\n", task)
-
 	msg = types.Message{
 		Endpoint:                strings.TrimPrefix(r.URL.Path, "/"),
 		ReminderAndLimitRequest: task,
