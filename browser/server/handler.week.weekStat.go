@@ -5,11 +5,16 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"pkg/chart"
 	"pkg/types"
 	"strings"
 	"time"
 
 	helperFuncs "pkg/helper"
+
+	views "views/components"
+
+	"github.com/a-h/templ"
 )
 
 var lastRequestSaturday string
@@ -86,10 +91,25 @@ func (a *App) WeekStatHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	templComp := prepareHtTMLResponse(msg)
-
-	if err = templComp.Render(context.TODO(), w); err != nil {
+	if err = weekStatResponse(msg.WeekStatResponse).Render(context.TODO(), w); err != nil {
 		a.serverError(w, err)
 	}
 	lastRequestSaturday = msg.WeekStatResponse.Keys[6]
+}
+
+func weekStatResponse(w types.WeekStatMessage) templ.Component {
+	return views.WeekStatTempl(
+		chart.WeekStatBarChart(chart.BarChartData{
+			XAxis:       w.FormattedDay[:],
+			YAxis:       w.Values[:],
+			Keys:        w.Keys[:],
+			Month:       w.Month,
+			Year:        w.Year,
+			TotalUptime: w.TotalWeekUptime,
+		}),
+		w.TotalWeekUptime,
+		w.AppDetail,
+		w.AllCategory,
+		w.Keys[6],
+	)
 }

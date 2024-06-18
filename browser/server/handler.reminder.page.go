@@ -72,7 +72,7 @@ func (a *App) AllLimitTask(w http.ResponseWriter, r *http.Request) {
 		views.RenderTasks(true, templ.NopComponent).Render(context.TODO(), w)
 		return
 	}
-	
+
 	c := views.LimitTasks(reminderTasks)
 	views.RenderTasks(false, c).Render(context.TODO(), w)
 }
@@ -221,9 +221,7 @@ func (a *App) CreateLimitHandler(w http.ResponseWriter, r *http.Request) {
 	hours, minutes := time.Duration(hrs)*time.Hour, time.Duration(min)*time.Minute
 
 	task.TaskTime.Limit = hours.Hours() + minutes.Hours()
-
 	task.CreatedAt = time.Now()
-
 	task.UUID = uuid.New()
 
 	fmt.Printf("\n%+v\n\n", task)

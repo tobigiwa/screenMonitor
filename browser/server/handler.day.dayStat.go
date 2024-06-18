@@ -5,9 +5,14 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"pkg/chart"
 	helperFuncs "pkg/helper"
 	"pkg/types"
 	"strings"
+
+	views "views/components"
+
+	"github.com/a-h/templ"
 )
 
 func (a *App) DayStatHandler(w http.ResponseWriter, r *http.Request) {
@@ -38,10 +43,19 @@ func (a *App) DayStatHandler(w http.ResponseWriter, r *http.Request) {
 		a.serverError(w, fmt.Errorf("error occurred in commWithDaemonService:%w", err))
 	}
 
-	templComp := prepareHtTMLResponse(msg)
-
-	if err = templComp.Render(context.TODO(), w); err != nil {
+	if err = dayStatResponse(msg.DayStatResponse).Render(context.TODO(), w); err != nil {
 		a.serverError(w, err)
 	}
+}
 
+func dayStatResponse(w types.DayStatMessage) templ.Component {
+	return views.DayStatTempl(
+		chart.DayStatPieChart(
+			chart.PieChartData{
+				PieData:  w.EachApp,
+				DayTotal: w.DayTotal,
+				Date:     w.Date,
+			}),
+		nil,
+	)
 }
