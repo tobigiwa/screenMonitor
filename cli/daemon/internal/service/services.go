@@ -21,7 +21,7 @@ func (s *Service) StopTaskManger() error {
 	return s.taskManager.CloseChan()
 }
 
-func (s *Service) getWeekStat(msg types.Date) types.WeekStatMessage {
+func (s *Service) getWeekStat(msg types.Date) (types.WeekStatMessage, error) {
 	var (
 		weekStat    db.WeeklyStat
 		appsInfo    []types.AppIconCategoryAndCmdLine
@@ -30,7 +30,7 @@ func (s *Service) getWeekStat(msg types.Date) types.WeekStatMessage {
 	)
 
 	if weekStat, err = s.db.GetWeek(msg); err != nil {
-		return types.WeekStatMessage{IsError: true, Error: fmt.Errorf("error weekStat: %w", err)}
+		return types.NoMessage.WeekStatResponse, fmt.Errorf("error weekStat: %w", err)
 	}
 
 	var (
@@ -55,7 +55,7 @@ func (s *Service) getWeekStat(msg types.Date) types.WeekStatMessage {
 	}
 
 	if appsInfo, err = s.db.GetAppIconCategoryAndCmdLine(appNameInTheWeek); err != nil {
-		return types.WeekStatMessage{IsError: true, Error: fmt.Errorf("err with GetAppIconAndCategory:%w", err)}
+		return types.NoMessage.WeekStatResponse, fmt.Errorf("err with GetAppIconAndCategory:%w", err)
 	}
 
 	for i := 0; i < sizeOfApps; i++ {
@@ -63,22 +63,23 @@ func (s *Service) getWeekStat(msg types.Date) types.WeekStatMessage {
 	}
 
 	if allCategory, err = s.db.GetAllACategories(); err != nil {
-		return types.WeekStatMessage{IsError: true, Error: fmt.Errorf("err with GetAllCategories:%w", err)}
+		return types.NoMessage.WeekStatResponse, fmt.Errorf("err with GetAllCategories:%w", err)
 	}
 
 	return types.WeekStatMessage{
-		Keys:            keys,
-		FormattedDay:    formattedDay,
-		Values:          values,
-		TotalWeekUptime: weekStat.WeekTotal.Active,
-		AllCategory:     allCategory,
-		Month:           month,
-		Year:            fmt.Sprint(year),
-		AppDetail:       appCard,
-	}
+			Keys:            keys,
+			FormattedDay:    formattedDay,
+			Values:          values,
+			TotalWeekUptime: weekStat.WeekTotal.Active,
+			AllCategory:     allCategory,
+			Month:           month,
+			Year:            fmt.Sprint(year),
+			AppDetail:       appCard,
+		},
+		nil
 }
 
-func (s *Service) getAppStat(msg types.AppStatRequest) types.AppStatMessage {
+func (s *Service) getAppStat(msg types.AppStatRequest) (types.AppStatMessage, error) {
 	var (
 		appStat types.AppRangeStat
 		err     error
@@ -94,8 +95,7 @@ func (s *Service) getAppStat(msg types.AppStatRequest) types.AppStatMessage {
 	}
 
 	if err != nil {
-		fmt.Println("error weekStat:", err)
-		return types.AppStatMessage{IsError: true, Error: err}
+		return types.NoMessage.AppStatResponse, err
 	}
 
 	var (
@@ -111,47 +111,48 @@ func (s *Service) getAppStat(msg types.AppStatRequest) types.AppStatMessage {
 	month, year := helperFuncs.MonthAndYear(types.Date(appStat.DaysRange[lastDayOfTheRange].Key))
 
 	return types.AppStatMessage{
-		FormattedDay:     formattedDay,
-		Values:           values,
-		Month:            month,
-		Year:             year,
-		TotalRangeUptime: appStat.TotalRange.Active,
-		AppInfo:          appStat.AppInfo,
-	}
+			FormattedDay:     formattedDay,
+			Values:           values,
+			Month:            month,
+			Year:             year,
+			TotalRangeUptime: appStat.TotalRange.Active,
+			AppInfo:          appStat.AppInfo,
+		},
+		nil
 }
 
-func (s *Service) getDayStat(msg types.Date) types.DayStatMessage {
+func (s *Service) getDayStat(msg types.Date) (types.DayStatMessage, error) {
 	dayStat, err := s.db.GetDay(msg)
 	if err != nil {
-		return types.DayStatMessage{IsError: true, Error: err}
+		return types.NoMessage.DayStatResponse, err
 	}
 	d, _ := helperFuncs.ParseKey(msg)
 	date := fmt.Sprintf("%s. %s %s, %d", strings.TrimSuffix(d.Weekday().String(), "day"), helperFuncs.AddOrdinalSuffix(d.Day()), d.Month().String(), d.Year())
 
-	return types.DayStatMessage{EachApp: dayStat.EachApp, DayTotal: dayStat.DayTotal, Date: date}
+	return types.DayStatMessage{EachApp: dayStat.EachApp, DayTotal: dayStat.DayTotal, Date: date}, nil
 }
 
-func (s *Service) setAppCategory(msg types.SetCategoryRequest) types.SetCategoryResponse {
+func (s *Service) setAppCategory(msg types.SetCategoryRequest) (types.SetCategoryResponse, error) {
 	if err := s.db.SetAppCategory(msg.AppName, msg.Category); err != nil {
-		return types.SetCategoryResponse{IsError: true, Error: err}
+		return types.NoMessage.SetCategoryResponse, err
 	}
-	return types.SetCategoryResponse{IsCategorySet: true}
+	return types.SetCategoryResponse{IsCategorySet: true}, nil
 }
 
-func (s *Service) tasks() types.ReminderMessage {
+func (s *Service) tasks() (types.ReminderMessage, error) {
 
 	allApps, err := s.db.GetAllApp()
 	if err != nil {
-		return types.ReminderMessage{IsError: true, Error: err}
+		return types.NoMessage.ReminderAndLimitResponse, err
 	}
-	return types.ReminderMessage{AllApps: allApps}
+	return types.ReminderMessage{AllApps: allApps}, nil
 }
 
-func (s *Service) reminderTasks() types.ReminderMessage {
+func (s *Service) reminderTasks() (types.ReminderMessage, error) {
 
 	tasks, err := s.db.GetAllTask()
 	if err != nil {
-		return types.ReminderMessage{IsError: true, Error: err}
+		return types.NoMessage.ReminderAndLimitResponse, err
 	}
 
 	validTask := make([]types.Task, 0, len(tasks))
@@ -165,7 +166,7 @@ func (s *Service) reminderTasks() types.ReminderMessage {
 
 		if taskStartTime.Before(now) {
 			if err := s.db.RemoveTask(task.UUID); err != nil {
-				return types.ReminderMessage{IsError: true, Error: err}
+				return types.NoMessage.ReminderAndLimitResponse, err
 			}
 		}
 		validTask = append(validTask, task)
@@ -175,16 +176,17 @@ func (s *Service) reminderTasks() types.ReminderMessage {
 		return a.TaskTime.StartTime.Compare(b.TaskTime.StartTime)
 	})
 
-	return types.ReminderMessage{AllTask: slices.Clip(validTask)}
+	return types.ReminderMessage{AllTask: slices.Clip(validTask)}, nil
 }
 
-func (s *Service) limitTasks() types.ReminderMessage {
+func (s *Service) limitTasks() (types.ReminderMessage, error) {
 	tasks, err := s.db.GetAllTask()
 	if err != nil {
-		return types.ReminderMessage{IsError: true, Error: err}
+		return types.NoMessage.ReminderAndLimitResponse, err
 	}
 
 	limitTask := make([]types.Task, 0, len(tasks))
+
 	for _, task := range tasks {
 		if task.Job == types.Limit {
 			limitTask = append(limitTask, task)
@@ -195,35 +197,33 @@ func (s *Service) limitTasks() types.ReminderMessage {
 		return cmp.Compare(a.TaskTime.Limit, b.TaskTime.Limit)
 	})
 
-	return types.ReminderMessage{AllTask: slices.Clip(limitTask)}
+	return types.ReminderMessage{AllTask: slices.Clip(limitTask)}, nil
 }
 
-func (s *Service) addNewReminder(task types.Task) types.ReminderMessage {
+func (s *Service) addNewReminder(task types.Task) (types.ReminderMessage, error) {
 
 	if task.Job == types.ReminderWithAction {
 		appInfo, err := s.db.GetAppIconCategoryAndCmdLine([]string{task.AppName})
 		if err != nil {
-			return types.ReminderMessage{IsError: true, Error: err}
+			return types.NoMessage.ReminderAndLimitResponse, err
 		}
 		task.AppIconCategoryAndCmdLine = appInfo[0]
 	}
 
 	err := s.taskManager.SendTaskToTaskManager(task)
 	if err != nil {
-		return types.ReminderMessage{IsError: true, Error: err}
+		return types.NoMessage.ReminderAndLimitResponse, err
 	}
 
-	return types.ReminderMessage{
-		CreatedNewTask: true,
-	}
+	return types.ReminderMessage{CreatedNewTask: true}, nil
 }
 
-func (s *Service) addNewLimitApp(msg types.Task) types.ReminderMessage {
+func (s *Service) addNewLimitApp(msg types.Task) (types.ReminderMessage, error) {
 
 	err := s.taskManager.SendTaskToTaskManager(msg)
 	if err != nil {
-		return types.ReminderMessage{IsError: true, Error: err}
+		return types.NoMessage.ReminderAndLimitResponse, err
 	}
 
-	return types.ReminderMessage{CreatedNewTask: true}
+	return types.ReminderMessage{CreatedNewTask: true}, nil
 }

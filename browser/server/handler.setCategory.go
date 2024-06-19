@@ -26,10 +26,9 @@ func (a *App) SetCategory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if !res.SetCategoryResponse.IsCategorySet {
-		a.serverError(w, fmt.Errorf("error setting app category: %w", res.SetCategoryResponse.Error))
+		a.serverError(w, fmt.Errorf("error setting app category"))
 		return
 	}
 
 	http.Redirect(w, r, "/index", http.StatusSeeOther)
-
 }

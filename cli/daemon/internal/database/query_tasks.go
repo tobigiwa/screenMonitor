@@ -68,13 +68,13 @@ func (bs *BadgerDBStore) GetTaskByUUID(taskID uuid.UUID) (types.Task, error) {
 		fmt.Println("error came from here:", err)
 		return types.Task{}, err
 	}
-	
+
 	for _, task := range taskArry {
 		if task.UUID == taskID {
 			return task, nil
 		}
 	}
-	
+
 	return types.Task{}, errors.New("task does not exist")
 }
 
@@ -84,6 +84,11 @@ func (bs *BadgerDBStore) AddTask(task types.Task) error {
 		return err
 	}
 
+	if bs.checkIfLimitAppExist(task, taskArry) {
+		fmt.Println("this happened")
+		return types.ErrLimitAppExist
+	}
+
 	taskArry = append(taskArry, task)
 
 	byteData, err := helperFuncs.EncodeJSON(taskArry)
@@ -91,6 +96,18 @@ func (bs *BadgerDBStore) AddTask(task types.Task) error {
 		return err
 	}
 	return bs.setOrUpdateKeyValue(dbTaskKey, byteData)
+}
+
+func (bs BadgerDBStore) checkIfLimitAppExist(task types.Task, tasks []types.Task) bool {
+
+	for i := 0; i < len(tasks); i++ {
+		if tasks[i].Job == types.Limit {
+			if tasks[i].AppName == task.AppName {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func (bs *BadgerDBStore) RemoveTask(id uuid.UUID) error {

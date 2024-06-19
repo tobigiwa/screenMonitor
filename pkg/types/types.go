@@ -11,6 +11,8 @@ import (
 type Message struct {
 	Endpoint                 string              `json:"endpoint"`
 	StatusCheck              string              `json:"statusCheck"`
+	IsError                  bool                `json:"isError"`
+	Error                    error               `json:"error"`
 	SetCategoryRequest       SetCategoryRequest  `json:"setCategoryRequest"`
 	SetCategoryResponse      SetCategoryResponse `json:"setCategoryResponse"`
 	DayStatRequest           Date                `json:"dayStatRequest"`
@@ -29,9 +31,7 @@ type SetCategoryRequest struct {
 }
 
 type SetCategoryResponse struct {
-	IsCategorySet bool  `json:"isCategorySet"`
-	IsError       bool  `json:"isError"`
-	Error         error `json:"error"`
+	IsCategorySet bool `json:"isCategorySet"`
 }
 
 type ReminderMessage struct {
@@ -39,8 +39,6 @@ type ReminderMessage struct {
 	CreatedNewTask bool                        `json:"createdNewTask"`
 	AllTask        []Task                      `json:"allTask"`
 	AllApps        []AppIconCategoryAndCmdLine `json:"allApps"`
-	IsError        bool                        `json:"isError"`
-	Error          error                       `json:"error"`
 }
 
 type WeekStatMessage struct {
@@ -52,16 +50,12 @@ type WeekStatMessage struct {
 	Year            string              `json:"year"`
 	AppDetail       []ApplicationDetail `json:"appDetail"`
 	AllCategory     []Category          `json:"allCategory"`
-	IsError         bool                `json:"isError"`
-	Error           error               `json:"error"`
 }
 
 type DayStatMessage struct {
 	EachApp  []AppStat `json:"eachApp"`
 	DayTotal Stats     `json:"dayTotal"`
 	Date     string    `josn:"date"`
-	IsError  bool      `json:"isError"`
-	Error    error     `json:"error"`
 }
 
 type AppStatRequest struct {
@@ -80,8 +74,6 @@ type AppStatMessage struct {
 	Year             string                    `json:"year"`
 	TotalRangeUptime float64                   `json:"totalRangeUptime"`
 	AppInfo          AppIconCategoryAndCmdLine `json:"appInfo"`
-	IsError          bool                      `json:"isError"`
-	Error            error                     `json:"error"`
 }
 
 type AppIconCategoryAndCmdLine struct {

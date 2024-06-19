@@ -2,6 +2,7 @@ package webserver
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"pkg/types"
@@ -28,6 +29,7 @@ func (a *App) ReminderAndAlertPageHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	// w.Header().Set("HX-Trigger-After-Settle", "reminder")
 	views.ReminderAndAlertPage(msg.ReminderAndLimitResponse.AllApps).Render(context.TODO(), w)
 }
 
@@ -181,17 +183,25 @@ func (a *App) CreateLimitHandler(w http.ResponseWriter, r *http.Request) {
 			task.AppName = value[0]
 
 		case "hrs":
-			hrs, err = strconv.Atoi(value[0])
-			if err != nil {
-				a.clientError(w, http.StatusBadRequest, fmt.Errorf("error parsing formData:%w", err))
-				return
+			if value[0] == "" {
+				hrs = 0
+			} else {
+				hrs, err = strconv.Atoi(value[0])
+				if err != nil {
+					a.clientError(w, http.StatusBadRequest, fmt.Errorf("error parsing formData:%w", err))
+					return
+				}
 			}
 
 		case "min":
-			min, err = strconv.Atoi(value[0])
-			if err != nil {
-				a.clientError(w, http.StatusBadRequest, fmt.Errorf("error parsing formData:%w", err))
-				return
+			if value[0] == "" {
+				min = 0
+			} else {
+				min, err = strconv.Atoi(value[0])
+				if err != nil {
+					a.clientError(w, http.StatusBadRequest, fmt.Errorf("error parsing formData:%w", err))
+					return
+				}
 			}
 
 		case "recurring":
@@ -231,6 +241,10 @@ func (a *App) CreateLimitHandler(w http.ResponseWriter, r *http.Request) {
 
 	res, err := a.commWithDaemonService(msg)
 	if err != nil {
+		if errors.Is(err, types.ErrLimitAppExist) {
+			fmt.Println("it got here")
+			// w.Header().Set("HX-Trigger", `{"showAlert": {"message": "Task created successfully!"}}`)
+		}
 		a.serverError(w, err)
 		return
 	}
@@ -238,5 +252,6 @@ func (a *App) CreateLimitHandler(w http.ResponseWriter, r *http.Request) {
 		a.serverError(w, fmt.Errorf("error creating reminder"))
 		return
 	}
-	http.Redirect(w, r, "/task?which=limit", http.StatusSeeOther)
+	w.Header().Set("HX-Trigger-After-Settle", "Applimit")
+	http.Redirect(w, r, "/tasks", http.StatusSeeOther)
 }

@@ -108,54 +108,61 @@ func treatMessage(c net.Conn) {
 		switch msg.Endpoint {
 
 		case "startConnection":
-			msg = types.Message{StatusCheck: "hELLo.., this is the DaemonService speaking, your connection is established."}
+			msg = types.Message{StatusCheck: "OK"}
 
 		case "closeConnection":
-			fmt.Println("we got a close connection message")
-			c.Close()
+			closeConnection(c)
 			return
 
 		case "weekStat":
-			msg.WeekStatResponse = ServiceInstance.getWeekStat(msg.WeekStatRequest)
+			msg.WeekStatResponse, err = ServiceInstance.getWeekStat(msg.WeekStatRequest)
 
 		case "appStat":
-			msg.AppStatResponse = ServiceInstance.getAppStat(msg.AppStatRequest)
+			msg.AppStatResponse, err = ServiceInstance.getAppStat(msg.AppStatRequest)
 
 		case "dayStat":
-			msg.DayStatResponse = ServiceInstance.getDayStat(msg.DayStatRequest)
+			msg.DayStatResponse, err = ServiceInstance.getDayStat(msg.DayStatRequest)
 
 		case "setCategory":
-			msg.SetCategoryResponse = ServiceInstance.setAppCategory(msg.SetCategoryRequest)
+			msg.SetCategoryResponse, err = ServiceInstance.setAppCategory(msg.SetCategoryRequest)
 
 		case "tasks":
-			msg.ReminderAndLimitResponse = ServiceInstance.tasks()
+			msg.ReminderAndLimitResponse, err = ServiceInstance.tasks()
 
 		case "reminderTasks":
-			msg.ReminderAndLimitResponse = ServiceInstance.reminderTasks()
+			msg.ReminderAndLimitResponse, err = ServiceInstance.reminderTasks()
 
 		case "limitTasks":
-			msg.ReminderAndLimitResponse = ServiceInstance.limitTasks()
+			msg.ReminderAndLimitResponse, err = ServiceInstance.limitTasks()
 
 		case "createReminder":
-			msg.ReminderAndLimitResponse = ServiceInstance.addNewReminder(msg.ReminderAndLimitRequest)
+			msg.ReminderAndLimitResponse, err = ServiceInstance.addNewReminder(msg.ReminderAndLimitRequest)
 
 		case "createLimit":
-			msg.ReminderAndLimitResponse = ServiceInstance.addNewLimitApp(msg.ReminderAndLimitRequest)
+			msg.ReminderAndLimitResponse, err = ServiceInstance.addNewLimitApp(msg.ReminderAndLimitRequest)
+		}
+
+		if err != nil {
+			msg.IsError, msg.Error = true, err
 		}
 
 		bytes, err := helperFuncs.EncodeJSON(msg)
 		if err != nil {
-			fmt.Println("error encoding response:", err)
-			continue
+			msg.Error = fmt.Errorf("error encoding response in serviceInstance: %w: %w", msg.Error, err)
 		}
 
-		n, err = c.Write(bytes)
+		_, err = c.Write(bytes)
 		if err != nil {
 			fmt.Println("error writing response:", err)
 			continue
 		}
-		if n != len(bytes) {
-			fmt.Println("bytes written", n, "encoded byte", len(bytes))
-		}
+	}
+}
+
+func closeConnection(c net.Conn) {
+	fmt.Println("we got a close connection message")
+	err := c.Close()
+	if err != nil {
+		fmt.Println("ERROR CLOSING CONNECTION")
 	}
 }

@@ -21,6 +21,21 @@ templ ReminderAndAlertPage(allApps []types.AppIconCategoryAndCmdLine) {
 				@menu()
 				@reminderAndLimitPage(allApps)
 			</div>
+			<script>
+				document.body.addEventListener('reminder', () => {
+					const remiderRequestBtn = document.querySelector( '.reminderRequest' );
+					console.log("this was triggered")
+					if ( remiderRequestBtn ) {
+						remiderRequestBtn.click();
+					};	
+				});
+				document.body.addEventListener('Applimit', () => {
+					const limitRequestBtn = document.querySelector( '.limitRequest' );
+					if ( limitRequestBtn ) {
+						limitRequestBtn.click();
+					};	
+				});
+		</script>
 		</body>
 	</html>
 }
@@ -38,7 +53,7 @@ templ reminderAndLimitPage(allApps []types.AppIconCategoryAndCmdLine) {
 
 templ RenderTasks(isEmpty bool, taskType templ.Component) {
 	if isEmpty {
-		<div id="task-holder" hx-swap-oob="true" style="min-height: calc(100vh - 8rem); display: flex; justify-content: center; align-items: center; color:white">No reminder</div>
+		<div id="task-holder" hx-swap-oob="true" style="min-height: calc(100vh - 8rem); display: flex; justify-content: center; align-items: center; color:white">No Task</div>
 	} else {
 		<div id="task-holder" hx-swap-oob="true">
 			<ul>
@@ -56,7 +71,7 @@ templ reminderAndLimitDialog(allApps []types.AppIconCategoryAndCmdLine) {
 templ reminderAndLimitHeaderSection() {
 	<div class="sticky-header">
 		<div class="reminder-request">
-			<h2 class="reminderRequest" hx-get="/reminderTasks" hx-swap="none" hx-select-oob="#task-holder:outerHTML">Reminder and Alert</h2>
+			<h2 class="reminderRequest" hx-get="/reminderTasks" hx-swap="none" hx-select-oob="#task-holder:outerHTML">Reminder</h2>
 			<button
 				class="reminder-dialog__btn"
 				title="add new reminder task"
@@ -67,7 +82,7 @@ templ reminderAndLimitHeaderSection() {
 			</button>
 		</div>
 		<div class="limit-request">
-			<h2 hx-get="/limitTasks">Limit</h2>
+			<h2 class="limitRequest" hx-get="/limitTasks" hx-swap="none" hx-select-oob="#task-holder:outerHTML">App Limit</h2>
 			<button
 				class="limit-dialog__btn"
 				title="add new app limit"
@@ -277,14 +292,12 @@ templ limitDialog(allApp []types.AppIconCategoryAndCmdLine) {
 					type="number"
 					name="hrs"
 					min="0"
-					required
 					placeholder="limit in Hrs"
 				/>
 				<input
 					type="number"
 					name="min"
 					min="0"
-					required
 					placeholder="limit in Minutes"
 				/>
 			</div>
@@ -305,10 +318,9 @@ templ limitDialog(allApp []types.AppIconCategoryAndCmdLine) {
 						type="checkbox"
 						name="exitApp"
 						value="true"
-						checked
 					/>
 					<label for="sound-notification-first">
-						Exist
+						Exit
 						app
 					</label>
 				</div>

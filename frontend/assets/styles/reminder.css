@@ -13,9 +13,9 @@
     color: white;
     margin-bottom: 5px;
     border-radius: 2px 2px 0 0;
+    display: flex;
+    gap: 2rem;
 }
-
-
 
 .reminder-request,
 .limit-request {
@@ -23,16 +23,15 @@
     justify-content: start;
     align-items: center;
     width: 50%;
-    padding: 0 10px;
     cursor: pointer;
 
     & h2 {
         margin: 0;
         padding: 0;
         width: 100%;
+        text-align: center;
 
         &:hover {
-            background-color: rgba(0, 0, 0, 0.2);
             transform: scale(0.9);
         }
     }
@@ -115,20 +114,6 @@
         padding-top: 7px;
     }
 }
-
-
-
-
-ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-}
-
-li+li {
-    margin-top: 1rem;
-}
-
 
 .remainder-tasks {
     width: 100%;
@@ -276,6 +261,16 @@ li+li {
 .button-container {
     display: flex;
     justify-content: space-between;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+li+li {
+    margin-top: 1rem;
 }
 
 button {
