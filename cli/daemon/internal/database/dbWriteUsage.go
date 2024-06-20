@@ -131,7 +131,7 @@ func updateAppInfoForOldApp(windowId xproto.Window, app *AppInfo) {
 			app.IsIconSet = true
 		}
 	}
-	fmt.Println("this app got here", app.AppName, !app.IsCmdLineSet && !app.IsCategorySet, app.IsCategorySet, app.IsCmdLineSet)
+	// fmt.Println("this app got here", app.AppName, !app.IsCmdLineSet && !app.IsCategorySet, app.IsCategorySet, app.IsCmdLineSet)
 	if !app.IsCmdLineSet && !app.IsCategorySet {
 		if r, err := getDesktopCategoryAndCmd(app.AppName); err == nil {
 			if r.cmdLine != "" {
@@ -155,19 +155,4 @@ func updateAppInfoForOldApp(windowId xproto.Window, app *AppInfo) {
 	}
 }
 
-func ExampleOf_opsFunc(v []byte) ([]byte, error) {
-	var (
-		app AppInfo
-		err error
-	)
 
-	if app, err = helperFuncs.DecodeJSON[AppInfo](v); err != nil {
-		return nil, err
-	}
-	// a := app.AppName
-	// app.AppIconCategoryAndCmdLine = types.NoAppIconCategoryAndCmdLine
-	// app.AppName = a
-	fmt.Println(app.AppName, app.IsCategorySet, app.DesktopCategories, "category-", app.Category, app.IsCmdLineSet, app.CmdLine, app.IsIconSet)
-
-	return helperFuncs.EncodeJSON(app)
-}

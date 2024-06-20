@@ -1,0 +1,59 @@
+package frontend
+
+import "pkg/types"
+import "time"
+import helperFuncs "pkg/helper"
+
+templ ReminderTasks(tasks []types.Task) {
+	for _, t := range tasks {
+		<li>
+			<div class="remainder-tasks">
+				<div class="info">
+					<p class="title"><span class="label"><i>title:</i></span> <span class="content">{ t.UI.Title }</span></p>
+					<p class="subtitle"><span class="label"><i>subtitle:</i></span> <span class="content">{ t.UI.Subtitle }</span></p>
+					<details>
+						<summary><span class="label"><i>See attached note</i></span></summary>
+						<p>{ t.UI.Notes }</p>
+					</details>
+					<div class="action">would launch: <img src={ getImageFilePath(t.AppName, t.Icon) } alt=""/> { t.AppName }</div>
+				</div>
+				<div class="spacing">
+					<button class="edit-button">Edit</button>
+				</div>
+				<div class="alert">
+					<p class="start"><span class="label"><i>Starts at:</i></span> <span class="content">{ formatTimeToHumanReadable(t.TaskTime.StartTime) }</span></p>
+					if time.Now().Before(t.TaskTime.StartTime.Add(intToDuration(-t.TaskTime.AlertTimesInMinutes[0]))) {
+						<p class="remind">
+							<span class="label"><i>reminder at:</i></span>
+							<span class="content">{ formatTimeToHumanReadable(t.TaskTime.StartTime.Add(intToDuration(-t.TaskTime.AlertTimesInMinutes[0]))) }</span>
+						</p>
+					}
+					if time.Now().Before(t.TaskTime.StartTime.Add(intToDuration(-t.TaskTime.AlertTimesInMinutes[1]))) {
+						<p class="remind">
+							<span class="label"><i>reminder at:</i></span>
+							<span class="content">{ formatTimeToHumanReadable(t.TaskTime.StartTime.Add(intToDuration(-t.TaskTime.AlertTimesInMinutes[1]))) }</span>
+						</p>
+					}
+				</div>
+			</div>
+		</li>
+	}
+}
+
+templ LimitTasks(tasks []types.Task) {
+	for _, t := range  tasks {
+		<li>
+			<div class="limit-tasks">
+				<div class="appInfo">
+					<img src={ getImageFilePath(t.AppName, t.Icon) } alt={ t.AppName }/>
+					<p>{ t.AppName }</p>
+				</div>
+				<div class="limitInfo">
+					<p class="shade">{ helperFuncs.UsageTimeInHrsMin(t.TaskTime.Limit) }</p>
+					<p hidden class="uuid">{ t.UUID.String() }</p>
+					<button>Edit</button>
+				</div>
+			</div>
+		</li>
+	}
+}

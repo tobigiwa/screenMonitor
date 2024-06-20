@@ -1,7 +1,7 @@
 {
   "version": 3,
-  "sources": ["script.js"],
-  "sourcesContent": ["document.addEventListener( 'DOMContentLoaded', function (evt)\n{\n\n\n} );\n\n\n\n"],
-  "mappings": "MAAA,SAAS,iBAAkB,mBAAoB,SAAUA,EACzD,CAGA,CAAE",
-  "names": ["evt"]
+  "sources": [],
+  "sourcesContent": [],
+  "mappings": "",
+  "names": []
 }

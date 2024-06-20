@@ -60,7 +60,7 @@ func DaemonServiceLinux() {
 	go service.StartService(socketDir, badgerDB)
 
 	ctx, cancel := context.WithCancel(context.Background())
-	timer := time.NewTimer(time.Duration(1) * time.Minute)
+	timer := time.NewTimer(time.Duration(58) * time.Second)
 
 	go monitor.WindowChangeTimerFunc(ctx, timer)
 
@@ -74,7 +74,7 @@ func DaemonServiceLinux() {
 	<-sig
 	close(sig)
 
-	// err = monitor.Db.UpdateOpertionOnBuCKET("app", db.ExampleOf_opsFunc)
+	// err = monitor.Db.UpdateAppInfoManually([]byte("app:Google-chrome"), db.ExampleOf_opsFunc)
 	// if err != nil {
 	// 	fmt.Println("opt failed", err)
 	// }

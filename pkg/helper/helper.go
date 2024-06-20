@@ -78,12 +78,12 @@ func PercentagesString(part, total float64) string {
 	return fmt.Sprintf("%.0f%%", p)
 }
 
-func SaturdayOfTheWeek(t time.Time) string {
+func SaturdayOfTheWeek(t time.Time) types.Date {
 	daysUntilSaturday := 6 - int(t.Weekday())
-	return t.AddDate(0, 0, daysUntilSaturday).Format(types.TimeFormat)
+	return types.Date(t.AddDate(0, 0, daysUntilSaturday).Format(types.TimeFormat))
 }
 
-func FirstSaturdayOfTheMonth(month string) string {
+func FirstSaturdayOfTheMonth(month string) types.Date {
 	t, err := time.Parse("January", month)
 	if err != nil {
 		return ""
@@ -93,7 +93,7 @@ func FirstSaturdayOfTheMonth(month string) string {
 
 	for {
 		if firstDayOfMonth.Weekday() == time.Saturday {
-			return firstDayOfMonth.Format(types.TimeFormat)
+			return types.Date(firstDayOfMonth.Format(types.TimeFormat))
 		}
 		firstDayOfMonth = firstDayOfMonth.AddDate(0, 0, 1)
 	}
@@ -118,14 +118,14 @@ func LastSaturdayOfTheMonth(month string) string {
 	return s.Format(types.TimeFormat)
 }
 
-func ReturnLastWeekSaturday(t time.Time) string {
+func ReturnLastWeekSaturday(t time.Time) types.Date {
 
 	if t.Weekday() == time.Saturday {
-		return t.AddDate(0, 0, -7).Format(types.TimeFormat)
+		return types.Date(t.AddDate(0, 0, -7).Format(types.TimeFormat))
 	}
 
 	daysSinceSaturday := int(t.Weekday()+1) % 7
-	return t.AddDate(0, 0, -daysSinceSaturday).Format(types.TimeFormat)
+	return types.Date(t.AddDate(0, 0, -daysSinceSaturday).Format(types.TimeFormat))
 }
 
 func IsFutureDate(t time.Time) bool {
@@ -134,8 +134,8 @@ func IsFutureDate(t time.Time) bool {
 	return nextWeekDay.After(today)
 }
 
-func ReturnNexWeektSaturday(saturday time.Time) string {
-	return saturday.AddDate(0, 0, 7).Format(types.TimeFormat)
+func ReturnNexWeektSaturday(saturday time.Time) types.Date {
+	return types.Date(saturday.AddDate(0, 0, 7).Format(types.TimeFormat))
 }
 
 func FormattedToDay() time.Time {
@@ -174,6 +174,6 @@ func IsInCurrentWeekTime(t time.Time) bool {
 }
 
 func IsInCurrentWeekDate(d types.Date) bool {
-	t, _ := d.ToTime()
-	return IsInCurrentWeekTime(t)
+	// t, _ := d.ToTime()
+	return SaturdayOfTheWeek(time.Now()) == d
 }

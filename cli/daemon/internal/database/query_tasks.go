@@ -54,17 +54,39 @@ func (bs *BadgerDBStore) GetTaskByAppName(appName string) ([]types.Task, error) 
 
 	requestedTaskArr := make([]types.Task, 0, len(taskArry))
 	for i := 0; i < len(taskArry); i++ {
-		if taskArry[i].AppInfo.AppName == appName {
+		if taskArry[i].AppName == appName {
 			requestedTaskArr = append(requestedTaskArr, taskArry[i])
 		}
 	}
 	return slices.Clip(requestedTaskArr), nil
 }
 
+func (bs *BadgerDBStore) GetTaskByUUID(taskID uuid.UUID) (types.Task, error) {
+
+	taskArry, err := bs.getAllTasks()
+	if err != nil {
+		fmt.Println("error came from here:", err)
+		return types.Task{}, err
+	}
+
+	for _, task := range taskArry {
+		if task.UUID == taskID {
+			return task, nil
+		}
+	}
+
+	return types.Task{}, errors.New("task does not exist")
+}
+
 func (bs *BadgerDBStore) AddTask(task types.Task) error {
 	taskArry, err := bs.getAllTasks()
 	if err != nil {
 		return err
+	}
+
+	if bs.checkIfLimitAppExist(task, taskArry) {
+		fmt.Println("this happened")
+		return types.ErrLimitAppExist
 	}
 
 	taskArry = append(taskArry, task)
@@ -74,6 +96,18 @@ func (bs *BadgerDBStore) AddTask(task types.Task) error {
 		return err
 	}
 	return bs.setOrUpdateKeyValue(dbTaskKey, byteData)
+}
+
+func (bs BadgerDBStore) checkIfLimitAppExist(task types.Task, tasks []types.Task) bool {
+
+	for i := 0; i < len(tasks); i++ {
+		if tasks[i].Job == types.Limit {
+			if tasks[i].AppName == task.AppName {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func (bs *BadgerDBStore) RemoveTask(id uuid.UUID) error {

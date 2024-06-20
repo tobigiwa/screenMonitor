@@ -1,31 +1,45 @@
-.reminder-page {
-    overflow-y: auto;
+.reminder-limit__page {
     max-height: auto;
-    min-height: calc(100vh - 4rem);
-}
-
-.cards-holder {
-    max-height: calc(100vh - 8rem);
-    min-height: auto;
+    min-height: calc(100vh - 7rem);
+    background-color: rgba(226, 208, 208, 0.034);
 }
 
 .sticky-header {
-    height: 4rem;
+    height: 3rem;
     position: sticky;
     top: 0;
     z-index: 10;
-    display: inline-flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    background-color: var(--primary-color2);
+    background-color: var(--black-color);
     color: white;
+    margin-bottom: 5px;
+    border-radius: 2px 2px 0 0;
+    display: flex;
+    gap: 2rem;
+}
+
+.reminder-request,
+.limit-request {
+    display: inline-flex;
+    justify-content: start;
+    align-items: center;
+    width: 50%;
+    cursor: pointer;
+
+    & h2 {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        text-align: center;
+
+        &:hover {
+            transform: scale(0.9);
+        }
+    }
 
     & button {
         width: 3rem;
         height: 3rem;
         border-radius: 5px;
-        /* margin-right: 10px; */
     }
 
     & img {
@@ -35,19 +49,73 @@
 }
 
 
-ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
+#task-holder {
+    overflow-y: auto;
+    max-height: calc(100vh - 7rem);
+    min-height: auto;
 }
 
-li+li {
-    margin-top: 1rem;
+.limit-tasks {
+    display: inline-flex;
+    width: 100%;
+    padding: 0 5px;
+    justify-content: space-between;
+    background-color: var(--primary-color2);
+    color: var(--white-color);
+
+
+    .appInfo {
+        display: inline-flex;
+        justify-content: start;
+        align-items: center;
+        line-height: 3rem;
+        gap: 5px;
+        width: 50%;
+        padding: 0 5px;
+
+    }
+
+    .limitInfo {
+        display: inline-flex;
+        justify-content: end;
+        align-items: center;
+        gap: 30px;
+        width: 50%;
+        padding: 0 5px;
+    }
+
+    img {
+        height: 2rem;
+        width: 2rem;
+        vertical-align: middle;
+    }
+
+    button {
+        padding: 10px;
+        background-color: #161d1d;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    p {
+        margin: 0;
+        padding: 0;
+    }
+
+    .shade {
+        background-color: #9c6767;
+        font-weight: bold;
+        font-style: italic;
+        height: 2rem;
+        width: 10rem;
+        text-align: center;
+        padding-top: 7px;
+    }
 }
 
-
-
-.card {
+.remainder-tasks {
     width: 100%;
     background-color: wheat;
     display: inline-flex;
@@ -105,9 +173,6 @@ li+li {
         }
     }
 
-
-    .content {}
-
     .spacing {
         flex: 1;
         position: relative;
@@ -120,58 +185,92 @@ li+li {
     }
 }
 
-.new-reminder {
-    width: 98%;
-    padding: 0 10px;
-}
 
-.form-pair {
-    display: flex;
-    flex-direction: column;
-}
+.reminder-dialog {
+    .new-reminder {
+        width: 98%;
+        padding: 0 10px;
+    }
 
-.titles {
-    width: 100%;
-    display: inline-flex;
-    justify-content: space-between;
-}
+    .form-pair {
+        display: flex;
+        flex-direction: column;
+    }
 
-.reminder-time {
-    width: 100%;
-    display: inline-flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
+    .titles {
+        width: 100%;
+        display: inline-flex;
+        justify-content: space-between;
+    }
 
-    & img {
-        width: 1rem;
+    .reminder-time {
+        width: 100%;
+        display: inline-flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+
+        & img {
+            width: 1rem;
+        }
+    }
+
+    .combine {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    label {
+        margin-bottom: 5px;
+        font-style: italic;
+        font-size: 90%;
+    }
+
+    input[type="text"],
+    input[type="datetime-local"],
+    input[type="number"],
+    input[type="search"],
+    textarea {
+        padding: 5px;
+        font-size: 0.8rem;
+        margin-bottom: 10px;
     }
 }
 
-.combine {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
 
-label {
-    margin-bottom: 5px;
-    font-style: italic;
-    font-size: 90%;
-}
+.limit-dialog {
+    height: 30vh;
 
-input[type="text"],
-input[type="datetime-local"],
-input[type="number"],
-input[type="search"],
-textarea {
-    padding: 5px;
-    font-size: 0.8rem;
-    margin-bottom: 10px;
+    input[type="number"] {
+        margin-top: 0.8rem;
+        width: 8rem;
+        height: 2rem;
+    }
+
+    .inline {
+        margin-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    label {
+        font-style: italic;
+    }
 }
 
 .button-container {
     display: flex;
     justify-content: space-between;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+li+li {
+    margin-top: 1rem;
 }
 
 button {

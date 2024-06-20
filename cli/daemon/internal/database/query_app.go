@@ -157,5 +157,59 @@ func (bs *BadgerDBStore) GetAllACategories() ([]types.Category, error) {
 	}
 
 	return helperFuncs.DecodeJSON[[]types.Category](byteData)
+}
 
+func (bs *BadgerDBStore) GetAllApp() ([]types.AppIconCategoryAndCmdLine, error) {
+	res := make([]types.AppIconCategoryAndCmdLine, 0, 30)
+
+	err := bs.db.View(func(txn *badger.Txn) error {
+		opts := badger.DefaultIteratorOptions
+		opts.PrefetchValues = true
+		opts.PrefetchSize = 100
+		it := txn.NewIterator(opts)
+		defer it.Close()
+
+		for it.Seek(dbAppPrefix); it.ValidForPrefix(dbAppPrefix); it.Next() {
+			err := it.Item().Value(func(val []byte) error {
+
+				var (
+					app AppInfo
+					err error
+				)
+
+				if app, err = helperFuncs.DecodeJSON[AppInfo](val); err != nil {
+					return err
+				}
+
+				if app.IsCmdLineSet {
+					res = append(res, app.AppIconCategoryAndCmdLine)
+				}
+
+				return nil
+			})
+
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+	return slices.Clip(res), nil
+
+}
+
+func (bs *BadgerDBStore) GetAllAppWithCmdLine() ([]types.AppIconCategoryAndCmdLine, error) {
+	r, err := bs.GetAllApp()
+	if err != nil {
+		return nil, err
+	}
+
+	r = slices.DeleteFunc(r, func(i types.AppIconCategoryAndCmdLine) bool {
+		return !i.IsCmdLineSet
+	})
+	return r, nil
 }

@@ -1,6 +1,7 @@
 package jobs
 
 import (
+	monitoring "LiScreMon/cli/daemon/internal/monitoring/linux"
 	"fmt"
 	"log"
 	"os"
@@ -64,12 +65,27 @@ func (tm *TaskManager) StartTaskManger() error {
 	go tm.disperseTask()
 
 	for _, task := range tasks {
-		now, taskStartTime := time.Now(), task.TaskTime.StartTime
-		if taskStartTime.Before(now) {
-			if err := tm.dbHandle.RemoveTask(task.UUID); err != nil {
-				return fmt.Errorf("err deleting old task: %+v :err %v", task, err)
+
+		if task.Job == types.ReminderWithAction || task.Job == types.ReminderWithNoAction {
+			now, taskStartTime := time.Now(), task.TaskTime.StartTime
+			if taskStartTime.Before(now) {
+				fmt.Printf("removing task %+v\n\n", task)
+				if err := tm.dbHandle.RemoveTask(task.UUID); err != nil {
+					return fmt.Errorf("err deleting old task: %+v :err %v", task, err)
+				}
 			}
-			continue
+		}
+
+		if task.Job == types.Limit {
+			if !task.TaskTime.EveryDay {
+				a := task.CreatedAt.Add(time.Duration(task.TaskTime.Limit) * time.Hour)
+				if a.Before(time.Now()) {
+					fmt.Printf("removing task %+v\n\n", task)
+					if err := tm.dbHandle.RemoveTask(task.UUID); err != nil {
+						return fmt.Errorf("err deleting old task: %+v :err %v", task, err)
+					}
+				}
+			}
 		}
 
 		tm.channel <- task
@@ -104,6 +120,8 @@ func (tm *TaskManager) disperseTask() {
 			tm.createRemidersWithAction(task)
 
 		case types.Limit:
+			monitoring.AddNewLimit(task)
+
 		}
 	}
 
@@ -129,7 +147,7 @@ func (tm *TaskManager) createRemidersWithAction(task types.Task) {
 		gocron.WithEventListeners(
 			gocron.AfterJobRuns(
 				func(jobID uuid.UUID, jobName string) {
-					cmd := exec.Command("bash", "-c", task.AppInfo.CmdLine)
+					cmd := exec.Command("bash", "-c", task.CmdLine)
 					err := cmd.Start()
 					if err != nil {
 						log.Println(err)

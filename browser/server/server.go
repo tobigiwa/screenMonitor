@@ -58,14 +58,15 @@ func (a *App) CheckDaemonService() (types.Message, error) {
 		Endpoint:    "startConnection",
 		StatusCheck: "I wish this project prospered.",
 	}
-	return a.writeAndReadWithDaemonService(msg)
+	return a.commWithDaemonService(msg)
 }
 
-func (a *App) writeAndReadWithDaemonService(msg types.Message) (types.Message, error) {
+func (a *App) commWithDaemonService(msg types.Message) (types.Message, error) {
 	bytesData, err := helperFuncs.EncodeJSON(msg) // encode message in byte
 	if err != nil {
 		return types.NoMessage, fmt.Errorf("encode %w", err)
 	}
+
 	if _, err = a.daemonConn.Write(bytesData); err != nil { // write to socket
 		return types.NoMessage, fmt.Errorf("write %w", err)
 	}
@@ -86,10 +87,17 @@ func (a *App) writeAndReadWithDaemonService(msg types.Message) (types.Message, e
 			dataBuf.Write(tempBuf[:n])
 		}
 
-		if json.Valid(dataBuf.Bytes()) { // Implement this function based on your protocol
+		if json.Valid(dataBuf.Bytes()) { 
 			break
 		}
 	}
 
-	return helperFuncs.DecodeJSON[types.Message](dataBuf.Bytes())
+	if msg, err = helperFuncs.DecodeJSON[types.Message](dataBuf.Bytes()); err != nil {
+		return types.NoMessage, err
+	}
+	
+	if msg.IsError {
+		return types.NoMessage, msg.Error
+	}
+	return msg, nil
 }

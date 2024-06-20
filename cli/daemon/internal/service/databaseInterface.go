@@ -14,7 +14,7 @@ type DatabaseInterface interface {
 	DeleteKey([]byte) error
 	DeleteBucket(dbPrefix string) error
 	GetDay(types.Date) (db.DailyStat, error)
-	GetWeek(string) (db.WeeklyStat, error)
+	GetWeek(types.Date) (db.WeeklyStat, error)
 	AppWeeklyStat(appName string, anyDayInTheWeek types.Date) (types.AppRangeStat, error)
 	AppMonthlyStat(appName, month, year string) (types.AppRangeStat, error)
 	AppDateRangeStat(appName string, start, end types.Date) (types.AppRangeStat, error)
@@ -26,4 +26,6 @@ type DatabaseInterface interface {
 	AddTask(task types.Task) error
 	SetAppCategory(appName string, category types.Category) error
 	GetAllACategories() ([]types.Category, error)
+	UpdateAppInfoManually(key []byte, opsFunc func([]byte) ([]byte, error)) error
+	GetAllApp() ([]types.AppIconCategoryAndCmdLine, error)
 }

@@ -218,7 +218,7 @@ a {
 
     .header {
         height: 4rem;
-        background-color: #363636;
+        background-color: var(--primary-color2);
         display: flex;
         justify-content: space-between;
 

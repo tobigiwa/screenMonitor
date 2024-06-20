@@ -3,6 +3,8 @@ package database
 import (
 	"bytes"
 	"fmt"
+	helperFuncs "pkg/helper"
+	"pkg/types"
 
 	badger "github.com/dgraph-io/badger/v4"
 )
@@ -131,10 +133,16 @@ func (bs *BadgerDBStore) UpdateOpertionOnBuCKET(dbPrefix string, opsFunc func([]
 
 		for it.Seek(prefix); it.ValidForPrefix(prefix); it.Next() {
 			err := it.Item().Value(func(val []byte) error {
+
 				updatedByteArr, err := opsFunc(val)
 				if err != nil {
 					return err
 				}
+
+				if bytes.Equal(updatedByteArr, val) {
+					return nil
+				}
+
 				return txn.Set(it.Item().Key(), updatedByteArr)
 			})
 
@@ -149,4 +157,45 @@ func (bs *BadgerDBStore) UpdateOpertionOnBuCKET(dbPrefix string, opsFunc func([]
 		return err
 	}
 	return nil
+}
+
+func (bs *BadgerDBStore) UpdateAppInfoManually(key []byte, opsFunc func([]byte) ([]byte, error)) error {
+
+	byteData, err := bs.Get(key)
+	if err != nil {
+		return err
+	}
+	updatedByteArr, err := opsFunc(byteData)
+	if err != nil {
+		return err
+	}
+
+	if bytes.Equal(updatedByteArr, byteData) {
+		return nil
+	}
+
+	return bs.setOrUpdateKeyValue(key, updatedByteArr)
+}
+
+func ExampleOf_opsFunc(v []byte) ([]byte, error) {
+	var (
+		app AppInfo
+		err error
+	)
+
+	if app, err = helperFuncs.DecodeJSON[AppInfo](v); err != nil {
+		return nil, err
+	}
+
+	if app.AppName == "Google-chrome" {
+		app.ScreenStat[today()] = types.Stats{}
+		fmt.Println(app.AppName, app.ScreenStat[today()].Active)
+	}
+
+	// a := app.AppName
+	// app.AppIconCategoryAndCmdLine = types.NoAppIconCategoryAndCmdLine
+	// app.AppName = a
+	// fmt.Println(app.AppName, app.IsCategorySet, app.DesktopCategories, "category-", app.Category, app.IsCmdLineSet, app.CmdLine, app.IsIconSet)
+
+	return helperFuncs.EncodeJSON(app)
 }

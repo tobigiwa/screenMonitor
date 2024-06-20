@@ -2,6 +2,7 @@ package monitoring
 
 import (
 	"log"
+	"pkg/types"
 	"time"
 
 	db "LiScreMon/cli/daemon/internal/database"
@@ -22,6 +23,8 @@ var (
 	netActiveWindow       = &netActiveWindowInfo{}
 	monitor               X11Monitor
 	x11Conn               *xgbutil.XUtil
+
+	fixtyEightSecs = time.Duration(58) * time.Second
 )
 
 func InitMonitoring(db *db.BadgerDBStore) X11Monitor {
@@ -40,7 +43,7 @@ func InitMonitoring(db *db.BadgerDBStore) X11Monitor {
 	monitor = X11Monitor{
 		X11Connection:  x11Conn,
 		Db:             db,
-		windowChangeCh: make(chan struct{}, 1),
+		windowChangeCh: make(chan types.GenericKeyValue[xproto.Window, float64], 1),
 	}
 
 	setRootEventMask(x11Conn)

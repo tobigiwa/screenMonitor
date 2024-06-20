@@ -22,13 +22,13 @@ templ IndexPage() {
 		<body>
 			<div class="page">
 				@menu()
-				@screentime()
+				@screentimeTimePage()
 			</div>
 		</body>
 	</html>
 }
 
-templ screentime() {
+templ screentimeTimePage() {
 	<div class="main">
 		@Header()
 		@chartWrapper("", types.NoAppIconCategoryAndCmdLine)
@@ -82,18 +82,14 @@ templ chartControls() {
 			</button>
 		</div>
 		<div class="spacing"></div>
-		// <div class="right-controls">
-		// 	<button class="right-controls__btn text" href="#">Asce.</button>
-		// 	<button class="right-controls__btn text" href="#">Desc.</button>
-		// </div>
 		<script>
-		document.addEventListener( 'DOMContentLoaded', function ()
-		{
-			const thisWeekButton = document.querySelector( '#thisWeekButton' );
-			if ( thisWeekButton ) {
-				thisWeekButton.click();
-			}	
-		});
+			document.addEventListener( 'DOMContentLoaded', function ()
+			{
+				const thisWeekButton = document.querySelector( '#thisWeekButton' );
+				if ( thisWeekButton ) {
+					thisWeekButton.click();
+				}	
+			});
 		</script>
 	</div>
 }
@@ -140,7 +136,6 @@ templ chartHighlight(appDetails []types.ApplicationDetail, totalWeekUsage float6
 
 				// build the modal dialog
 				const dialog = document.getElementById('categoryDialog');
-				const formElement = dialog.querySelector('form').reset();
 				const imgElement = dialog.querySelector('form .head img');
 				const headerClassParagraph = dialog.querySelector('form .head p');
 				const dialogLegend = dialog.querySelector('form legend');
@@ -153,7 +148,6 @@ templ chartHighlight(appDetails []types.ApplicationDetail, totalWeekUsage float6
 				dialogLegend.innerHTML = `Select a category for ${appName}:`
 				
 				if (desktopCategories === '' || desktopCategories.trim() === '') {
-					// dialogDesktopCategoriesClass.remove();
 					dialogDesktopCategoriesClass.style.display = 'none';
 				} else {
 					dialogDesktopCategoriesClass.innerHTML = `Application file category(s):\n${desktopCategories}`;

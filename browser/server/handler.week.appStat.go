@@ -5,8 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"pkg/chart"
 	"pkg/types"
 	"strings"
+	views "views/components"
+
+	"github.com/a-h/templ"
 )
 
 func (a *App) AppStatHandler(w http.ResponseWriter, r *http.Request) {
@@ -50,15 +54,26 @@ func (a *App) AppStatHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if msg, err = a.writeAndReadWithDaemonService(msg); err != nil {
-		a.serverError(w, fmt.Errorf("error occurred in writeAndReadWithDaemonService:%w", err))
+	if msg, err = a.commWithDaemonService(msg); err != nil {
+		a.serverError(w, fmt.Errorf("error occurred in commWithDaemonService:%w", err))
 		return
 	}
 
-	templComp := prepareHtTMLResponse(msg)
-	if err = templComp.Render(context.TODO(), w); err != nil {
+	if err = appStatResponse(msg.AppStatResponse).Render(context.TODO(), w); err != nil {
 		a.serverError(w, fmt.Errorf("templ reander error:%w", err))
 	}
+}
 
-	templComp.Render(context.TODO(), w)
+func appStatResponse(w types.AppStatMessage) templ.Component {
+	return views.AppStatTempl(
+		chart.AppStatBarChart(
+			chart.BarChartData{
+				AppName:     w.AppInfo.AppName,
+				YAxis:       w.Values,
+				XAxis:       w.FormattedDay,
+				Month:       w.Month,
+				Year:        w.Year,
+				TotalUptime: w.TotalRangeUptime,
+			}),
+		w.AppInfo)
 }

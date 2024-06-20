@@ -78,7 +78,7 @@
 
 .chart-highlight {
     max-height: calc(100vh - 37rem);
-    min-height: auto;
+    min-height: calc(100vh - 37rem);
     overflow-y: auto;
     background-color: #353535;
     border-radius: 2%;

@@ -9,18 +9,20 @@ import (
 )
 
 type Message struct {
-	Endpoint            string              `json:"endpoint"`
-	StatusCheck         string              `json:"statusCheck"`
-	SetCategoryRequest  SetCategoryRequest  `json:"setCategoryRequest"`
-	SetCategoryResponse SetCategoryResponse `json:"setCategoryResponse"`
-	DayStatRequest      Date                `json:"dayStatRequest"`
-	DayStatResponse     DayStatMessage      `json:"dayStatResponse"`
-	WeekStatRequest     string              `json:"weekStatRequest"`
-	WeekStatResponse    WeekStatMessage     `json:"weekStatResponse"`
-	AppStatRequest      AppStatRequest      `json:"appStatResquest"`
-	AppStatResponse     AppStatMessage      `json:"appStatResponse"`
-	ReminderRequest     Task                `json:"reminderRequest"`
-	ReminderResponse    ReminderMessage     `json:"reminderResponse"`
+	Endpoint                 string              `json:"endpoint"`
+	StatusCheck              string              `json:"statusCheck"`
+	IsError                  bool                `json:"isError"`
+	Error                    error               `json:"error"`
+	SetCategoryRequest       SetCategoryRequest  `json:"setCategoryRequest"`
+	SetCategoryResponse      SetCategoryResponse `json:"setCategoryResponse"`
+	DayStatRequest           Date                `json:"dayStatRequest"`
+	DayStatResponse          DayStatMessage      `json:"dayStatResponse"`
+	WeekStatRequest          Date                `json:"weekStatRequest"`
+	WeekStatResponse         WeekStatMessage     `json:"weekStatResponse"`
+	AppStatRequest           AppStatRequest      `json:"appStatResquest"`
+	AppStatResponse          AppStatMessage      `json:"appStatResponse"`
+	ReminderAndLimitRequest  Task                `json:"reminderAndLimitRequest"`
+	ReminderAndLimitResponse ReminderMessage     `json:"reminderAndLimitResponse"`
 }
 
 type SetCategoryRequest struct {
@@ -29,17 +31,14 @@ type SetCategoryRequest struct {
 }
 
 type SetCategoryResponse struct {
-	IsCategorySet bool  `json:"isCategorySet"`
-	IsError       bool  `json:"isError"`
-	Error         error `json:"error"`
+	IsCategorySet bool `json:"isCategorySet"`
 }
 
 type ReminderMessage struct {
-	Task           Task   `json:"task"`
-	CreatedNewTask bool   `json:"createdNewTask"`
-	AllTask        []Task `json:"allTask"`
-	IsError        bool   `json:"isError"`
-	Error          error  `json:"error"`
+	Task           Task                        `json:"task"`
+	CreatedNewTask bool                        `json:"createdNewTask"`
+	AllTask        []Task                      `json:"allTask"`
+	AllApps        []AppIconCategoryAndCmdLine `json:"allApps"`
 }
 
 type WeekStatMessage struct {
@@ -51,16 +50,12 @@ type WeekStatMessage struct {
 	Year            string              `json:"year"`
 	AppDetail       []ApplicationDetail `json:"appDetail"`
 	AllCategory     []Category          `json:"allCategory"`
-	IsError         bool                `json:"isError"`
-	Error           error               `json:"error"`
 }
 
 type DayStatMessage struct {
 	EachApp  []AppStat `json:"eachApp"`
 	DayTotal Stats     `json:"dayTotal"`
 	Date     string    `josn:"date"`
-	IsError  bool      `json:"isError"`
-	Error    error     `json:"error"`
 }
 
 type AppStatRequest struct {
@@ -79,8 +74,6 @@ type AppStatMessage struct {
 	Year             string                    `json:"year"`
 	TotalRangeUptime float64                   `json:"totalRangeUptime"`
 	AppInfo          AppIconCategoryAndCmdLine `json:"appInfo"`
-	IsError          bool                      `json:"isError"`
-	Error            error                     `json:"error"`
 }
 
 type AppIconCategoryAndCmdLine struct {
@@ -156,11 +149,18 @@ type ScreenTime struct {
 }
 
 type Task struct {
-	UUID     uuid.UUID                 `json:"uuid"`
-	AppInfo  AppIconCategoryAndCmdLine `json:"appInfo"`
-	TaskTime TaskTime                  `json:"taskTime"`
-	UI       UItextInfo                `json:"ui"`
-	Job      TaskType                  `json:"job"`
+	AppIconCategoryAndCmdLine
+	UUID      uuid.UUID  `json:"uuid"`
+	TaskTime  TaskTime   `json:"taskTime"`
+	UI        UItextInfo `json:"ui"`
+	Job       TaskType   `json:"job"`
+	CreatedAt time.Time  `json:"createdAt"`
+}
+
+type AppLimit struct {
+	Limit    float64 `json:"limit"`
+	EveryDay bool    `json:"oneTime"`
+	ExitApp  bool    `json:"exitApp"`
 }
 
 type UItextInfo struct {
@@ -176,4 +176,5 @@ type TaskTime struct {
 	EndTime             time.Time `json:"endTime"`
 	AlertTimesInMinutes [3]int    `json:"alertTimesInMinutes"`
 	AlertSound          [3]bool   `json:"alertSound"`
+	AppLimit
 }
