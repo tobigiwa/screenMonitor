@@ -29,8 +29,7 @@ func (a *App) ReminderAndAlertPageHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	// w.Header().Set("HX-Trigger-After-Settle", "reminder")
-	views.ReminderAndAlertPage(msg.ReminderAndLimitResponse.AllApps).Render(context.TODO(), w)
+	views.ReminderAndAlertPage(r.URL.Query().Get("taskType"), msg.ReminderAndLimitResponse.AllApps).Render(context.TODO(), w)
 }
 
 func (a *App) AllReminderTask(w http.ResponseWriter, r *http.Request) {
@@ -253,5 +252,5 @@ func (a *App) CreateLimitHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("HX-Trigger-After-Settle", "Applimit")
-	http.Redirect(w, r, "/tasks", http.StatusSeeOther)
+	http.Redirect(w, r, "/tasks?taskType=AppLimit", http.StatusSeeOther)
 }

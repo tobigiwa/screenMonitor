@@ -42,7 +42,6 @@ templ chartWrapper(chart template.HTML, info types.AppIconCategoryAndCmdLine) {
 		<div id="echart" hx-swap-oob="true">
 			@templ.Raw(chart)
 			if !reflect.ValueOf(info).IsZero() {
-				// accounting for weekStat, which does not need an icon...
 				if info.IsIconSet {
 					<img src={ getImageFilePath(info.AppName, info.Icon) } alt={ info.AppName } class="appIcon"/>
 				} else {
@@ -65,20 +64,12 @@ templ chartControls() {
 				</select>
 			</div>
 			<button class="left-controls__btn img backward-arrow" hx-get="/weekStat?week=backward" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">
-				<img
-					class="chart__controls--img"
-					src="assets/svg/angle-left-svgrepo-com.svg"
-					alt=""
-				/>
+				<img class="chart__controls--img" src="assets/svg/angle-left-svgrepo-com.svg" alt=""/>
 			</button>
 			<button class="left-controls__btn text" hx-get="/weekStat?week=lastweek" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">Last Week</button>
 			<button class="left-controls__btn text" id="thisWeekButton" hx-get="/weekStat?week=thisweek" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">This Week</button>
 			<button class="left-controls__btn img forward-arrow" hx-get="/weekStat?week=forward" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">
-				<img
-					class="chart__controls--img"
-					src="assets/svg/angle-right-svgrepo-com.svg"
-					alt=""
-				/>
+				<img class="chart__controls--img" src="assets/svg/angle-right-svgrepo-com.svg" alt=""/>
 			</button>
 		</div>
 		<div class="spacing"></div>
@@ -192,8 +183,8 @@ templ setCategoryDialog(allCategory []types.Category) {
 			</div>
 		</form>
 		<script>
-			const dialog = document.getElementById('categoryDialog');
-			dialog.addEventListener('click', (e) => e.stopPropagation());
+			const setCategoryDialog = document.getElementById('categoryDialog');
+			setCategoryDialog.addEventListener('click', (e) => e.stopPropagation());
 		</script>
 	</dialog>
 }

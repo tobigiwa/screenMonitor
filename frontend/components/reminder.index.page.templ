@@ -2,7 +2,7 @@ package frontend
 
 import "pkg/types"
 
-templ ReminderAndAlertPage(allApps []types.AppIconCategoryAndCmdLine) {
+templ ReminderAndAlertPage(taskType string, allApps []types.AppIconCategoryAndCmdLine) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
@@ -14,26 +14,22 @@ templ ReminderAndAlertPage(allApps []types.AppIconCategoryAndCmdLine) {
 			<script src="assets/javascript/script.out.js"></script>
 			<script src="assets/libraries/htmx.min.js"></script>
 			<script src="assets/libraries/dd.min.js"></script>
-			<title>ScreenTimePage</title>
+			<title>ScreenTime</title>
 		</head>
 		<body>
 			<div class="page">
 				@menu()
 				@reminderAndLimitPage(allApps)
+				@templ.JSONScript("id", taskType)
 			</div>
 			<script>
-				document.body.addEventListener('reminder', () => {
-					const remiderRequestBtn = document.querySelector( '.reminderRequest' );
-					console.log("this was triggered")
-					if ( remiderRequestBtn ) {
-						remiderRequestBtn.click();
-					};	
-				});
-				document.body.addEventListener('Applimit', () => {
-					const limitRequestBtn = document.querySelector( '.limitRequest' );
-					if ( limitRequestBtn ) {
-						limitRequestBtn.click();
-					};	
+				document.addEventListener( 'DOMContentLoaded', function () {
+					const data = JSON.parse(document.getElementById('id').textContent);
+					if (data === "AppLimit") {
+						document.querySelector( '.applimitRequest' ).click();
+					} else {
+						document.querySelector( '.reminderRequest' ).click();
+					}
 				});
 		</script>
 		</body>
@@ -82,7 +78,7 @@ templ reminderAndLimitHeaderSection() {
 			</button>
 		</div>
 		<div class="limit-request">
-			<h2 class="limitRequest" hx-get="/limitTasks" hx-swap="none" hx-select-oob="#task-holder:outerHTML">App Limit</h2>
+			<h2 class="applimitRequest" hx-get="/limitTasks" hx-swap="none" hx-select-oob="#task-holder:outerHTML">App Limit</h2>
 			<button
 				class="limit-dialog__btn"
 				title="add new app limit"
@@ -92,15 +88,15 @@ templ reminderAndLimitHeaderSection() {
 				/>
 			</button>
 		</div>
-		<script>
-			document.addEventListener( 'DOMContentLoaded', function ()
-			{
-				const remiderRequestBtn = document.querySelector( '.reminderRequest' );
-				if ( remiderRequestBtn ) {
-					remiderRequestBtn.click();
-				}	
-			});
-		</script>
+		// <script>
+		// 	document.addEventListener( 'DOMContentLoaded', function ()
+		// 	{
+		// 		const remiderRequestBtn = document.querySelector( '.reminderRequest' );
+		// 		if ( remiderRequestBtn ) {
+		// 			remiderRequestBtn.click();
+		// 		}	
+		// 	});
+		// </script>
 	</div>
 }
 
