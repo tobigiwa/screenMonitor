@@ -16,7 +16,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (a *App) ReminderAndAlertPageHandler(w http.ResponseWriter, r *http.Request) {
+func (a *App) tasksPage(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 	msg := types.Message{
@@ -29,10 +29,10 @@ func (a *App) ReminderAndAlertPageHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	views.ReminderAndAlertPage(r.URL.Query().Get("taskType"), msg.ReminderAndLimitResponse.AllApps).Render(context.TODO(), w)
+	views.TasksPage("", msg.ReminderAndLimitResponse.AllApps).Render(context.TODO(), w)
 }
 
-func (a *App) AllReminderTask(w http.ResponseWriter, r *http.Request) {
+func (a *App) ReminderTasksHandler(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 	msg := types.Message{
@@ -55,7 +55,7 @@ func (a *App) AllReminderTask(w http.ResponseWriter, r *http.Request) {
 	views.RenderTasks(false, c).Render(context.TODO(), w)
 }
 
-func (a *App) AllLimitTask(w http.ResponseWriter, r *http.Request) {
+func (a *App) appLimitTasksHandler(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 	msg := types.Message{
@@ -74,12 +74,16 @@ func (a *App) AllLimitTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := views.LimitTasks(reminderTasks)
+	c := views.AppLimitTasks(reminderTasks)
 	views.RenderTasks(false, c).Render(context.TODO(), w)
 }
 
-func (a *App) CreateReminderHandler(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+func (a *App) newReminderHandler(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		a.clientError(w, http.StatusBadRequest, err)
+		return
+	}
 
 	var task types.Task
 
@@ -93,19 +97,18 @@ func (a *App) CreateReminderHandler(w http.ResponseWriter, r *http.Request) {
 
 		case "reminder":
 			startTime, err := time.ParseInLocation("2006-01-02T15:04", value[0], time.Local)
-			fmt.Println(startTime, value[0])
 			if err != nil {
 				a.clientError(w, http.StatusBadRequest, err)
 				return
 			}
-			task.TaskTime.StartTime = startTime
+			task.Reminder.StartTime = startTime
 
 		case "soundNotification":
 			if _, err := strconv.ParseBool(value[0]); err != nil {
 				a.clientError(w, http.StatusBadRequest, fmt.Errorf("error parsing formData:%w", err))
 				return
 			}
-			task.TaskTime.AlertSound[2] = true
+			task.Reminder.AlertSound[2] = true
 
 		case "firstNotification":
 			alert, err := strconv.Atoi(value[0])
@@ -113,14 +116,14 @@ func (a *App) CreateReminderHandler(w http.ResponseWriter, r *http.Request) {
 				a.clientError(w, http.StatusBadRequest, fmt.Errorf("error parsing formData:%w", err))
 				return
 			}
-			task.TaskTime.AlertTimesInMinutes[0] = alert
+			task.Reminder.AlertTimesInMinutes[0] = alert
 
 		case "soundFirstNotification":
 			if _, err := strconv.ParseBool(value[0]); err != nil {
 				a.clientError(w, http.StatusBadRequest, fmt.Errorf("error parsing formData:%w", err))
 				return
 			}
-			task.TaskTime.AlertSound[0] = true
+			task.Reminder.AlertSound[0] = true
 
 		case "secondNotification":
 			alert, err := strconv.Atoi(value[0])
@@ -128,14 +131,14 @@ func (a *App) CreateReminderHandler(w http.ResponseWriter, r *http.Request) {
 				a.clientError(w, http.StatusBadRequest, fmt.Errorf("error parsing formData:%w", err))
 				return
 			}
-			task.TaskTime.AlertTimesInMinutes[1] = alert
+			task.Reminder.AlertTimesInMinutes[1] = alert
 
 		case "soundSecondNotification":
 			if _, err := strconv.ParseBool(value[0]); err != nil {
 				a.clientError(w, http.StatusBadRequest, fmt.Errorf("error parsing formData:%w", err))
 				return
 			}
-			task.TaskTime.AlertSound[1] = true
+			task.Reminder.AlertSound[1] = true
 
 		case "app":
 			if task.AppName = value[0]; value[0] == "no-app" {
@@ -154,26 +157,25 @@ func (a *App) CreateReminderHandler(w http.ResponseWriter, r *http.Request) {
 		Endpoint:                strings.TrimPrefix(r.URL.Path, "/"),
 		ReminderAndLimitRequest: task,
 	}
-	res, err := a.commWithDaemonService(msg)
-	if err != nil {
+	if _, err = a.commWithDaemonService(msg); err != nil {
 		a.serverError(w, err)
 		return
 	}
-	if !res.ReminderAndLimitResponse.CreatedNewTask {
-		a.serverError(w, fmt.Errorf("error creating reminder"))
-		return
-	}
-	http.Redirect(w, r, "/tasks", http.StatusSeeOther)
+
+	views.TasksPage("", msg.ReminderAndLimitResponse.AllApps).Render(context.TODO(), w)
 }
 
-func (a *App) CreateLimitHandler(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+func (a *App) newAppLimitHandler(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		a.clientError(w, http.StatusBadRequest, err)
+		return
+	}
 
 	var (
 		msg      types.Message
 		task     types.Task
 		hrs, min int
-		err      error
 	)
 
 	for key, value := range r.Form {
@@ -210,7 +212,7 @@ func (a *App) CreateLimitHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			if val {
-				task.TaskTime.EveryDay = true
+				task.AppLimit.IsEveryDay = true
 				task.Job = types.Limit
 			}
 
@@ -221,7 +223,7 @@ func (a *App) CreateLimitHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			if val {
-				task.TaskTime.ExitApp = true
+				task.AppLimit.ExitApp = true
 			}
 
 		}
@@ -229,8 +231,7 @@ func (a *App) CreateLimitHandler(w http.ResponseWriter, r *http.Request) {
 
 	hours, minutes := time.Duration(hrs)*time.Hour, time.Duration(min)*time.Minute
 
-	task.TaskTime.Limit = hours.Hours() + minutes.Hours()
-	task.CreatedAt = time.Now()
+	task.AppLimit.Limit = hours.Hours() + minutes.Hours()
 	task.UUID = uuid.New()
 
 	msg = types.Message{
@@ -238,19 +239,49 @@ func (a *App) CreateLimitHandler(w http.ResponseWriter, r *http.Request) {
 		ReminderAndLimitRequest: task,
 	}
 
-	res, err := a.commWithDaemonService(msg)
-	if err != nil {
+	if _, err = a.commWithDaemonService(msg); err != nil {
 		if errors.Is(err, types.ErrLimitAppExist) {
 			fmt.Println("it got here")
-			// w.Header().Set("HX-Trigger", `{"showAlert": {"message": "Task created successfully!"}}`)
 		}
+
 		a.serverError(w, err)
 		return
 	}
-	if !res.ReminderAndLimitResponse.CreatedNewTask {
-		a.serverError(w, fmt.Errorf("error creating reminder"))
+
+	views.TasksPage("AppLimit", msg.ReminderAndLimitResponse.AllApps).Render(context.TODO(), w)
+
+}
+
+func (a *App) removeTask(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	path := strings.Split(r.URL.Path, "/")
+	if !(len(path) > 2) {
+		a.clientError(w, http.StatusBadRequest, fmt.Errorf("error parsing url"))
 		return
 	}
-	w.Header().Set("HX-Trigger-After-Settle", "Applimit")
-	http.Redirect(w, r, "/tasks?taskType=AppLimit", http.StatusSeeOther)
+
+	endpoint, pathParam := path[1], r.PathValue("uuid")
+
+	msg := types.Message{
+		Endpoint: endpoint,
+	}
+
+	if msg.ReminderAndLimitRequest.UUID, err = uuid.Parse(pathParam); err != nil {
+		a.clientError(w, http.StatusBadRequest, fmt.Errorf("bad task uuid format:%w", err))
+		return
+	}
+
+	if msg, err = a.commWithDaemonService(msg); err != nil {
+		a.serverError(w, err)
+		return
+	}
+
+	if r.URL.Query().Get("taskType") == "AppLimit" {
+		http.Redirect(w, r, "/appLimits", http.StatusSeeOther)
+		return
+	}
+
+	http.Redirect(w, r, "/reminders", http.StatusSeeOther)
 }

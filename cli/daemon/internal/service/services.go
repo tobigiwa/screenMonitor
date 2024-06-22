@@ -162,7 +162,7 @@ func (s *Service) reminderTasks() (types.ReminderMessage, error) {
 			continue
 		}
 
-		now, taskStartTime := time.Now(), task.TaskTime.StartTime
+		now, taskStartTime := time.Now(), task.Reminder.StartTime
 
 		if taskStartTime.Before(now) {
 			if err := s.db.RemoveTask(task.UUID); err != nil {
@@ -173,7 +173,7 @@ func (s *Service) reminderTasks() (types.ReminderMessage, error) {
 	}
 
 	slices.SortFunc(validTask, func(a, b types.Task) int {
-		return a.TaskTime.StartTime.Compare(b.TaskTime.StartTime)
+		return a.Reminder.StartTime.Compare(b.Reminder.StartTime)
 	})
 
 	return types.ReminderMessage{AllTask: slices.Clip(validTask)}, nil
@@ -194,7 +194,7 @@ func (s *Service) limitTasks() (types.ReminderMessage, error) {
 	}
 
 	slices.SortFunc(limitTask, func(a, b types.Task) int {
-		return cmp.Compare(a.TaskTime.Limit, b.TaskTime.Limit)
+		return cmp.Compare(a.AppLimit.Limit, b.AppLimit.Limit)
 	})
 
 	return types.ReminderMessage{AllTask: slices.Clip(limitTask)}, nil
@@ -215,7 +215,7 @@ func (s *Service) addNewReminder(task types.Task) (types.ReminderMessage, error)
 		return types.NoMessage.ReminderAndLimitResponse, err
 	}
 
-	return types.ReminderMessage{CreatedNewTask: true}, nil
+	return types.ReminderMessage{TaskOptSuccessful: true}, nil
 }
 
 func (s *Service) addNewLimitApp(msg types.Task) (types.ReminderMessage, error) {
@@ -225,5 +225,17 @@ func (s *Service) addNewLimitApp(msg types.Task) (types.ReminderMessage, error) 
 		return types.NoMessage.ReminderAndLimitResponse, err
 	}
 
-	return types.ReminderMessage{CreatedNewTask: true}, nil
+	return types.ReminderMessage{TaskOptSuccessful: true}, nil
+}
+
+func (s *Service) removeTask(msg types.Task) (types.ReminderMessage, error) {
+
+	err := s.db.RemoveTask(msg.UUID)
+	if err != nil {
+		return types.NoMessage.ReminderAndLimitResponse, err
+	}
+
+	s.taskManager.RemoveTask(msg.UUID)
+
+	return types.ReminderMessage{TaskOptSuccessful: true}, nil
 }

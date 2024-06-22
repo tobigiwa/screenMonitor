@@ -8,7 +8,7 @@ templ ReminderTasks(tasks []types.Task) {
 	for _, t := range tasks {
 		<li>
 			<div class="remainder-tasks">
-				<div class="info">
+				<div class="appInfo">
 					<p class="title"><span class="label"><i>title:</i></span> <span class="content">{ t.UI.Title }</span></p>
 					<p class="subtitle"><span class="label"><i>subtitle:</i></span> <span class="content">{ t.UI.Subtitle }</span></p>
 					<details>
@@ -18,7 +18,10 @@ templ ReminderTasks(tasks []types.Task) {
 					<div class="action">would launch: <img src={ getImageFilePath(t.AppName, t.Icon) } alt=""/> { t.AppName }</div>
 				</div>
 				<div class="spacing">
-					<button class="edit-button">Edit</button>
+					<div class="edit-button">
+						<img title="delete reminder" src="/assets/svg/delete.svg" alt="delete" hx-post={ "/removeTask/" + t.UUID.String() } hx-swap="none" hx-select-oob="#task-holder:outerHTML"/>
+						<img title="edit reminder" src="/assets/svg/edit.svg" alt="delete"/>
+					</div>
 				</div>
 				<div class="alert">
 					<p class="start"><span class="label"><i>Starts at:</i></span> <span class="content">{ formatTimeToHumanReadable(t.TaskTime.StartTime) }</span></p>
@@ -40,7 +43,7 @@ templ ReminderTasks(tasks []types.Task) {
 	}
 }
 
-templ LimitTasks(tasks []types.Task) {
+templ AppLimitTasks(tasks []types.Task) {
 	for _, t := range  tasks {
 		<li>
 			<div class="limit-tasks">
@@ -51,7 +54,10 @@ templ LimitTasks(tasks []types.Task) {
 				<div class="limitInfo">
 					<p class="shade">{ helperFuncs.UsageTimeInHrsMin(t.TaskTime.Limit) }</p>
 					<p hidden class="uuid">{ t.UUID.String() }</p>
-					<button>Edit</button>
+					<div style="display: flex; gap: 1rem;">
+						<img title="delete app limit" src="/assets/svg/delete.svg" alt="delete" hx-post={ "/removeTask/" + t.UUID.String() + "?taskType=AppLimit" } hx-swap="none" hx-select-oob="#task-holder:outerHTML"/>
+						<img title="edit app limit" src="/assets/svg/edit-white.svg" alt="edit"/>
+					</div>
 				</div>
 			</div>
 		</li>

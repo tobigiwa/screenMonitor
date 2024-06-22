@@ -12,7 +12,7 @@ type Message struct {
 	Endpoint                 string              `json:"endpoint"`
 	StatusCheck              string              `json:"statusCheck"`
 	IsError                  bool                `json:"isError"`
-	Error                    error               `json:"error"`
+	Error                    string              `json:"error"`
 	SetCategoryRequest       SetCategoryRequest  `json:"setCategoryRequest"`
 	SetCategoryResponse      SetCategoryResponse `json:"setCategoryResponse"`
 	DayStatRequest           Date                `json:"dayStatRequest"`
@@ -35,10 +35,10 @@ type SetCategoryResponse struct {
 }
 
 type ReminderMessage struct {
-	Task           Task                        `json:"task"`
-	CreatedNewTask bool                        `json:"createdNewTask"`
-	AllTask        []Task                      `json:"allTask"`
-	AllApps        []AppIconCategoryAndCmdLine `json:"allApps"`
+	Task              Task                        `json:"task"`
+	TaskOptSuccessful bool                        `json:"taskOptsuccessful"`
+	AllTask           []Task                      `json:"allTask"`
+	AllApps           []AppIconCategoryAndCmdLine `json:"allApps"`
 }
 
 type WeekStatMessage struct {
@@ -150,17 +150,10 @@ type ScreenTime struct {
 
 type Task struct {
 	AppIconCategoryAndCmdLine
-	UUID      uuid.UUID  `json:"uuid"`
-	TaskTime  TaskTime   `json:"taskTime"`
-	UI        UItextInfo `json:"ui"`
-	Job       TaskType   `json:"job"`
-	CreatedAt time.Time  `json:"createdAt"`
-}
-
-type AppLimit struct {
-	Limit    float64 `json:"limit"`
-	EveryDay bool    `json:"oneTime"`
-	ExitApp  bool    `json:"exitApp"`
+	TaskTime
+	UUID uuid.UUID  `json:"uuid"`
+	UI   UItextInfo `json:"ui"`
+	Job  TaskType   `json:"job"`
 }
 
 type UItextInfo struct {
@@ -168,13 +161,24 @@ type UItextInfo struct {
 	Subtitle string `json:"subtitle"`
 	Notes    string `json:"notes"`
 }
-
 type TaskType string
 
 type TaskTime struct {
+	AppLimit AppLimit `json:"appLimit"`
+	Reminder Reminder `json:"reminder"`
+}
+
+type Reminder struct {
 	StartTime           time.Time `json:"startTime"`
 	EndTime             time.Time `json:"endTime"`
 	AlertTimesInMinutes [3]int    `json:"alertTimesInMinutes"`
 	AlertSound          [3]bool   `json:"alertSound"`
-	AppLimit
+}
+
+type AppLimit struct {
+	Limit          float64 `json:"limit"`
+	IsEveryDay     bool    `json:"oneTime"`
+	ExitApp        bool    `json:"exitApp"`
+	Date           Date    `json:"date"`
+	IsLimitReached bool    `json:"isLimitReached"`
 }

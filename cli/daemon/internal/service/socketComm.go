@@ -129,26 +129,29 @@ func treatMessage(c net.Conn) {
 		case "tasks":
 			msg.ReminderAndLimitResponse, err = ServiceInstance.tasks()
 
-		case "reminderTasks":
+		case "reminders":
 			msg.ReminderAndLimitResponse, err = ServiceInstance.reminderTasks()
 
-		case "limitTasks":
+		case "appLimits":
 			msg.ReminderAndLimitResponse, err = ServiceInstance.limitTasks()
 
-		case "createReminder":
+		case "newReminder":
 			msg.ReminderAndLimitResponse, err = ServiceInstance.addNewReminder(msg.ReminderAndLimitRequest)
 
-		case "createLimit":
+		case "newAppLimit":
 			msg.ReminderAndLimitResponse, err = ServiceInstance.addNewLimitApp(msg.ReminderAndLimitRequest)
+
+		case "removeTask":
+			msg.ReminderAndLimitResponse, err = ServiceInstance.removeTask(msg.ReminderAndLimitRequest)
 		}
 
 		if err != nil {
-			msg.IsError, msg.Error = true, err
+			msg.IsError, msg.Error = true, err.Error()
 		}
 
 		bytes, err := helperFuncs.EncodeJSON(msg)
 		if err != nil {
-			msg.Error = fmt.Errorf("error encoding response in serviceInstance: %w: %w", msg.Error, err)
+			msg.Error = fmt.Errorf("error encoding response in serviceInstance: %w: %w", msg.Error, err).Error()
 		}
 
 		_, err = c.Write(bytes)

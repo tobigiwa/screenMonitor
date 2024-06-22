@@ -2,7 +2,7 @@ package frontend
 
 import "pkg/types"
 
-templ ReminderAndAlertPage(taskType string, allApps []types.AppIconCategoryAndCmdLine) {
+templ TasksPage(taskType string, allApps []types.AppIconCategoryAndCmdLine) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
@@ -67,7 +67,7 @@ templ reminderAndLimitDialog(allApps []types.AppIconCategoryAndCmdLine) {
 templ reminderAndLimitHeaderSection() {
 	<div class="sticky-header">
 		<div class="reminder-request">
-			<h2 class="reminderRequest" hx-get="/reminderTasks" hx-swap="none" hx-select-oob="#task-holder:outerHTML">Reminder</h2>
+			<h2 class="reminderRequest" hx-get="/reminders" hx-swap="none" hx-select-oob="#task-holder:outerHTML">Reminder</h2>
 			<button
 				class="reminder-dialog__btn"
 				title="add new reminder task"
@@ -78,7 +78,7 @@ templ reminderAndLimitHeaderSection() {
 			</button>
 		</div>
 		<div class="limit-request">
-			<h2 class="applimitRequest" hx-get="/limitTasks" hx-swap="none" hx-select-oob="#task-holder:outerHTML">App Limit</h2>
+			<h2 class="applimitRequest" hx-get="/appLimits" hx-swap="none" hx-select-oob="#task-holder:outerHTML">App Limit</h2>
 			<button
 				class="limit-dialog__btn"
 				title="add new app limit"
@@ -88,21 +88,12 @@ templ reminderAndLimitHeaderSection() {
 				/>
 			</button>
 		</div>
-		// <script>
-		// 	document.addEventListener( 'DOMContentLoaded', function ()
-		// 	{
-		// 		const remiderRequestBtn = document.querySelector( '.reminderRequest' );
-		// 		if ( remiderRequestBtn ) {
-		// 			remiderRequestBtn.click();
-		// 		}	
-		// 	});
-		// </script>
 	</div>
 }
 
 templ reminderDialog() {
 	<dialog class="reminder-dialog">
-		<form class="new-reminder" method="post" action="/createReminder">
+		<form class="new-reminder" method="post" action="/newReminder">
 			<div class="titles">
 				<div class="form-pair">
 					<label for="add-title">Title:</label>
@@ -268,7 +259,7 @@ templ reminderDialog() {
 
 templ limitDialog(allApp []types.AppIconCategoryAndCmdLine) {
 	<dialog class="limit-dialog">
-		<form class="" method="post" action="/createLimit">
+		<form class="" method="post" action="/newAppLimit">
 			<select
 				name="app"
 				is="ms-dropdown"
@@ -335,6 +326,7 @@ templ limitDialog(allApp []types.AppIconCategoryAndCmdLine) {
 				document.querySelector('.limit-dialog__btn').addEventListener('click', () => {
 					limitDialog.showModal();
 				});
+
 		</script>
 	</dialog>
 }

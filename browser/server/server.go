@@ -87,17 +87,18 @@ func (a *App) commWithDaemonService(msg types.Message) (types.Message, error) {
 			dataBuf.Write(tempBuf[:n])
 		}
 
-		if json.Valid(dataBuf.Bytes()) { 
+		if json.Valid(dataBuf.Bytes()) {
 			break
 		}
 	}
 
 	if msg, err = helperFuncs.DecodeJSON[types.Message](dataBuf.Bytes()); err != nil {
+		fmt.Println("ERRO FROM HERE")
 		return types.NoMessage, err
 	}
-	
+
 	if msg.IsError {
-		return types.NoMessage, msg.Error
+		return types.NoMessage, fmt.Errorf(msg.Error)
 	}
 	return msg, nil
 }

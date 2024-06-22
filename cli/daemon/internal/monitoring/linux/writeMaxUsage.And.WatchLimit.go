@@ -41,24 +41,24 @@ func (x11 *X11Monitor) WindowChangeTimerFunc(ctx context.Context, timer *time.Ti
 }
 
 func (x11 *X11Monitor) watchLimit(windowID xproto.Window, duration float64) {
-	// if windowName, ok := curSessionNamedWindow[windowID]; ok {
-	// 	if limitApp, ok := LimitApp[windowName]; ok {
+	if windowName, ok := curSessionNamedWindow[windowID]; ok {
+		if limitApp, ok := LimitApp[windowName]; ok {
 
-	// 		limitApp.timeSofar += duration
+			limitApp.timeSofar += duration
 
-	// 		if limitApp.timeSofar >= limitApp.limit {
-	// 			fmt.Printf("we have reached limit for this application\n%+v\n\n", limitApp)
-	// 			if err := x11.NotifyLimitReached(limitApp.taskUUID); err != nil {
-	// 				fmt.Println("error from notifyLimitReached", err)
-	// 			}
+			if limitApp.timeSofar >= limitApp.limit {
+				fmt.Printf("we have reached limit for this application\n%+v\n\n", limitApp)
+				if err := x11.NotifyLimitReached(limitApp.taskUUID); err != nil {
+					fmt.Println("error from notifyLimitReached", err)
+				}
 
-	// 		} else {
+			} else {
 
-	// 			LimitApp[windowName] = limitApp
-	// 			fmt.Printf("\nthis so far %f for app %s...limit at %f\n\n", limitApp.timeSofar, windowName, limitApp.limit)
-	// 		}
-	// 	}
-	// }
+				LimitApp[windowName] = limitApp
+				fmt.Printf("\nthis so far %f for app %s...limit at %f\n\n", limitApp.timeSofar, windowName, limitApp.limit)
+			}
+		}
+	}
 }
 
 func (x11 *X11Monitor) sendOneMinuteUsage() {
@@ -85,7 +85,7 @@ func AddNewLimit(t types.Task) {
 	LimitApp[t.AppName] = limitWindow{
 		windowInfo: windowInfo{WindowName: t.AppName},
 		taskUUID:   t.UUID,
-		limit:      t.TaskTime.Limit,
+		limit:      t.AppLimit.Limit,
 	}
 }
 
@@ -104,11 +104,11 @@ func (x11 *X11Monitor) NotifyLimitReached(taskID uuid.UUID) error {
 		return err
 	}
 	title := fmt.Sprintf("Usage Limit reached for %s", task.AppName)
-	subtitle := fmt.Sprintf("App: %s Usage Limit: %s", task.AppName, helperFuncs.UsageTimeInHrsMin(task.TaskTime.Limit))
+	subtitle := fmt.Sprintf("App: %s Usage Limit: %s", task.AppName, helperFuncs.UsageTimeInHrsMin(task.AppLimit.Limit))
 
 	beeep.Alert(title, subtitle, appLogo)
 
-	if !task.TaskTime.EveryDay {
+	if !task.AppLimit.IsEveryDay {
 		err := x11.Db.RemoveTask(taskID)
 		if err != nil {
 			return err

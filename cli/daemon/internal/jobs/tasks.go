@@ -67,7 +67,7 @@ func (tm *TaskManager) StartTaskManger() error {
 	for _, task := range tasks {
 
 		if task.Job == types.ReminderWithAction || task.Job == types.ReminderWithNoAction {
-			now, taskStartTime := time.Now(), task.TaskTime.StartTime
+			now, taskStartTime := time.Now(), task.Reminder.StartTime
 			if taskStartTime.Before(now) {
 				fmt.Printf("removing task %+v\n\n", task)
 				if err := tm.dbHandle.RemoveTask(task.UUID); err != nil {
@@ -77,19 +77,18 @@ func (tm *TaskManager) StartTaskManger() error {
 		}
 
 		if task.Job == types.Limit {
-			if !task.TaskTime.EveryDay {
-				a := task.CreatedAt.Add(time.Duration(task.TaskTime.Limit) * time.Hour)
-				if a.Before(time.Now()) {
-					fmt.Printf("removing task %+v\n\n", task)
-					if err := tm.dbHandle.RemoveTask(task.UUID); err != nil {
-						return fmt.Errorf("err deleting old task: %+v :err %v", task, err)
-					}
-				}
+			if task.AppLimit.IsLimitReached {
+
 			}
 		}
 
 		tm.channel <- task
 	}
+
+	return nil
+}
+
+func (tm *TaskManager) validAppLimitTask(task types.Task) error {
 
 	return nil
 }
@@ -128,22 +127,26 @@ func (tm *TaskManager) disperseTask() {
 }
 
 func (tm *TaskManager) createRemidersWithNoAction(task types.Task) {
+
 	tm.reminders(task)
 
 	if _, err := tm.gocron.NewJob(
-		gocron.OneTimeJob(gocron.OneTimeJobStartDateTime(task.TaskTime.StartTime)),
+		gocron.OneTimeJob(gocron.OneTimeJobStartDateTime(task.Reminder.StartTime)),
 		gocron.NewTask(taskFunc, task.UI, true),
+		gocron.WithTags(task.UUID.String()),
 	); err != nil {
 		fmt.Println("error creating job", err)
 	}
+
 }
 
 func (tm *TaskManager) createRemidersWithAction(task types.Task) {
 	tm.reminders(task)
 
 	tm.gocron.NewJob(
-		gocron.OneTimeJob(gocron.OneTimeJobStartDateTime(task.TaskTime.StartTime)),
+		gocron.OneTimeJob(gocron.OneTimeJobStartDateTime(task.Reminder.StartTime)),
 		gocron.NewTask(taskFunc, task.UI, true),
+		gocron.WithTags(task.UUID.String()),
 		gocron.WithEventListeners(
 			gocron.AfterJobRuns(
 				func(jobID uuid.UUID, jobName string) {
@@ -166,15 +169,16 @@ func (tm *TaskManager) reminders(task types.Task) {
 
 	for i := 0; i < 2; i++ {
 		var t time.Time
-		notifyBeForeReminder, withSound := task.TaskTime.AlertTimesInMinutes[i], task.TaskTime.AlertSound[i]
+		notifyBeForeReminder, withSound := task.Reminder.AlertTimesInMinutes[i], task.Reminder.AlertSound[i]
 
-		if t = task.TaskTime.StartTime.Add(-time.Duration(notifyBeForeReminder) * time.Minute); t.Before(time.Now()) {
+		if t = task.Reminder.StartTime.Add(-time.Duration(notifyBeForeReminder) * time.Minute); t.Before(time.Now()) {
 			continue // reminder is the past, useless
 		}
 
 		if _, err := tm.gocron.NewJob(
 			gocron.OneTimeJob(gocron.OneTimeJobStartDateTime(t)),
-			gocron.NewTask(taskReminderFunc, task.UI.Title, notifyBeForeReminder, withSound)); err != nil {
+			gocron.NewTask(taskReminderFunc, task.UI.Title, notifyBeForeReminder, withSound),
+			gocron.WithTags(task.UUID.String())); err != nil {
 			fmt.Println("gocron failed to add notififcation", err)
 		}
 	}
@@ -198,4 +202,8 @@ func taskFunc(task types.UItextInfo, withSound bool) {
 		return
 	}
 	beeep.Notify(title, task.Subtitle, appLogo)
+}
+
+func (tm *TaskManager) RemoveTask(taskUUID uuid.UUID) {
+	tm.gocron.RemoveByTags(taskUUID.String())
 }
