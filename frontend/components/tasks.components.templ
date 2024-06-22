@@ -24,17 +24,17 @@ templ ReminderTasks(tasks []types.Task) {
 					</div>
 				</div>
 				<div class="alert">
-					<p class="start"><span class="label"><i>Starts at:</i></span> <span class="content">{ formatTimeToHumanReadable(t.TaskTime.StartTime) }</span></p>
-					if time.Now().Before(t.TaskTime.StartTime.Add(intToDuration(-t.TaskTime.AlertTimesInMinutes[0]))) {
+					<p class="start"><span class="label"><i>Starts at:</i></span> <span class="content">{ formatTimeToHumanReadable(t.Reminder.StartTime) }</span></p>
+					if time.Now().Before(t.Reminder.StartTime.Add(intToDuration(-t.Reminder.AlertTimesInMinutes[0]))) {
 						<p class="remind">
 							<span class="label"><i>reminder at:</i></span>
-							<span class="content">{ formatTimeToHumanReadable(t.TaskTime.StartTime.Add(intToDuration(-t.TaskTime.AlertTimesInMinutes[0]))) }</span>
+							<span class="content">{ formatTimeToHumanReadable(t.Reminder.StartTime.Add(intToDuration(-t.Reminder.AlertTimesInMinutes[0]))) }</span>
 						</p>
 					}
-					if time.Now().Before(t.TaskTime.StartTime.Add(intToDuration(-t.TaskTime.AlertTimesInMinutes[1]))) {
+					if time.Now().Before(t.Reminder.StartTime.Add(intToDuration(-t.Reminder.AlertTimesInMinutes[1]))) {
 						<p class="remind">
 							<span class="label"><i>reminder at:</i></span>
-							<span class="content">{ formatTimeToHumanReadable(t.TaskTime.StartTime.Add(intToDuration(-t.TaskTime.AlertTimesInMinutes[1]))) }</span>
+							<span class="content">{ formatTimeToHumanReadable(t.Reminder.StartTime.Add(intToDuration(-t.Reminder.AlertTimesInMinutes[1]))) }</span>
 						</p>
 					}
 				</div>
@@ -52,7 +52,7 @@ templ AppLimitTasks(tasks []types.Task) {
 					<p>{ t.AppName }</p>
 				</div>
 				<div class="limitInfo">
-					<p class="shade">{ helperFuncs.UsageTimeInHrsMin(t.TaskTime.Limit) }</p>
+					<p class="shade">{ helperFuncs.UsageTimeInHrsMin(t.TaskTime.AppLimit.Limit) }</p>
 					<p hidden class="uuid">{ t.UUID.String() }</p>
 					<div style="display: flex; gap: 1rem;">
 						<img title="delete app limit" src="/assets/svg/delete.svg" alt="delete" hx-post={ "/removeTask/" + t.UUID.String() + "?taskType=AppLimit" } hx-swap="none" hx-select-oob="#task-holder:outerHTML"/>

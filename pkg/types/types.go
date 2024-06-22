@@ -177,8 +177,8 @@ type Reminder struct {
 
 type AppLimit struct {
 	Limit          float64 `json:"limit"`
-	IsEveryDay     bool    `json:"oneTime"`
+	OneTime        bool    `json:"oneTime"`
 	ExitApp        bool    `json:"exitApp"`
-	Date           Date    `json:"date"`
+	CreatedAt      Date    `json:"createdAt"`
 	IsLimitReached bool    `json:"isLimitReached"`
 }

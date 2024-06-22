@@ -101,7 +101,7 @@ func (bs *BadgerDBStore) AddTask(task types.Task) error {
 func (bs BadgerDBStore) checkIfLimitAppExist(task types.Task, tasks []types.Task) bool {
 
 	for i := 0; i < len(tasks); i++ {
-		if tasks[i].Job == types.Limit {
+		if tasks[i].Job == types.DailyAppLimit {
 			if tasks[i].AppName == task.AppName {
 				return true
 			}
@@ -123,5 +123,28 @@ func (bs *BadgerDBStore) RemoveTask(id uuid.UUID) error {
 	if err != nil {
 		return err
 	}
+	return bs.setOrUpdateKeyValue(dbTaskKey, byteData)
+}
+
+func (bs *BadgerDBStore) UpdateAppLimitStatus(taskID uuid.UUID) error {
+	taskArry, err := bs.getAllTasks()
+	if err != nil {
+		return err
+	}
+
+	for i := 0; i < len(taskArry); i++ {
+		if task := taskArry[i]; task.UUID == taskID {
+			task.AppLimit.CreatedAt = helperFuncs.Today()
+			task.AppLimit.IsLimitReached = true
+			taskArry[i] = task
+			break
+		}
+	}
+
+	byteData, err := helperFuncs.EncodeJSON(taskArry)
+	if err != nil {
+		return err
+	}
+
 	return bs.setOrUpdateKeyValue(dbTaskKey, byteData)
 }

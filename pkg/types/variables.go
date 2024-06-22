@@ -22,7 +22,7 @@ const (
 
 	ReminderWithNoAction TaskType = "ReminderWithNoAction"
 	ReminderWithAction   TaskType = "ReminderWithAction"
-	Limit                TaskType = "Limit"
+	DailyAppLimit        TaskType = "DailyAppLimit"
 )
 
 const (

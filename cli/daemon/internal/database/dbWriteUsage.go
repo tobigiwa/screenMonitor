@@ -45,7 +45,7 @@ func (bs *BadgerDBStore) WriteUsage(data types.ScreenTime) error {
 
 		updateAppInfoForOldApp(data.WindowID, &app)
 		app.AppName = data.AppName // !!!needs removing...
-		fmt.Printf("Existing appName:%v, time so far is: %v:%v, brought in %f\n\n", data.AppName, app.ScreenStat[today()].Active, app.ScreenStat[today()].Open, data.Duration)
+		fmt.Printf("Existing appName:%v, time so far is: %v:%v, brought in %f\n\n", data.AppName, app.ScreenStat[helperFuncs.Today()].Active, app.ScreenStat[helperFuncs.Today()].Open, data.Duration)
 		return updateAppStats(data, &app, txn)
 
 	})
@@ -53,7 +53,7 @@ func (bs *BadgerDBStore) WriteUsage(data types.ScreenTime) error {
 
 func updateAppStats(data types.ScreenTime, app *AppInfo, txn *badger.Txn) error {
 
-	todayStat, ok := app.ScreenStat[today()]
+	todayStat, ok := app.ScreenStat[helperFuncs.Today()]
 
 	if !ok { // we live to see a new day!!! 😎😎😎
 		now := time.Now()
@@ -77,7 +77,7 @@ func updateAppStats(data types.ScreenTime, app *AppInfo, txn *badger.Txn) error 
 		todayStat.Open += data.Duration
 	}
 
-	app.ScreenStat[today()] = todayStat
+	app.ScreenStat[helperFuncs.Today()] = todayStat
 
 	byteData, err := helperFuncs.EncodeJSON(app)
 	if err != nil {

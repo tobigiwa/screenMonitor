@@ -99,7 +99,7 @@ func (bs *BadgerDBStore) getDailyAppStat(day types.Date) (DailyStat, error) {
 	result.DayTotal.Open = dayTotalData.Open
 	result.EachApp = arr
 
-	if day != today() {
+	if day != helperFuncs.Today() {
 		byteData, _ := helperFuncs.EncodeJSON(result)
 		err := bs.setOrUpdateKeyValue(dbDayKey(day), byteData)
 		if err != nil {

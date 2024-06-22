@@ -23,6 +23,7 @@ type x11DBInterface interface {
 	UpdateOpertionOnBuCKET(dbPrefix string, opsFunc func([]byte) ([]byte, error)) error
 	UpdateAppInfoManually(key []byte, opsFunc func([]byte) ([]byte, error)) error
 	GetTaskByUUID(taskID uuid.UUID) (types.Task, error)
+	UpdateAppLimitStatus(taskID uuid.UUID) error
 	RemoveTask(id uuid.UUID) error
 	DeleteKey([]byte) error
 	Close() error
@@ -41,9 +42,7 @@ type windowInfo struct {
 
 type limitWindow struct {
 	windowInfo
-	taskUUID       uuid.UUID
-	timeSofar      float64
-	limit          float64
-	date           types.Date
-	isLimitReached bool
+	taskUUID  uuid.UUID
+	timeSofar float64
+	limit     float64
 }

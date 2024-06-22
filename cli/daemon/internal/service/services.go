@@ -2,7 +2,8 @@ package service
 
 import (
 	db "LiScreMon/cli/daemon/internal/database"
-	"LiScreMon/cli/daemon/internal/jobs"
+	"LiScreMon/cli/daemon/internal/tasks"
+
 	"cmp"
 	"fmt"
 	helperFuncs "pkg/helper"
@@ -14,7 +15,7 @@ import (
 
 type Service struct {
 	db          DatabaseInterface
-	taskManager *jobs.TaskManager
+	taskManager *tasks.TaskManager
 }
 
 func (s *Service) StopTaskManger() error {
@@ -158,7 +159,7 @@ func (s *Service) reminderTasks() (types.ReminderMessage, error) {
 	validTask := make([]types.Task, 0, len(tasks))
 	for _, task := range tasks {
 
-		if task.Job == types.Limit {
+		if task.Job == types.DailyAppLimit {
 			continue
 		}
 
@@ -188,7 +189,7 @@ func (s *Service) limitTasks() (types.ReminderMessage, error) {
 	limitTask := make([]types.Task, 0, len(tasks))
 
 	for _, task := range tasks {
-		if task.Job == types.Limit {
+		if task.Job == types.DailyAppLimit {
 			limitTask = append(limitTask, task)
 		}
 	}

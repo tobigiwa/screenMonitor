@@ -279,13 +279,15 @@ templ limitDialog(allApp []types.AppIconCategoryAndCmdLine) {
 					type="number"
 					name="hrs"
 					min="0"
-					placeholder="limit in Hrs"
+					max="23"
+					placeholder="limit in Hrs; 0 - 23"
 				/>
 				<input
 					type="number"
 					name="min"
 					min="0"
-					placeholder="limit in Minutes"
+					max="59"
+					placeholder="limit in Minutes; 0 - 59"
 				/>
 			</div>
 			<div class="inline">

@@ -1,4 +1,4 @@
-package jobs
+package tasks
 
 import (
 	monitoring "LiScreMon/cli/daemon/internal/monitoring/linux"
@@ -9,6 +9,8 @@ import (
 	"pkg/types"
 	"reflect"
 	"time"
+
+	helperFuncs "pkg/helper"
 
 	"github.com/gen2brain/beeep"
 	"github.com/go-co-op/gocron/v2"
@@ -30,7 +32,7 @@ type TaskManager struct {
 	channel  chan types.Task
 }
 
-func NewTaskManger(dbHandle TaskManagerDbRequirement) *TaskManager {
+func newTaskManger(dbHandle TaskManagerDbRequirement) *TaskManager {
 	var tm TaskManager
 	tm.dbHandle = dbHandle
 	tm.gocron, _ = gocron.NewScheduler()
@@ -51,46 +53,52 @@ func (tm *TaskManager) SendTaskToTaskManager(task types.Task) error {
 	if err := tm.dbHandle.AddTask(task); err != nil {
 		return fmt.Errorf("error adding task to db: %w", err)
 	}
+
+	if reflect.ValueOf(task).IsZero() {
+		return types.ErrZeroValueTask
+	}
+
 	tm.channel <- task
 	return nil
 }
 
-func (tm *TaskManager) StartTaskManger() error {
+func StartTaskManger(dbHandle TaskManagerDbRequirement) (*TaskManager, error) {
+
+	tm := newTaskManger(dbHandle)
 
 	tasks, err := tm.dbHandle.GetAllTask()
 	if err != nil {
-		return fmt.Errorf("taskManager cannot be started: %w", err)
+		return nil, fmt.Errorf("%s: %w", types.ErrTaskMangerNotStarted.Error(), err)
 	}
 
 	go tm.disperseTask()
 
 	for _, task := range tasks {
 
-		if task.Job == types.ReminderWithAction || task.Job == types.ReminderWithNoAction {
-			now, taskStartTime := time.Now(), task.Reminder.StartTime
-			if taskStartTime.Before(now) {
-				fmt.Printf("removing task %+v\n\n", task)
+		switch {
+		case task.Job != types.DailyAppLimit: // i.e reminders
+			if task.Reminder.StartTime.Before(time.Now()) {
 				if err := tm.dbHandle.RemoveTask(task.UUID); err != nil {
-					return fmt.Errorf("err deleting old task: %+v :err %v", task, err)
+					return nil, fmt.Errorf("%s %+v :err %w", types.ErrDeletingTask.Error(), task, err)
 				}
 			}
-		}
 
-		if task.Job == types.Limit {
-			if task.AppLimit.IsLimitReached {
+		case task.Job == types.DailyAppLimit:
+			if task.AppLimit.OneTime && task.AppLimit.CreatedAt != helperFuncs.Today() {
+				if err := tm.dbHandle.RemoveTask(task.UUID); err != nil {
+					return nil, fmt.Errorf("%s: %+v :%w", types.ErrDeletingTask.Error(), task, err)
+				}
+			}
 
+			if task.AppLimit.IsLimitReached && task.AppLimit.CreatedAt == helperFuncs.Today() {
+				continue
 			}
 		}
 
 		tm.channel <- task
 	}
 
-	return nil
-}
-
-func (tm *TaskManager) validAppLimitTask(task types.Task) error {
-
-	return nil
+	return tm, nil
 }
 
 func (tm *TaskManager) disperseTask() {
@@ -118,7 +126,7 @@ func (tm *TaskManager) disperseTask() {
 		case types.ReminderWithAction:
 			tm.createRemidersWithAction(task)
 
-		case types.Limit:
+		case types.DailyAppLimit:
 			monitoring.AddNewLimit(task)
 
 		}
@@ -207,3 +215,28 @@ func taskFunc(task types.UItextInfo, withSound bool) {
 func (tm *TaskManager) RemoveTask(taskUUID uuid.UUID) {
 	tm.gocron.RemoveByTags(taskUUID.String())
 }
+
+// switch {
+// 		case task.Job != types.DailyAppLimit:
+// 			now, taskStartTime := time.Now(), task.Reminder.StartTime
+// 			if taskStartTime.Before(now) {
+// 				fmt.Printf("removing task %+v\n\n", task)
+// 				if err := tm.dbHandle.RemoveTask(task.UUID); err != nil {
+// 					fmt.Printf("err deleting old task: %+v :err %v\n\n", task, err)
+// 					return fmt.Errorf("err deleting old task: %+v :err %w", task, err)
+// 				}
+// 			}
+
+// 		case task.Job == types.DailyAppLimit:
+// 			if task.AppLimit.OneTime && task.AppLimit.CreatedAt != helperFuncs.Today() {
+// 				fmt.Printf("removing task %+v\n\n", task)
+// 				if err := tm.dbHandle.RemoveTask(task.UUID); err != nil {
+// 					fmt.Printf("err deleting old task: %+v :err %v\n\n", task, err)
+// 					return fmt.Errorf("err deleting old task: %+v :err %w", task, err)
+// 				}
+// 			}
+
+// 			if task.AppLimit.IsLimitReached {
+// 				continue
+// 			}
+// 		}

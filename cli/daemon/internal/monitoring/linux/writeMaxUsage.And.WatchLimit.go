@@ -41,6 +41,7 @@ func (x11 *X11Monitor) WindowChangeTimerFunc(ctx context.Context, timer *time.Ti
 }
 
 func (x11 *X11Monitor) watchLimit(windowID xproto.Window, duration float64) {
+	
 	if windowName, ok := curSessionNamedWindow[windowID]; ok {
 		if limitApp, ok := LimitApp[windowName]; ok {
 
@@ -57,6 +58,8 @@ func (x11 *X11Monitor) watchLimit(windowID xproto.Window, duration float64) {
 				LimitApp[windowName] = limitApp
 				fmt.Printf("\nthis so far %f for app %s...limit at %f\n\n", limitApp.timeSofar, windowName, limitApp.limit)
 			}
+
+			
 		}
 	}
 }
@@ -103,16 +106,21 @@ func (x11 *X11Monitor) NotifyLimitReached(taskID uuid.UUID) error {
 	if err != nil {
 		return err
 	}
+
 	title := fmt.Sprintf("Usage Limit reached for %s", task.AppName)
 	subtitle := fmt.Sprintf("App: %s Usage Limit: %s", task.AppName, helperFuncs.UsageTimeInHrsMin(task.AppLimit.Limit))
 
 	beeep.Alert(title, subtitle, appLogo)
 
-	if !task.AppLimit.IsEveryDay {
-		err := x11.Db.RemoveTask(taskID)
-		if err != nil {
+	if task.AppLimit.OneTime {
+		if err := x11.Db.RemoveTask(taskID); err != nil {
 			return err
 		}
 	}
+
+	if err := x11.Db.UpdateAppLimitStatus(taskID); err != nil {
+		return err
+	}
+
 	return nil
 }

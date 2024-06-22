@@ -2,7 +2,7 @@ package service
 
 import (
 	db "LiScreMon/cli/daemon/internal/database"
-	"LiScreMon/cli/daemon/internal/jobs"
+	"LiScreMon/cli/daemon/internal/tasks"
 	"errors"
 	"fmt"
 	"io"
@@ -17,15 +17,15 @@ import (
 var (
 	ServiceInstance Service
 	SocketConn      *net.UnixListener
+
+	err error
 )
 
 func StartService(socketDir string, db *db.BadgerDBStore) {
 
 	ServiceInstance.db = db
 
-	ServiceInstance.taskManager = jobs.NewTaskManger(db)
-
-	if ServiceInstance.taskManager.StartTaskManger() != nil {
+	if ServiceInstance.taskManager, err = tasks.StartTaskManger(db); err != nil {
 		log.Fatal("error starting task manager")
 	}
 
@@ -151,7 +151,7 @@ func treatMessage(c net.Conn) {
 
 		bytes, err := helperFuncs.EncodeJSON(msg)
 		if err != nil {
-			msg.Error = fmt.Errorf("error encoding response in serviceInstance: %w: %w", msg.Error, err).Error()
+			msg.Error = fmt.Sprintf("error encoding response in serviceInstance: %s: %s", msg.Error, err.Error())
 		}
 
 		_, err = c.Write(bytes)

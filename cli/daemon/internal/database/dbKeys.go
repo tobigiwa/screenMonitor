@@ -6,9 +6,7 @@ import (
 	"time"
 )
 
-func today() types.Date {
-	return types.Date(time.Now().Format(types.TimeFormat))
-}
+
 func yesterday() types.Date {
 	return types.Date(time.Now().AddDate(0, 0, -1).Format(types.TimeFormat))
 }

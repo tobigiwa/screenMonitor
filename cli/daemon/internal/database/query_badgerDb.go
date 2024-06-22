@@ -188,8 +188,8 @@ func ExampleOf_opsFunc(v []byte) ([]byte, error) {
 	}
 
 	if app.AppName == "Google-chrome" {
-		app.ScreenStat[today()] = types.Stats{}
-		fmt.Println(app.AppName, app.ScreenStat[today()].Active)
+		app.ScreenStat[helperFuncs.Today()] = types.Stats{}
+		fmt.Println(app.AppName, app.ScreenStat[helperFuncs.Today()].Active)
 	}
 
 	// a := app.AppName

@@ -143,12 +143,14 @@ ul {
 }
 
 .remainder-tasks {
+
     width: 100%;
     background-color: wheat;
     display: inline-flex;
     justify-content: space-between;
+    margin-bottom: 0.3rem;
 
-    & p {
+    p {
         margin: 5px;
     }
 

@@ -51,7 +51,9 @@ func AddOrdinalSuffix(n int) string {
 func ParseKey(key types.Date) (time.Time, error) {
 	return time.Parse(types.TimeFormat, string(key))
 }
-
+func Today() types.Date {
+	return types.Date(time.Now().Format(types.TimeFormat))
+}
 func FormattedDay(date types.Date) string {
 	day, _ := ParseKey(date)
 	dayWithSuffix := AddOrdinalSuffix(day.Day())

@@ -14,6 +14,8 @@ import (
 
 	"github.com/a-h/templ"
 	"github.com/google/uuid"
+
+	helperFuncs "pkg/helper"
 )
 
 func (a *App) tasksPage(w http.ResponseWriter, r *http.Request) {
@@ -206,23 +208,23 @@ func (a *App) newAppLimitHandler(w http.ResponseWriter, r *http.Request) {
 			}
 
 		case "recurring":
-			val, err := strconv.ParseBool(value[0])
+			isEveryDay, err := strconv.ParseBool(value[0])
 			if err != nil {
 				a.clientError(w, http.StatusBadRequest, fmt.Errorf("error parsing formData:%w", err))
 				return
 			}
-			if val {
-				task.AppLimit.IsEveryDay = true
-				task.Job = types.Limit
+			if isEveryDay {
+				task.AppLimit.OneTime = false
+				task.Job = types.DailyAppLimit
 			}
 
 		case "exitApp":
-			val, err := strconv.ParseBool(value[0])
+			exitApp, err := strconv.ParseBool(value[0])
 			if err != nil {
 				a.clientError(w, http.StatusBadRequest, fmt.Errorf("error parsing formData:%w", err))
 				return
 			}
-			if val {
+			if exitApp {
 				task.AppLimit.ExitApp = true
 			}
 
@@ -232,6 +234,7 @@ func (a *App) newAppLimitHandler(w http.ResponseWriter, r *http.Request) {
 	hours, minutes := time.Duration(hrs)*time.Hour, time.Duration(min)*time.Minute
 
 	task.AppLimit.Limit = hours.Hours() + minutes.Hours()
+	task.AppLimit.CreatedAt = helperFuncs.Today()
 	task.UUID = uuid.New()
 
 	msg = types.Message{
