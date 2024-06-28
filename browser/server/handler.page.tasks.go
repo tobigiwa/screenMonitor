@@ -2,7 +2,6 @@ package webserver
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"pkg/types"
@@ -159,6 +158,7 @@ func (a *App) newReminderHandler(w http.ResponseWriter, r *http.Request) {
 		Endpoint:                strings.TrimPrefix(r.URL.Path, "/"),
 		ReminderAndLimitRequest: task,
 	}
+	
 	if _, err = a.commWithDaemonService(msg); err != nil {
 		a.serverError(w, err)
 		return
@@ -243,8 +243,7 @@ func (a *App) newAppLimitHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if _, err = a.commWithDaemonService(msg); err != nil {
-		if errors.Is(err, types.ErrLimitAppExist) {
-			fmt.Println("it got here")
+		if strings.Contains(err.Error(), types.ErrLimitAppExist.Error()) {
 		}
 
 		a.serverError(w, err)

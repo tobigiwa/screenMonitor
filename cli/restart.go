@@ -4,9 +4,10 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cli
 
 import (
+	"LiScreMon/cli/daemon"
 	"fmt"
 	"log"
-	"os/exec"
+	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -22,25 +23,17 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		err := exec.Command("LiScreMon", "start").Start()
-		if err != nil {
-			log.Println("error starting", err)
+
+		if err := stopLiscrenMon(); err != nil {
+			log.Println("could not sucessfully shutdown running LiScreMon", err)
 			return
 		}
-		fmt.Println("LiSreMon is running again")
+		fmt.Println("LiScreMon would be restarting now...")
+		time.Sleep(1 * time.Second) // allow for all resources to be released
+		daemon.DaemonServiceLinux()
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(backgroundCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// backgroundCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// backgroundCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

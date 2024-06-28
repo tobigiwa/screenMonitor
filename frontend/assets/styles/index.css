@@ -17,7 +17,7 @@ body {
     padding: 0%;
     height: 100%;
     font-style: system-ui, sans-serif;
-    /* overflow: hidden; */
+    overflow: hidden;
 }
 
 a {

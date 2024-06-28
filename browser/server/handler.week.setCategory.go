@@ -30,5 +30,5 @@ func (a *App) SetCategory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/index", http.StatusSeeOther)
+	http.Redirect(w, r, "/screentime", http.StatusSeeOther)
 }

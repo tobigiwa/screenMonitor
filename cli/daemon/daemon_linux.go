@@ -84,7 +84,7 @@ func DaemonServiceLinux() {
 	monitor.CloseWindowChangeCh()            // a different goroutine,closes a channel, this should be after calling the CancelFunc passed to monitor.WindowChangeTimerFunc
 	service.ServiceInstance.StopTaskManger() // a different goroutine for managing taskManager, fired from service
 	service.SocketConn.Close()
-	monitor.Db.Close()
+	badgerDB.Close()
 
 	os.Exit(0)
 }

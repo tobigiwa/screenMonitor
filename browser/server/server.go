@@ -93,7 +93,6 @@ func (a *App) commWithDaemonService(msg types.Message) (types.Message, error) {
 	}
 
 	if msg, err = helperFuncs.DecodeJSON[types.Message](dataBuf.Bytes()); err != nil {
-		fmt.Println("ERRO FROM HERE")
 		return types.NoMessage, err
 	}
 

@@ -41,7 +41,7 @@ func (x11 *X11Monitor) WindowChangeTimerFunc(ctx context.Context, timer *time.Ti
 }
 
 func (x11 *X11Monitor) watchLimit(windowID xproto.Window, duration float64) {
-	
+
 	if windowName, ok := curSessionNamedWindow[windowID]; ok {
 		if limitApp, ok := LimitApp[windowName]; ok {
 
@@ -49,6 +49,9 @@ func (x11 *X11Monitor) watchLimit(windowID xproto.Window, duration float64) {
 
 			if limitApp.timeSofar >= limitApp.limit {
 				fmt.Printf("we have reached limit for this application\n%+v\n\n", limitApp)
+				
+				delete(LimitApp, windowName)
+				
 				if err := x11.NotifyLimitReached(limitApp.taskUUID); err != nil {
 					fmt.Println("error from notifyLimitReached", err)
 				}
@@ -59,7 +62,6 @@ func (x11 *X11Monitor) watchLimit(windowID xproto.Window, duration float64) {
 				fmt.Printf("\nthis so far %f for app %s...limit at %f\n\n", limitApp.timeSofar, windowName, limitApp.limit)
 			}
 
-			
 		}
 	}
 }

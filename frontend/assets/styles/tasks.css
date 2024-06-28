@@ -77,9 +77,9 @@ ul {
 
 
 #task-holder {
-    overflow-y: auto;
     max-height: calc(100vh - 7rem);
     min-height: auto;
+    overflow-y: auto;
 }
 
 .limit-tasks {
@@ -145,7 +145,7 @@ ul {
 .remainder-tasks {
 
     width: 100%;
-    background-color: wheat;
+    background-color: #444141;
     display: inline-flex;
     justify-content: space-between;
     margin-bottom: 0.3rem;
@@ -155,9 +155,9 @@ ul {
     }
 
     .appInfo {
-        background-color: rgb(143, 118, 118);
         padding-left: 10px;
         padding-right: 10px;
+        width: 45%;
 
         .title .content {
             font-weight: bolder;
@@ -186,9 +186,28 @@ ul {
         }
     }
 
-    .alert {
-        background-color: rgb(143, 118, 118);
+    .edit-and-alerts {
+        display: inline-flex;
+        width: 100%;
+        justify-content: end;
+        gap: 1rem;
+        vertical-align: baseline;
+    }
 
+    .edit-button {
+
+        img {
+            height: 1.5rem;
+            width: 2rem;
+            cursor: pointer;
+        }
+
+        img:hover {
+            transform: scale(1.2);
+        }
+    }
+
+    .alerts {
         .start .label {
             font-size: 1em;
             font-weight: bold;
@@ -201,26 +220,7 @@ ul {
         }
     }
 
-    .spacing {
-        flex: 1;
-        position: relative;
 
-        .edit-button {
-            position: absolute;
-            right: 2%;
-            bottom: 0;
-
-            img {
-                height: 1.5rem;
-                width: 2rem;
-                cursor: pointer;
-
-                &:hover {
-                    transform: scale(1.2);
-                }
-            }
-        }
-    }
 }
 
 

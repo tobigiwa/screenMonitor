@@ -15,28 +15,30 @@ templ ReminderTasks(tasks []types.Task) {
 						<summary><span class="label"><i>See attached note</i></span></summary>
 						<p>{ t.UI.Notes }</p>
 					</details>
-					<div class="action">would launch: <img src={ getImageFilePath(t.AppName, t.Icon) } alt=""/> { t.AppName }</div>
+					if t.Job == types.ReminderWithAction {
+						<div class="action">would launch: <img src={ getImageFilePath(t.AppName, t.Icon) } alt=""/> { t.AppName }</div>
+					}
 				</div>
-				<div class="spacing">
+				<div class="edit-and-alerts">
 					<div class="edit-button">
 						<img title="delete reminder" src="/assets/svg/delete.svg" alt="delete" hx-post={ "/removeTask/" + t.UUID.String() } hx-swap="none" hx-select-oob="#task-holder:outerHTML"/>
 						<img title="edit reminder" src="/assets/svg/edit.svg" alt="delete"/>
 					</div>
-				</div>
-				<div class="alert">
-					<p class="start"><span class="label"><i>Starts at:</i></span> <span class="content">{ formatTimeToHumanReadable(t.Reminder.StartTime) }</span></p>
-					if time.Now().Before(t.Reminder.StartTime.Add(intToDuration(-t.Reminder.AlertTimesInMinutes[0]))) {
-						<p class="remind">
-							<span class="label"><i>reminder at:</i></span>
-							<span class="content">{ formatTimeToHumanReadable(t.Reminder.StartTime.Add(intToDuration(-t.Reminder.AlertTimesInMinutes[0]))) }</span>
-						</p>
-					}
-					if time.Now().Before(t.Reminder.StartTime.Add(intToDuration(-t.Reminder.AlertTimesInMinutes[1]))) {
-						<p class="remind">
-							<span class="label"><i>reminder at:</i></span>
-							<span class="content">{ formatTimeToHumanReadable(t.Reminder.StartTime.Add(intToDuration(-t.Reminder.AlertTimesInMinutes[1]))) }</span>
-						</p>
-					}
+					<div class="alerts">
+						<p class="start"><span class="label"><i>Starts at:</i></span> <span class="content">{ formatTimeToHumanReadable(t.Reminder.StartTime) }</span></p>
+						if time.Now().Before(t.Reminder.StartTime.Add(intToDuration(-t.Reminder.AlertTimesInMinutes[0]))) {
+							<p class="remind">
+								<span class="label"><i>reminder at:</i></span>
+								<span class="content">{ formatTimeToHumanReadable(t.Reminder.StartTime.Add(intToDuration(-t.Reminder.AlertTimesInMinutes[0]))) }</span>
+							</p>
+						}
+						if time.Now().Before(t.Reminder.StartTime.Add(intToDuration(-t.Reminder.AlertTimesInMinutes[1]))) {
+							<p class="remind">
+								<span class="label"><i>reminder at:</i></span>
+								<span class="content">{ formatTimeToHumanReadable(t.Reminder.StartTime.Add(intToDuration(-t.Reminder.AlertTimesInMinutes[1]))) }</span>
+							</p>
+						}
+					</div>
 				</div>
 			</div>
 		</li>
