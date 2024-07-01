@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net"
 	"os"
 	helperFuncs "pkg/helper"
@@ -14,26 +13,35 @@ import (
 	"syscall"
 )
 
-var (
-	ServiceInstance Service
-	SocketConn      *net.UnixListener
+func NewService(db *db.BadgerDBStore) (*Service, error) {
 
-	err error
-)
+	var (
+		service Service
+		err     error
+	)
 
-func StartService(socketDir string, db *db.BadgerDBStore) {
+	service.db = db
 
-	ServiceInstance.db = db
-
-	if ServiceInstance.taskManager, err = tasks.StartTaskManger(db); err != nil {
-		log.Fatal("error starting task manager")
+	if service.taskManager, err = tasks.StartTaskManger(db); err != nil {
+		return nil, fmt.Errorf("error starting task manager")
 	}
 
-	SocketConn = domainSocket(socketDir)
-	handleConnection(SocketConn)
+	return &service, nil
 }
 
-func domainSocket(socketDir string) *net.UnixListener {
+func (s *Service) StartService(socketDir string, db *db.BadgerDBStore) error {
+
+	SocketConn, err := domainSocket(socketDir)
+	if err != nil {
+		return err
+	}
+	s.handleConnection(SocketConn) // blocking
+
+	SocketConn.Close()
+	return nil
+}
+
+func domainSocket(socketDir string) (*net.UnixListener, error) {
 
 	var (
 		conn     *net.UnixListener
@@ -42,7 +50,7 @@ func domainSocket(socketDir string) *net.UnixListener {
 	)
 
 	if err = os.MkdirAll(socketDir, 0755); err != nil {
-		log.Fatal("error creating socket dir:", err)
+		return nil, fmt.Errorf("error creating socket dir:%w", err)
 	}
 
 	socketFilePath := socketDir + "daemon.sock"
@@ -50,19 +58,19 @@ func domainSocket(socketDir string) *net.UnixListener {
 	syscall.Unlink(socketFilePath)
 
 	if unixAddr, err = net.ResolveUnixAddr("unix", socketFilePath); err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	if conn, err = net.ListenUnix("unix", unixAddr); err != nil {
-		log.Fatal("error creating domain socket:", err)
+		return nil, fmt.Errorf("error creating domain socket:%w", err)
 	}
 
 	conn.SetUnlinkOnClose(true)
 
-	return conn
+	return conn, nil
 }
 
-func handleConnection(listener *net.UnixListener) {
+func (s *Service) handleConnection(listener *net.UnixListener) {
 	for {
 		c, err := listener.Accept()
 		if err != nil {
@@ -76,11 +84,11 @@ func handleConnection(listener *net.UnixListener) {
 		}
 
 		fmt.Println("Connection accepted")
-		go treatMessage(c)
+		go s.treatMessage(c)
 	}
 }
 
-func treatMessage(c net.Conn) {
+func (s *Service) treatMessage(c net.Conn) {
 	for {
 		var (
 			msg types.Message
@@ -115,34 +123,34 @@ func treatMessage(c net.Conn) {
 			return
 
 		case "weekStat":
-			msg.WeekStatResponse, err = ServiceInstance.getWeekStat(msg.WeekStatRequest)
+			msg.WeekStatResponse, err = s.getWeekStat(msg.WeekStatRequest)
 
 		case "appStat":
-			msg.AppStatResponse, err = ServiceInstance.getAppStat(msg.AppStatRequest)
+			msg.AppStatResponse, err = s.getAppStat(msg.AppStatRequest)
 
 		case "dayStat":
-			msg.DayStatResponse, err = ServiceInstance.getDayStat(msg.DayStatRequest)
+			msg.DayStatResponse, err = s.getDayStat(msg.DayStatRequest)
 
 		case "setCategory":
-			msg.SetCategoryResponse, err = ServiceInstance.setAppCategory(msg.SetCategoryRequest)
+			msg.SetCategoryResponse, err = s.setAppCategory(msg.SetCategoryRequest)
 
 		case "tasks":
-			msg.ReminderAndLimitResponse, err = ServiceInstance.tasks()
+			msg.ReminderAndLimitResponse, err = s.tasks()
 
 		case "reminders":
-			msg.ReminderAndLimitResponse, err = ServiceInstance.reminderTasks()
+			msg.ReminderAndLimitResponse, err = s.reminderTasks()
 
 		case "appLimits":
-			msg.ReminderAndLimitResponse, err = ServiceInstance.limitTasks()
+			msg.ReminderAndLimitResponse, err = s.limitTasks()
 
 		case "newReminder":
-			msg.ReminderAndLimitResponse, err = ServiceInstance.addNewReminder(msg.ReminderAndLimitRequest)
+			msg.ReminderAndLimitResponse, err = s.addNewReminder(msg.ReminderAndLimitRequest)
 
 		case "newAppLimit":
-			msg.ReminderAndLimitResponse, err = ServiceInstance.addNewLimitApp(msg.ReminderAndLimitRequest)
+			msg.ReminderAndLimitResponse, err = s.addNewLimitApp(msg.ReminderAndLimitRequest)
 
 		case "removeTask":
-			msg.ReminderAndLimitResponse, err = ServiceInstance.removeTask(msg.ReminderAndLimitRequest)
+			msg.ReminderAndLimitResponse, err = s.removeTask(msg.ReminderAndLimitRequest)
 		}
 
 		if err != nil {

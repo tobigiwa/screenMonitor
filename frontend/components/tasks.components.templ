@@ -15,7 +15,7 @@ templ ReminderTasks(tasks []types.Task) {
 						<summary><span class="label"><i>See attached note</i></span></summary>
 						<p>{ t.UI.Notes }</p>
 					</details>
-					if t.Job == types.ReminderWithAction {
+					if t.Job == types.ReminderWithAppLaunch {
 						<div class="action">would launch: <img src={ getImageFilePath(t.AppName, t.Icon) } alt=""/> { t.AppName }</div>
 					}
 				</div>

@@ -143,9 +143,9 @@ func (a *App) newReminderHandler(w http.ResponseWriter, r *http.Request) {
 
 		case "app":
 			if task.AppName = value[0]; value[0] == "no-app" {
-				task.Job = types.ReminderWithNoAction
+				task.Job = types.ReminderWithNoAppLaunch
 			} else {
-				task.Job = types.ReminderWithAction
+				task.Job = types.ReminderWithAppLaunch
 			}
 
 		case "note":
@@ -158,7 +158,7 @@ func (a *App) newReminderHandler(w http.ResponseWriter, r *http.Request) {
 		Endpoint:                strings.TrimPrefix(r.URL.Path, "/"),
 		ReminderAndLimitRequest: task,
 	}
-	
+
 	if _, err = a.commWithDaemonService(msg); err != nil {
 		a.serverError(w, err)
 		return

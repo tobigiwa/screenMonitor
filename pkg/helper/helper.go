@@ -4,9 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"os"
 	"pkg/types"
 	"strings"
 	"time"
+
+	"github.com/gen2brain/beeep"
 )
 
 func EncodeJSON[T any](tyPe T) ([]byte, error) {
@@ -178,4 +181,28 @@ func IsInCurrentWeekTime(t time.Time) bool {
 func IsInCurrentWeekDate(d types.Date) bool {
 	// t, _ := d.ToTime()
 	return SaturdayOfTheWeek(time.Now()) == d
+}
+
+func ConfigDir() (string, error) {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+
+	configDir := homeDir + "/liScreMon"
+
+	if err := os.MkdirAll(configDir, 0755); err != nil {
+		return "", err
+	}
+
+	types.AppLogoFilePath = configDir + "/liscremon.jpeg"
+
+	return configDir, nil
+}
+
+func NotifyWithBeep(title, subtitle string) {
+	beeep.Alert(title, subtitle, types.AppLogoFilePath)
+}
+func NotifyWithoutBeep(title, subtitle string) {
+	beeep.Notify(title, subtitle, types.AppLogoFilePath)
 }

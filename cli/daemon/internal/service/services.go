@@ -203,7 +203,7 @@ func (s *Service) limitTasks() (types.ReminderMessage, error) {
 
 func (s *Service) addNewReminder(task types.Task) (types.ReminderMessage, error) {
 
-	if task.Job == types.ReminderWithAction {
+	if task.Job == types.ReminderWithAppLaunch {
 		appInfo, err := s.db.GetAppIconCategoryAndCmdLine([]string{task.AppName})
 		if err != nil {
 			return types.NoMessage.ReminderAndLimitResponse, err

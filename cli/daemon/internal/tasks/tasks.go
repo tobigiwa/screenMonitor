@@ -4,7 +4,6 @@ import (
 	monitoring "LiScreMon/cli/daemon/internal/monitoring/linux"
 	"fmt"
 	"log"
-	"os"
 	"os/exec"
 	"pkg/types"
 	"reflect"
@@ -12,12 +11,9 @@ import (
 
 	helperFuncs "pkg/helper"
 
-	"github.com/gen2brain/beeep"
 	"github.com/go-co-op/gocron/v2"
 	"github.com/google/uuid"
 )
-
-var appLogo = ""
 
 type TaskManagerDbRequirement interface {
 	GetTaskByAppName(appName string) ([]types.Task, error)
@@ -103,12 +99,8 @@ func StartTaskManger(dbHandle TaskManagerDbRequirement) (*TaskManager, error) {
 
 func (tm *TaskManager) disperseTask() {
 
-	// config directory
-	homeDir, _ := os.UserHomeDir()
-	configDir := homeDir + "/liScreMon/"
-	appLogo = configDir + "liscremon.jpeg"
-
 	tm.gocron.Start()
+
 	for {
 		task := <-tm.channel
 
@@ -119,17 +111,18 @@ func (tm *TaskManager) disperseTask() {
 		}
 
 		fmt.Printf("task received   %+v\n\n", task)
+
 		switch task.Job {
-		case types.ReminderWithNoAction:
+		case types.ReminderWithNoAppLaunch:
 			tm.createRemidersWithNoAction(task)
 
-		case types.ReminderWithAction:
+		case types.ReminderWithAppLaunch:
 			tm.createRemidersWithAction(task)
 
 		case types.DailyAppLimit:
 			monitoring.AddNewLimit(task)
-
 		}
+
 	}
 
 }
@@ -194,49 +187,26 @@ func (tm *TaskManager) reminders(task types.Task) {
 
 func taskReminderFunc(taskTitle string, durationbeforeTask int, withSound bool) {
 	title := fmt.Sprintf("%d Minutes to your task", durationbeforeTask)
-	if withSound {
 
-		beeep.Alert(title, taskTitle, appLogo)
+	if withSound {
+		helperFuncs.NotifyWithBeep(title, taskTitle)
 		return
 	}
-	beeep.Notify(title, taskTitle, appLogo)
+
+	helperFuncs.NotifyWithoutBeep(title, taskTitle)
 }
 
 func taskFunc(task types.UItextInfo, withSound bool) {
 	title := fmt.Sprintf("Reminder: %s", task.Title)
-	if withSound {
 
-		beeep.Alert(title, task.Subtitle, appLogo)
+	if withSound {
+		helperFuncs.NotifyWithBeep(title, task.Subtitle)
 		return
 	}
-	beeep.Notify(title, task.Subtitle, appLogo)
+
+	helperFuncs.NotifyWithoutBeep(title, task.Subtitle)
 }
 
 func (tm *TaskManager) RemoveTask(taskUUID uuid.UUID) {
 	tm.gocron.RemoveByTags(taskUUID.String())
 }
-
-// switch {
-// 		case task.Job != types.DailyAppLimit:
-// 			now, taskStartTime := time.Now(), task.Reminder.StartTime
-// 			if taskStartTime.Before(now) {
-// 				fmt.Printf("removing task %+v\n\n", task)
-// 				if err := tm.dbHandle.RemoveTask(task.UUID); err != nil {
-// 					fmt.Printf("err deleting old task: %+v :err %v\n\n", task, err)
-// 					return fmt.Errorf("err deleting old task: %+v :err %w", task, err)
-// 				}
-// 			}
-
-// 		case task.Job == types.DailyAppLimit:
-// 			if task.AppLimit.OneTime && task.AppLimit.CreatedAt != helperFuncs.Today() {
-// 				fmt.Printf("removing task %+v\n\n", task)
-// 				if err := tm.dbHandle.RemoveTask(task.UUID); err != nil {
-// 					fmt.Printf("err deleting old task: %+v :err %v\n\n", task, err)
-// 					return fmt.Errorf("err deleting old task: %+v :err %w", task, err)
-// 				}
-// 			}
-
-// 			if task.AppLimit.IsLimitReached {
-// 				continue
-// 			}
-// 		}
