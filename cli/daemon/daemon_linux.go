@@ -26,7 +26,7 @@ func DaemonServiceLinux() {
 	// config directory
 	configDir, err := helperFuncs.ConfigDir()
 	if err != nil {
-		log.Fatal(err) // exit
+		log.Fatalln(err) // exit
 	}
 
 	socketDir := fmt.Sprintf("%s/socket/", configDir)
@@ -35,7 +35,7 @@ func DaemonServiceLinux() {
 	// logging
 	logFile, err := os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		log.Fatal(err) // exit
+		log.Fatalln(err) // exit
 	}
 	defer logFile.Close()
 
@@ -50,7 +50,7 @@ func DaemonServiceLinux() {
 	// database
 	badgerDB, err := db.NewBadgerDb(configDir + "/badgerDB/")
 	if err != nil {
-		log.Fatal(err) // exit
+		log.Fatalln(err) // exit
 	}
 
 	sig := make(chan os.Signal, 1)
@@ -59,12 +59,13 @@ func DaemonServiceLinux() {
 	// service
 	service, err := service.NewService(badgerDB)
 	if err != nil {
-		log.Fatal(err) // exit
+		log.Fatalln(err) // exit
 	}
 
 	go func() {
 		if err := service.StartService(socketDir, badgerDB); err != nil {
 			time.Sleep(2 * time.Second)
+			fmt.Println(err)
 			sig <- syscall.SIGTERM //if service.StartService fails, send a signal to close the program
 		}
 	}()
@@ -72,7 +73,10 @@ func DaemonServiceLinux() {
 	ctx, cancel := context.WithCancel(context.Background())
 	timer := time.NewTimer(time.Duration(58) * time.Second)
 
-	monitor := monitoring.InitMonitoring(badgerDB)
+	monitor, err  := monitoring.InitMonitoring(badgerDB)
+	if err != nil {
+		log.Fatalln(err) // exit
+	}
 
 	go func() {
 		monitor.WindowChangeTimerFunc(ctx, timer)

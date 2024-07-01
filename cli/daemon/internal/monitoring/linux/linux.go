@@ -1,7 +1,7 @@
 package monitoring
 
 import (
-	"log"
+	"fmt"
 	"pkg/types"
 	"time"
 
@@ -19,22 +19,32 @@ var (
 	// for a particular window in each session.
 	curSessionNamedWindow = make(map[xproto.Window]string, 20)
 	netActiveWindowAtom   xproto.Atom
-	netClientStackingAtom xproto.Atom
-	netActiveWindow       = &netActiveWindowInfo{}
 	monitor               X11Monitor
-	x11Conn               *xgbutil.XUtil
 
-	fixtyEightSecs = time.Duration(58) * time.Second
+	// netClientStackingAtom xproto.Atom
+	x11Conn         *xgbutil.XUtil
+	netActiveWindow = &netActiveWindowInfo{}
+	fixtyEightSecs  = time.Duration(58) * time.Second
 )
 
-func InitMonitoring(db *db.BadgerDBStore) X11Monitor {
+func InitMonitoring(db *db.BadgerDBStore) (X11Monitor, error) {
 
-	var err error
+	var (
+		err error
+	)
+
+	count := 0
+
 	// X server connection
 	for {
 		if x11Conn, err = xgbutil.NewConn(); err != nil { // we wait till we connect to X server
-			log.Println(err)
-			time.Sleep(2 * time.Second)
+			count++
+			time.Sleep(1 * time.Second)
+
+			if count > 20 {
+				return X11Monitor{}, fmt.Errorf("error connecting to X server:%w", err)
+			}
+
 			continue
 		}
 		break
@@ -46,22 +56,28 @@ func InitMonitoring(db *db.BadgerDBStore) X11Monitor {
 		windowChangeCh: make(chan types.GenericKeyValue[xproto.Window, float64], 1),
 	}
 
-	setRootEventMask(x11Conn)
+	if err = setRootEventMask(x11Conn); err != nil {
+		return X11Monitor{}, err
+	}
 
 	registerRootWindowForEvents(x11Conn)
 
 	windows, err := currentlyOpenedWindows(x11Conn)
 	if err != nil {
-		log.Fatal(err)
+		return X11Monitor{}, err
 	}
 
 	for _, window := range windows {
 		getWindowClassName(x11Conn, window)
 		registerWindowForEvents(window)
 	}
+	atoms, err := neededAtom()
+	if err != nil {
+		return X11Monitor{}, err
+	}
 
-	netActiveWindowAtom, netClientStackingAtom = neededAtom()[0], neededAtom()[1]
+	netActiveWindowAtom, _ = atoms[0], atoms[1]
 	netActiveWindow.WindowID = xevent.NoWindow
 
-	return monitor
+	return monitor, nil
 }

@@ -80,7 +80,7 @@ func (x11 *X11Monitor) sendOneMinuteUsage() {
 		Duration: oneMinuteUsage,
 		Interval: types.TimeInterval{Start: oneMinuteTimeStamp, End: time.Now()},
 	}); err != nil {
-		log.Fatalf("write to db error:%v", err)
+		log.Fatalln("write to db error:", err)
 	}
 }
 

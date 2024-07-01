@@ -3,7 +3,6 @@ package tasks
 import (
 	monitoring "LiScreMon/cli/daemon/internal/monitoring/linux"
 	"fmt"
-	"log"
 	"os/exec"
 	"pkg/types"
 	"reflect"
@@ -154,12 +153,12 @@ func (tm *TaskManager) createRemidersWithAction(task types.Task) {
 					cmd := exec.Command("bash", "-c", task.CmdLine)
 					err := cmd.Start()
 					if err != nil {
-						log.Println(err)
+						fmt.Println(err)
 					}
 
 					err = cmd.Wait()
 					if err != nil {
-						log.Printf("Command finished with error: %v", err)
+						fmt.Printf("Command finished with error: %v", err)
 					}
 				}),
 		),

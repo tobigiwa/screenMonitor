@@ -6,7 +6,6 @@ package cli
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"os/exec"
 	"strconv"
 	"syscall"
@@ -25,7 +24,7 @@ When this command is invoked, it prints "stop called" to the standard output and
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if err := stopLiscrenMon(); err != nil {
-			log.Println(err)
+			fmt.Println(err)
 		}
 		fmt.Println("LiScreMon stopped successfully")
 

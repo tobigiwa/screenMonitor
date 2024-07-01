@@ -54,7 +54,7 @@ func main() {
 		}
 
 		if err := server.Shutdown(context.TODO()); err != nil {
-			log.Fatalf("Graceful server shutdown Failed:%+v\n", err)
+			fmt.Printf("Graceful server shutdown Failed:%+v\n", err)
 		}
 	}(done)
 
@@ -62,6 +62,5 @@ func main() {
 	if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		log.Fatalln("Server error:", err)
 	}
-	fmt.Println()
 	fmt.Println("SERVER STOPPED GRACEFULLY")
 }

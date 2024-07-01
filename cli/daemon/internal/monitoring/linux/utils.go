@@ -2,7 +2,6 @@ package monitoring
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/BurntSushi/xgb/xproto"
 	"github.com/BurntSushi/xgbutil"
@@ -15,14 +14,13 @@ func currentlyOpenedWindows(X *xgbutil.XUtil) ([]xproto.Window, error) {
 	return ewmh.ClientListGet(X)
 }
 
-func setRootEventMask(X *xgbutil.XUtil) {
+func setRootEventMask(X *xgbutil.XUtil) error {
 	err := xproto.ChangeWindowAttributesChecked(X.Conn(), X.RootWin(), xproto.CwEventMask,
-		[]uint32{
-			xproto.EventMaskPropertyChange |
-				xproto.EventMaskSubstructureNotify}).Check()
+		[]uint32{xproto.EventMaskPropertyChange | xproto.EventMaskSubstructureNotify}).Check()
 	if err != nil {
-		log.Fatal("Failed to select notify events for root:", err)
+		return fmt.Errorf("Failed to set eventMask on root widow:%w", err)
 	}
+	return nil
 }
 
 func registerWindowForEvents(windowID xproto.Window) {
@@ -30,7 +28,7 @@ func registerWindowForEvents(windowID xproto.Window) {
 		[]uint32{
 			xproto.EventMaskStructureNotify}).Check()
 	if err != nil {
-		log.Fatalf("Failed to select notify events for window:%v, error: %v", windowID, err)
+		fmt.Printf("Failed to select notify events for window:%v, error: %v", windowID, err)
 	}
 
 	registerWindow(windowID)
@@ -96,15 +94,15 @@ func checkQueryTreeForParent(X *xgbutil.XUtil, window xproto.Window) (string, er
 // index 0: _NET_ACTIVE_WINDOW
 //
 // index 1: _NET_CLIENT_LIST_STACKING
-func neededAtom() []xproto.Atom {
+func neededAtom() ([]xproto.Atom, error) {
 	netActiveWindowAtom, err := xprop.Atm(x11Conn, "_NET_ACTIVE_WINDOW")
 	if err != nil {
-		log.Fatalf("Could not get _NET_ACTIVE_WINDOW atom: %v", err)
+		return nil, fmt.Errorf("could not get _NET_ACTIVE_WINDOW atom:%w", err)
 	}
 	netClientStackingAtom, err := xprop.Atm(x11Conn, "_NET_CLIENT_LIST_STACKING")
 	if err != nil {
-		log.Fatalf("Could not get _NET_CLIENT_LIST_STACKING atom: %v", err)
+		return nil, fmt.Errorf("could not get _NET_CLIENT_LIST_STACKING atom:%w", err)
 	}
 
-	return []xproto.Atom{netActiveWindowAtom, netClientStackingAtom}
+	return []xproto.Atom{netActiveWindowAtom, netClientStackingAtom}, nil
 }

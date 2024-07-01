@@ -6,7 +6,6 @@ package cli
 import (
 	"LiScreMon/cli/daemon"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -25,7 +24,7 @@ to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		if err := stopLiscrenMon(); err != nil {
-			log.Println("could not sucessfully shutdown running LiScreMon", err)
+			fmt.Println("could not sucessfully shutdown running LiScreMon", err)
 			return
 		}
 		fmt.Println("LiScreMon would be restarting now...")
