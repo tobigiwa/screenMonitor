@@ -10,7 +10,6 @@ import (
 
 type DatabaseInterface interface {
 	WriteUsage(types.ScreenTime) error
-	Close() error
 	DeleteKey([]byte) error
 	DeleteBucket(dbPrefix string) error
 	GetDay(types.Date) (db.DailyStat, error)
@@ -28,4 +27,5 @@ type DatabaseInterface interface {
 	GetAllACategories() ([]types.Category, error)
 	UpdateAppInfoManually(key []byte, opsFunc func([]byte) ([]byte, error)) error
 	GetAllApp() ([]types.AppIconCategoryAndCmdLine, error)
+	GetTaskByUUID(taskID uuid.UUID) (types.Task, error)
 }

@@ -2,6 +2,7 @@ package service
 
 import (
 	db "LiScreMon/cli/daemon/internal/database"
+	monitoring "LiScreMon/cli/daemon/internal/monitoring/linux"
 	"LiScreMon/cli/daemon/internal/tasks"
 
 	"cmp"
@@ -231,12 +232,19 @@ func (s *Service) addNewLimitApp(msg types.Task) (types.ReminderMessage, error) 
 
 func (s *Service) removeTask(msg types.Task) (types.ReminderMessage, error) {
 
+	if t, err := s.db.GetTaskByUUID(msg.UUID); err == nil {
+
+		if t.Job == types.DailyAppLimit {
+			delete(monitoring.LimitApp, t.AppName)
+		}
+
+		s.taskManager.RemoveTask(msg.UUID)
+	}
+
 	err := s.db.RemoveTask(msg.UUID)
 	if err != nil {
 		return types.NoMessage.ReminderAndLimitResponse, err
 	}
-
-	s.taskManager.RemoveTask(msg.UUID)
 
 	return types.ReminderMessage{TaskOptSuccessful: true}, nil
 }

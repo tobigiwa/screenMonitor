@@ -26,7 +26,6 @@ type x11DBInterface interface {
 	UpdateAppLimitStatus(taskID uuid.UUID) error
 	RemoveTask(id uuid.UUID) error
 	DeleteKey([]byte) error
-	Close() error
 }
 
 type X11Monitor struct {
@@ -45,6 +44,6 @@ type limitWindow struct {
 	taskUUID       uuid.UUID
 	timeSofar      float64
 	limit          float64
-	tenMinuToLimit  bool
+	tenMinToLimit bool
 	fiveMinToLimit bool
 }

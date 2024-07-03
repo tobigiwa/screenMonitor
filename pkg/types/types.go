@@ -179,6 +179,6 @@ type AppLimit struct {
 	Limit          float64 `json:"limit"`
 	OneTime        bool    `json:"oneTime"`
 	ExitApp        bool    `json:"exitApp"`
-	CreatedAt      Date    `json:"createdAt"`
+	Today          Date    `json:"today"`
 	IsLimitReached bool    `json:"isLimitReached"`
 }

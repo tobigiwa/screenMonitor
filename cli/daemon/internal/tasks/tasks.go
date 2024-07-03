@@ -73,20 +73,21 @@ func StartTaskManger(dbHandle TaskManagerDbRequirement) (*TaskManager, error) {
 
 		switch {
 		case task.Job != types.DailyAppLimit: // i.e reminders
-			if task.Reminder.StartTime.Before(time.Now()) {
+			if task.Reminder.StartTime.Before(time.Now()) { // this is a double-check, the reminder should have been removed when done
 				if err := tm.dbHandle.RemoveTask(task.UUID); err != nil {
 					return nil, fmt.Errorf("%s %+v :err %w", types.ErrDeletingTask.Error(), task, err)
 				}
 			}
 
-		case task.Job == types.DailyAppLimit:
-			if task.AppLimit.OneTime && task.AppLimit.CreatedAt != helperFuncs.Today() {
+		case task.Job == types.DailyAppLimit: // this is a double-check, the oneTime app limit should have been removed when done
+			if task.AppLimit.OneTime && task.AppLimit.Today != helperFuncs.Today() { // whether it reached limit or not,for a new day, the limit does not matter again, hence why it is a dailyLimit.
 				if err := tm.dbHandle.RemoveTask(task.UUID); err != nil {
 					return nil, fmt.Errorf("%s: %+v :%w", types.ErrDeletingTask.Error(), task, err)
 				}
 			}
 
-			if task.AppLimit.IsLimitReached && task.AppLimit.CreatedAt == helperFuncs.Today() {
+			if task.AppLimit.IsLimitReached && task.AppLimit.Today == helperFuncs.Today() {
+				// limit has been reached...and limit was reached that very day
 				continue
 			}
 		}

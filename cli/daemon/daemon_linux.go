@@ -41,7 +41,7 @@ func DaemonServiceLinux() {
 		log.Fatalln(err) // exit
 	}
 
-	sig := make(chan os.Signal, 1)
+	sig := make(chan os.Signal, 3)
 	signal.Notify(sig, os.Interrupt, syscall.SIGTERM)
 
 	// service
@@ -52,8 +52,8 @@ func DaemonServiceLinux() {
 
 	go func() {
 		if err := service.StartService(fmt.Sprintf("%s/socket/", configDir), badgerDB); err != nil {
-			fmt.Println("error starting service", err)
-			sig <- syscall.SIGTERM //if service.StartService fails, send a signal to close the program
+			log.Println("error starting service", err)
+			sig <- syscall.SIGTERM // if service.StartService fails, send a signal to close the program
 		}
 	}()
 
@@ -71,10 +71,11 @@ func DaemonServiceLinux() {
 
 	go func() {
 		xevent.Main(monitor.X11Connection) // Start the x11 event loop.
+		log.Println("error starting x11 event loop", err)
+		sig <- syscall.SIGTERM // if the event loop cannot be started, send a signal to close the program
 	}()
 
-	<-sig
-	close(sig)
+	<-sig // only awaiting the first signal
 
 	// err = monitor.Db.UpdateAppInfoManually([]byte("app:Google-chrome"), db.ExampleOf_opsFunc)
 	// if err != nil {
@@ -91,6 +92,7 @@ func DaemonServiceLinux() {
 
 	service.StopTaskManger() // a different goroutine for managing taskManager, fired from service
 	badgerDB.Close()
+	close(sig)
 	logFile.Close()
 
 	os.Exit(0)

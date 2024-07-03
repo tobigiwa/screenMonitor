@@ -55,22 +55,23 @@ func main() {
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, os.Interrupt, syscall.SIGTERM)
 
-	go func(done chan os.Signal) {
-		<-done
-		close(done)
-
-		if err := app.CloseDaemonConnection(); err != nil {
-			fmt.Println("error closing socket connection with daemon, error:", err)
+	go func() {
+		fmt.Println("Server is running on port http://127.0.0.1:8080/screentime")
+		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Println("Server error:", err)
 		}
+	}()
 
-		if err := server.Shutdown(context.TODO()); err != nil {
-			fmt.Printf("Graceful server shutdown Failed:%+v\n", err)
-		}
-	}(done)
+	<-done
+	close(done)
 
-	fmt.Println("Server is running on port http://127.0.0.1:8080/screentime")
-	if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-		log.Fatalln("Server error:", err)
+	if err := app.CloseDaemonConnection(); err != nil {
+		fmt.Println("error closing socket connection with daemon, error:", err)
 	}
+
+	if err := server.Shutdown(context.TODO()); err != nil {
+		fmt.Printf("Graceful server shutdown Failed:%+v\n", err)
+	}
+
 	fmt.Println("SERVER STOPPED GRACEFULLY")
 }

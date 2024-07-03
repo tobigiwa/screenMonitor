@@ -234,7 +234,7 @@ func (a *App) newAppLimitHandler(w http.ResponseWriter, r *http.Request) {
 	hours, minutes := time.Duration(hrs)*time.Hour, time.Duration(min)*time.Minute
 
 	task.AppLimit.Limit = hours.Hours() + minutes.Hours()
-	task.AppLimit.CreatedAt = helperFuncs.Today()
+	task.AppLimit.Today = helperFuncs.Today()
 	task.UUID = uuid.New()
 
 	msg = types.Message{

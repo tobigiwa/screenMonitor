@@ -111,15 +111,15 @@ func (bs BadgerDBStore) checkIfLimitAppExist(task types.Task, tasks []types.Task
 }
 
 func (bs *BadgerDBStore) RemoveTask(id uuid.UUID) error {
-	taskArry, err := bs.getAllTasks()
+	taskArray, err := bs.getAllTasks()
 	if err != nil {
 		return err
 	}
-	allTasks := slices.DeleteFunc(taskArry, func(s types.Task) bool {
+	newTaskArray := slices.DeleteFunc(taskArray, func(s types.Task) bool {
 		return s.UUID == id
 	})
 
-	byteData, err := helperFuncs.EncodeJSON(allTasks)
+	byteData, err := helperFuncs.EncodeJSON(newTaskArray)
 	if err != nil {
 		return err
 	}
@@ -134,7 +134,7 @@ func (bs *BadgerDBStore) UpdateAppLimitStatus(taskID uuid.UUID) error {
 
 	for i := 0; i < len(taskArry); i++ {
 		if task := taskArry[i]; task.UUID == taskID {
-			task.AppLimit.CreatedAt = helperFuncs.Today()
+			task.AppLimit.Today = helperFuncs.Today()
 			task.AppLimit.IsLimitReached = true
 			taskArry[i] = task
 			break
