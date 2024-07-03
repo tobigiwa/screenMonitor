@@ -18,7 +18,7 @@ func setRootEventMask(X *xgbutil.XUtil) error {
 	err := xproto.ChangeWindowAttributesChecked(X.Conn(), X.RootWin(), xproto.CwEventMask,
 		[]uint32{xproto.EventMaskPropertyChange | xproto.EventMaskSubstructureNotify}).Check()
 	if err != nil {
-		return fmt.Errorf("Failed to set eventMask on root widow:%w", err)
+		return fmt.Errorf("failed to set eventMask on root widow:%w", err)
 	}
 	return nil
 }

@@ -42,7 +42,9 @@ type windowInfo struct {
 
 type limitWindow struct {
 	windowInfo
-	taskUUID  uuid.UUID
-	timeSofar float64
-	limit     float64
+	taskUUID       uuid.UUID
+	timeSofar      float64
+	limit          float64
+	tenMinuToLimit  bool
+	fiveMinToLimit bool
 }

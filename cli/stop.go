@@ -46,7 +46,7 @@ func stopLiscrenMon() (Error error) {
 	arrayOfpidByte := bytes.Split(result, []byte(" "))
 
 	if len(arrayOfpidByte) == 1 { // the running program
-		fmt.Printf("LiScreMon was not running\n\n")
+		fmt.Println("LiScreMon was not running")
 		return
 	}
 
@@ -57,7 +57,7 @@ func stopLiscrenMon() (Error error) {
 			continue
 		}
 
-		if err := syscall.Kill(otherProcess, syscall.SIGINT); err != nil {
+		if err := syscall.Kill(otherProcess, syscall.SIGTERM); err != nil {
 			Error = fmt.Errorf("%w:%w", Error, err)
 		}
 	}

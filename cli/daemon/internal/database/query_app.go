@@ -181,9 +181,12 @@ func (bs *BadgerDBStore) GetAllApp() ([]types.AppIconCategoryAndCmdLine, error) 
 					return err
 				}
 
-				if app.IsCmdLineSet {
-					res = append(res, app.AppIconCategoryAndCmdLine)
+				if len(res) == cap(res) {
+					res = slices.Grow(res, 10)
 				}
+				// if app.IsCmdLineSet {
+				res = append(res, app.AppIconCategoryAndCmdLine)
+				// }
 
 				return nil
 			})
@@ -199,7 +202,22 @@ func (bs *BadgerDBStore) GetAllApp() ([]types.AppIconCategoryAndCmdLine, error) 
 		return nil, err
 	}
 	return slices.Clip(res), nil
+}
 
+func (bs *BadgerDBStore) GetAppByName(appName string) (AppInfo, error) {
+	byteData, err := bs.Get(dbAppKey(appName))
+	if err != nil {
+		return AppInfo{}, err
+	}
+	return helperFuncs.DecodeJSON[AppInfo](byteData)
+}
+
+func (bs *BadgerDBStore) GetAppTodayActiveStatSoFar(appName string) (float64, error) {
+	appInfo, err := bs.GetAppByName(appName)
+	if err != nil {
+		return 0, err
+	}
+	return appInfo.ScreenStat[helperFuncs.Today()].Active, nil
 }
 
 func (bs *BadgerDBStore) GetAllAppWithCmdLine() ([]types.AppIconCategoryAndCmdLine, error) {

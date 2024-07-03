@@ -2,6 +2,8 @@ package main
 
 import (
 	webserver "browser/server"
+	helperFuncs "pkg/helper"
+
 	"context"
 	"errors"
 	"fmt"
@@ -16,12 +18,19 @@ import (
 
 func main() {
 
-	opts := slog.HandlerOptions{
-		AddSource: true,
+	// config directory
+	configDir, err := helperFuncs.ConfigDir()
+	if err != nil {
+		log.Fatalln(err) // exit
 	}
 
-	textLogger := slog.NewTextHandler(os.Stdout, &opts)
-	logger := slog.New(textLogger)
+	// logging
+	logger, logFile, err := helperFuncs.Logger(fmt.Sprintf("%s/webserver.log", configDir))
+	if err != nil {
+		log.Fatalln(err) // exit
+	}
+	defer logFile.Close()
+
 	slog.SetDefault(logger)
 
 	app, err := webserver.NewApp(logger)
@@ -38,8 +47,9 @@ func main() {
 	}
 
 	server := &http.Server{
-		Addr:    ":8080",
-		Handler: app.Routes(),
+		Addr:     ":8080",
+		Handler:  app.Routes(),
+		ErrorLog: slog.NewLogLogger(logger.Handler(), slog.LevelError),
 	}
 
 	done := make(chan os.Signal, 1)

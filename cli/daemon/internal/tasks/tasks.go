@@ -19,6 +19,7 @@ type TaskManagerDbRequirement interface {
 	GetAllTask() ([]types.Task, error)
 	RemoveTask(id uuid.UUID) error
 	AddTask(task types.Task) error
+	GetAppTodayActiveStatSoFar(appName string) (float64, error)
 }
 
 type TaskManager struct {
@@ -113,39 +114,46 @@ func (tm *TaskManager) disperseTask() {
 
 		switch task.Job {
 		case types.ReminderWithNoAppLaunch:
-			tm.createRemidersWithNoAction(task)
+			tm.reminderWithNoAppLaunch(task)
 
 		case types.ReminderWithAppLaunch:
-			tm.createRemidersWithAction(task)
+			tm.reminderWithAppLaunch(task)
 
 		case types.DailyAppLimit:
-			monitoring.AddNewLimit(task)
+			timeSofar, _ := tm.dbHandle.GetAppTodayActiveStatSoFar(task.AppName)
+			monitoring.AddNewLimit(task, timeSofar)
 		}
 
 	}
 
 }
 
-func (tm *TaskManager) createRemidersWithNoAction(task types.Task) {
+func (tm *TaskManager) reminderWithNoAppLaunch(task types.Task) {
 
-	tm.reminders(task)
+	tm.preNotify(task)
 
 	if _, err := tm.gocron.NewJob(
 		gocron.OneTimeJob(gocron.OneTimeJobStartDateTime(task.Reminder.StartTime)),
-		gocron.NewTask(taskFunc, task.UI, true),
+		gocron.NewTask(reminderAlert, task.UI, true),
 		gocron.WithTags(task.UUID.String()),
+		gocron.WithEventListeners(
+			gocron.AfterJobRuns(func(jobID uuid.UUID, jobName string) {
+				tm.dbHandle.RemoveTask(task.UUID)
+
+			}),
+		),
 	); err != nil {
 		fmt.Println("error creating job", err)
 	}
 
 }
 
-func (tm *TaskManager) createRemidersWithAction(task types.Task) {
-	tm.reminders(task)
+func (tm *TaskManager) reminderWithAppLaunch(task types.Task) {
+	tm.preNotify(task)
 
 	tm.gocron.NewJob(
 		gocron.OneTimeJob(gocron.OneTimeJobStartDateTime(task.Reminder.StartTime)),
-		gocron.NewTask(taskFunc, task.UI, true),
+		gocron.NewTask(reminderAlert, task.UI, true),
 		gocron.WithTags(task.UUID.String()),
 		gocron.WithEventListeners(
 			gocron.AfterJobRuns(
@@ -161,11 +169,14 @@ func (tm *TaskManager) createRemidersWithAction(task types.Task) {
 						fmt.Printf("Command finished with error: %v", err)
 					}
 				}),
+			gocron.AfterJobRuns(func(jobID uuid.UUID, jobName string) {
+				tm.dbHandle.RemoveTask(task.UUID)
+			}),
 		),
 	)
 }
 
-func (tm *TaskManager) reminders(task types.Task) {
+func (tm *TaskManager) preNotify(task types.Task) {
 
 	for i := 0; i < 2; i++ {
 		var t time.Time
@@ -177,14 +188,14 @@ func (tm *TaskManager) reminders(task types.Task) {
 
 		if _, err := tm.gocron.NewJob(
 			gocron.OneTimeJob(gocron.OneTimeJobStartDateTime(t)),
-			gocron.NewTask(taskReminderFunc, task.UI.Title, notifyBeForeReminder, withSound),
+			gocron.NewTask(preNotifyAlert, task.UI.Title, notifyBeForeReminder, withSound),
 			gocron.WithTags(task.UUID.String())); err != nil {
 			fmt.Println("gocron failed to add notififcation", err)
 		}
 	}
 }
 
-func taskReminderFunc(taskTitle string, durationbeforeTask int, withSound bool) {
+func preNotifyAlert(taskTitle string, durationbeforeTask int, withSound bool) {
 	title := fmt.Sprintf("%d Minutes to your task", durationbeforeTask)
 
 	if withSound {
@@ -195,7 +206,7 @@ func taskReminderFunc(taskTitle string, durationbeforeTask int, withSound bool) 
 	helperFuncs.NotifyWithoutBeep(title, taskTitle)
 }
 
-func taskFunc(task types.UItextInfo, withSound bool) {
+func reminderAlert(task types.UItextInfo, withSound bool) {
 	title := fmt.Sprintf("Reminder: %s", task.Title)
 
 	if withSound {

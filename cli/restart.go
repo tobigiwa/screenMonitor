@@ -28,7 +28,7 @@ to quickly create a Cobra application.`,
 			return
 		}
 		fmt.Println("LiScreMon would be restarting now...")
-		time.Sleep(1 * time.Second) // allow for all resources to be released
+		time.Sleep(2 * time.Second) // allow for all resources to be released
 		daemon.DaemonServiceLinux()
 	},
 }
