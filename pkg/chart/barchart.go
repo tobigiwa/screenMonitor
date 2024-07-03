@@ -42,7 +42,7 @@ const barChartOptions = `{
 		},
 		valueFormatter: function(value) {
 			var hours = Math.floor(value);
-			var minutes = Math.round((value - hours) * 60);
+			var minutes = Math.trunc((value - hours) * 60);
 			return hours + 'Hrs:' + minutes + 'Mins';
 				}
 		},
