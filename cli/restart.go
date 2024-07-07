@@ -23,6 +23,16 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
+		// cpuProfileFile, err := os.Create("cpuProfile.prof")
+		// if err != nil {
+		// 	panic(err)
+		// }
+		// defer cpuProfileFile.Close()
+		// if err := pprof.StartCPUProfile(cpuProfileFile); err != nil {
+		// 	panic(err)
+		// }
+		// defer pprof.StopCPUProfile()
+
 		if err := stopLiscrenMon(); err != nil {
 			fmt.Println("could not sucessfully shutdown running LiScreMon", err)
 			return

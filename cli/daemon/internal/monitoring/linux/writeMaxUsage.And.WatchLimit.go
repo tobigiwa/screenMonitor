@@ -55,12 +55,12 @@ func (x11 *X11Monitor) watchLimit(windowID xproto.Window, duration float64) {
 				return
 			}
 
-			if timeLeft := limitApp.limit - limitApp.timeSofar; timeLeft >= 300 && timeLeft <= 600 && !limitApp.tenMinToLimit {
+			if timeLeft := limitApp.limit - limitApp.timeSofar; timeLeft > float64(0.125) && timeLeft <= float64(0.1666) && !limitApp.tenMinToLimit {
 				limitApp.tenMinToLimit = true
 				LimitApp[windowName] = limitApp
 				x11.appLimitLeftNotification(limitApp.taskUUID, "10")
 
-			} else if timeLeft >= 60 && timeLeft <= 300 && !limitApp.fiveMinToLimit {
+			} else if timeLeft > float64(0.0583) && timeLeft <= float64(0.0833) && !limitApp.fiveMinToLimit {
 				limitApp.fiveMinToLimit = true
 				LimitApp[windowName] = limitApp
 				x11.appLimitLeftNotification(limitApp.taskUUID, "5")
@@ -141,8 +141,8 @@ func (x11 *X11Monitor) appLimitLeftNotification(taskID uuid.UUID, left string) e
 		return err
 	}
 
-	title := fmt.Sprintf("%sMinute usage limit left for app: %s", left, task.AppName)
-	subtitle := fmt.Sprintf("App: %s Usage Limit: %s", task.AppName, helperFuncs.UsageTimeInHrsMin(task.AppLimit.Limit))
+	title := fmt.Sprintf("%s minute usage left for %s", left, task.AppName)
+	subtitle := fmt.Sprintf("App: %s; Usage Limit: %s", task.AppName, helperFuncs.UsageTimeInHrsMin(task.AppLimit.Limit))
 
 	helperFuncs.NotifyWithoutBeep(title, subtitle)
 

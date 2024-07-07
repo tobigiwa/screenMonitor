@@ -3,7 +3,7 @@ module browser
 go 1.22.1
 
 require (
-	github.com/a-h/templ v0.2.707
+	github.com/a-h/templ v0.2.731
 	github.com/google/uuid v1.6.0
 	pkg v0.0.0
 	views v0.0.0

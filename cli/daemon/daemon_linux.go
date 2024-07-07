@@ -75,7 +75,7 @@ func DaemonServiceLinux() {
 		sig <- syscall.SIGTERM // if the event loop cannot be started, send a signal to close the program
 	}()
 
-	<-sig // only awaiting the first signal
+	<-sig // awaiting only the first signal
 
 	// err = monitor.Db.UpdateAppInfoManually([]byte("app:Google-chrome"), db.ExampleOf_opsFunc)
 	// if err != nil {
@@ -92,8 +92,6 @@ func DaemonServiceLinux() {
 
 	service.StopTaskManger() // a different goroutine for managing taskManager, fired from service
 	badgerDB.Close()
-	close(sig)
 	logFile.Close()
-
-	os.Exit(0)
+	close(sig)
 }

@@ -11,9 +11,11 @@ templ TasksPage(taskType string, allApps []types.AppIconCategoryAndCmdLine) {
 			<link rel="stylesheet" href="/assets/styles/index.css"/>
 			<link rel="stylesheet" href="/assets/styles/tasks.css"/>
 			<link rel="stylesheet" href="/assets/styles/dd.min.css"/>
+			<link rel="stylesheet" href="/assets/styles/jquery-ui.css"/>
 			<script src="assets/javascript/script.out.js"></script>
 			<script src="assets/libraries/htmx.min.js"></script>
 			<script src="assets/libraries/dd.min.js"></script>
+			<script src="assets/libraries/jquery-ui.min.js"></script>
 			<title>ScreenTime</title>
 		</head>
 		<body>
@@ -62,6 +64,33 @@ templ RenderTasks(isEmpty bool, taskType templ.Component) {
 templ reminderAndLimitDialog(allApps []types.AppIconCategoryAndCmdLine) {
 	@reminderDialog()
 	@limitDialog(allApps)
+	<script>
+	   appLimitdialog = $( "#appLimit-dialog" ).dialog({
+			autoOpen: false,
+			height: 400,
+			width: 350,
+			modal: true,
+			buttons: {
+				"Create AppLimit": function() {},
+				Cancel: function() {
+				dialog.dialog( "close" );
+				}
+			},
+			close: function() {
+				form[ 0 ].reset();
+				allFields.removeClass( "ui-state-error" );
+			}
+    	});
+
+		form = dialog.find( "form" ).on( "submit", function( event ) {
+			event.preventDefault();
+	    });
+ 
+			
+		$("#limit-dialog__btn").button().click(function() {
+			appLimitdialog.dialog("open");
+		});
+	</script>
 }
 
 templ reminderAndLimitHeaderSection() {
@@ -80,7 +109,7 @@ templ reminderAndLimitHeaderSection() {
 		<div class="limit-request">
 			<h2 class="applimitRequest" hx-get="/appLimits" hx-swap="none" hx-select-oob="#task-holder:outerHTML">App Limit</h2>
 			<button
-				class="limit-dialog__btn"
+				id="limit-dialog__btn"
 				title="add new app limit"
 			>
 				<img
@@ -258,7 +287,8 @@ templ reminderDialog() {
 }
 
 templ limitDialog(allApp []types.AppIconCategoryAndCmdLine) {
-	<dialog class="limit-dialog">
+	// <dialog class="limit-dialog">
+	<div id="appLimit-dialog">
 		<form class="" method="post" action="/newAppLimit">
 			<select
 				name="app"
@@ -323,12 +353,12 @@ templ limitDialog(allApp []types.AppIconCategoryAndCmdLine) {
 				>Close</button>
 			</div>
 		</form>
-		<script type="text/javascript">
-				const limitDialog = document.querySelector('.limit-dialog');
-				document.querySelector('.limit-dialog__btn').addEventListener('click', () => {
-					limitDialog.showModal();
-				});
-
-		</script>
-	</dialog>
+		// <script type="text/javascript">
+		// 		const limitDialog = document.querySelector('.limit-dialog');
+		// 		document.querySelector('.limit-dialog__btn').addEventListener('click', () => {
+		// 			limitDialog.showModal();
+		// 		});
+		// </script>
+	</div>
+	// </dialog>
 }

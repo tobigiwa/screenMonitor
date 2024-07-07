@@ -197,7 +197,7 @@ func (tm *TaskManager) preNotify(task types.Task) {
 }
 
 func preNotifyAlert(taskTitle string, durationbeforeTask int, withSound bool) {
-	title := fmt.Sprintf("%d Minutes to your task", durationbeforeTask)
+	title := fmt.Sprintf("%d minutes to your task", durationbeforeTask)
 
 	if withSound {
 		helperFuncs.NotifyWithBeep(title, taskTitle)
@@ -208,7 +208,7 @@ func preNotifyAlert(taskTitle string, durationbeforeTask int, withSound bool) {
 }
 
 func reminderAlert(task types.UItextInfo, withSound bool) {
-	title := fmt.Sprintf("Reminder: %s", task.Title)
+	title := fmt.Sprintf("Task: %s", task.Title)
 
 	if withSound {
 		helperFuncs.NotifyWithBeep(title, task.Subtitle)

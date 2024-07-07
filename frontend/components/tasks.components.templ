@@ -1,8 +1,10 @@
 package frontend
 
-import "pkg/types"
-import "time"
-import helperFuncs "pkg/helper"
+import (
+	helperFuncs "pkg/helper"
+	"pkg/types"
+	"time"
+)
 
 templ ReminderTasks(tasks []types.Task) {
 	for _, t := range tasks {
