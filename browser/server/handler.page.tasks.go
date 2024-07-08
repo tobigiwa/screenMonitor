@@ -168,6 +168,7 @@ func (a *App) newReminderHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) newAppLimitHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("it got here")
 	err := r.ParseForm()
 	if err != nil {
 		a.clientError(w, http.StatusBadRequest, err)
@@ -249,8 +250,8 @@ func (a *App) newAppLimitHandler(w http.ResponseWriter, r *http.Request) {
 		a.serverError(w, err)
 		return
 	}
-
-	views.TasksPage("AppLimit", msg.ReminderAndLimitResponse.AllApps).Render(context.TODO(), w)
+	fmt.Println(r.Method)
+	http.Redirect(w, r, "/appLimits", http.StatusCreated)
 
 }
 

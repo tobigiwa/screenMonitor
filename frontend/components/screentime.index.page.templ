@@ -23,7 +23,7 @@ templ IndexPage() {
 		</head>
 		<body>
 			<div class="page">
-				@menu()
+				@sideBarMenu()
 				@screentimeTimePage()
 			</div>
 		</body>
@@ -32,7 +32,7 @@ templ IndexPage() {
 
 templ screentimeTimePage() {
 	<div class="main">
-		@Header()
+		@header()
 		@chartWrapper("", types.NoAppIconCategoryAndCmdLine)
 		@chartControls()
 		@chartHighlight(nil, 0, nil, "")

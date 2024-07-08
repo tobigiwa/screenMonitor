@@ -11,16 +11,20 @@ templ TasksPage(taskType string, allApps []types.AppIconCategoryAndCmdLine) {
 			<link rel="stylesheet" href="/assets/styles/index.css"/>
 			<link rel="stylesheet" href="/assets/styles/tasks.css"/>
 			<link rel="stylesheet" href="/assets/styles/dd.min.css"/>
-			<link rel="stylesheet" href="/assets/styles/jquery-ui.css"/>
+			<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.3/themes/base/jquery-ui.min.css" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+			// <link rel="styleshhet" href="/assets/styles/jquery-ui.css"/>
 			<script src="assets/javascript/script.out.js"></script>
 			<script src="assets/libraries/htmx.min.js"></script>
 			<script src="assets/libraries/dd.min.js"></script>
-			<script src="assets/libraries/jquery-ui.min.js"></script>
+			<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.3/jquery-ui.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+			// <script src="assets/libraries/jquery-ui.js"></script>
+			<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+			// <script src="assets/libraries/jquery-3.7.1.js"></script>
 			<title>ScreenTime</title>
 		</head>
 		<body>
 			<div class="page">
-				@menu()
+				@sideBarMenu()
 				@reminderAndLimitPage(allApps)
 				@templ.JSONScript("id", taskType)
 			</div>
@@ -40,7 +44,7 @@ templ TasksPage(taskType string, allApps []types.AppIconCategoryAndCmdLine) {
 
 templ reminderAndLimitPage(allApps []types.AppIconCategoryAndCmdLine) {
 	<div class="main">
-		@Header()
+		@header()
 		@reminderAndLimitHeaderSection()
 		<div class="reminder-limit__page">
 			@RenderTasks(true, templ.NopComponent)
@@ -65,31 +69,32 @@ templ reminderAndLimitDialog(allApps []types.AppIconCategoryAndCmdLine) {
 	@reminderDialog()
 	@limitDialog(allApps)
 	<script>
-	   appLimitdialog = $( "#appLimit-dialog" ).dialog({
-			autoOpen: false,
-			height: 400,
-			width: 350,
-			modal: true,
-			buttons: {
-				"Create AppLimit": function() {},
-				Cancel: function() {
-				dialog.dialog( "close" );
+		var appLimitdialog, form;
+		appLimitdialog = $( "#appLimit-dialog" ).dialog({
+				autoOpen: false,
+				height: 400,
+				width: 550,
+				modal: true,
+				buttons: {
+					"Create AppLimit": function() {
+						console.log(form[0]);
+						form[0].submit();
+					},
+					Cancel: function() {
+						appLimitdialog.dialog( "close" );
+					}
+				},
+				close: function() {
+					form[ 0 ].reset();
 				}
-			},
-			close: function() {
-				form[ 0 ].reset();
-				allFields.removeClass( "ui-state-error" );
-			}
-    	});
+			});
 
-		form = dialog.find( "form" ).on( "submit", function( event ) {
-			event.preventDefault();
-	    });
- 
+			form = appLimitdialog.find( "form" );
 			
-		$("#limit-dialog__btn").button().click(function() {
-			appLimitdialog.dialog("open");
-		});
+			$("#limit-dialog__btn").button().click(function() {
+				console.log("clicked");
+				appLimitdialog.dialog("open");
+			});
 	</script>
 }
 
@@ -289,7 +294,7 @@ templ reminderDialog() {
 templ limitDialog(allApp []types.AppIconCategoryAndCmdLine) {
 	// <dialog class="limit-dialog">
 	<div id="appLimit-dialog">
-		<form class="" method="post" action="/newAppLimit">
+		<form hx-post="/newAppLimit" hx-swap="none" hx-select-oob="#task-holder:outerHTML">
 			<select
 				name="app"
 				is="ms-dropdown"
