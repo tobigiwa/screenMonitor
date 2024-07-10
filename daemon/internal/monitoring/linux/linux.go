@@ -5,7 +5,7 @@ import (
 	"pkg/types"
 	"time"
 
-	db "LiScreMon/cli/daemon/internal/database"
+	db "LiScreMon/daemon/internal/database"
 
 	"github.com/BurntSushi/xgb/xproto"
 	"github.com/BurntSushi/xgbutil"

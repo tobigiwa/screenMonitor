@@ -1,8 +1,8 @@
 package service
 
 import (
-	db "LiScreMon/cli/daemon/internal/database"
-	"LiScreMon/cli/daemon/internal/tasks"
+	db "LiScreMon/daemon/internal/database"
+	"LiScreMon/daemon/internal/tasks"
 	"errors"
 	"fmt"
 	"io"

@@ -4,7 +4,7 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cli
 
 import (
-	"LiScreMon/cli/daemon"
+	"LiScreMon/daemon"
 	"os"
 	"runtime/pprof"
 

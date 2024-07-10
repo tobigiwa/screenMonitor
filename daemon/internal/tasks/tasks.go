@@ -1,7 +1,7 @@
 package tasks
 
 import (
-	monitoring "LiScreMon/cli/daemon/internal/monitoring/linux"
+	monitoring "LiScreMon/daemon/internal/monitoring/linux"
 	"fmt"
 	"os/exec"
 	"pkg/types"

@@ -1,9 +1,9 @@
 package daemon
 
 import (
-	db "LiScreMon/cli/daemon/internal/database"
-	monitoring "LiScreMon/cli/daemon/internal/monitoring/linux"
-	"LiScreMon/cli/daemon/internal/service"
+	db "LiScreMon/daemon/internal/database"
+	monitoring "LiScreMon/daemon/internal/monitoring/linux"
+	"LiScreMon/daemon/internal/service"
 
 	"context"
 	"fmt"
