@@ -1,7 +1,7 @@
 package main
 
 import (
-	webserver "browser/server"
+	webserver "agent"
 	helperFuncs "pkg/helper"
 
 	"context"

@@ -150,7 +150,7 @@ func (s *Service) tasks() (types.ReminderMessage, error) {
 	return types.ReminderMessage{AllApps: allApps}, nil
 }
 
-func (s *Service) reminderTasks() (types.ReminderMessage, error) {
+func (s *Service) allReminderTask() (types.ReminderMessage, error) {
 
 	tasks, err := s.db.GetAllTask()
 	if err != nil {
@@ -181,7 +181,7 @@ func (s *Service) reminderTasks() (types.ReminderMessage, error) {
 	return types.ReminderMessage{AllTask: slices.Clip(validTask)}, nil
 }
 
-func (s *Service) limitTasks() (types.ReminderMessage, error) {
+func (s *Service) allDailyAppLimitTask() (types.ReminderMessage, error) {
 	tasks, err := s.db.GetAllTask()
 	if err != nil {
 		return types.NoMessage.ReminderAndLimitResponse, err
@@ -227,7 +227,13 @@ func (s *Service) addNewLimitApp(msg types.Task) (types.ReminderMessage, error) 
 		return types.NoMessage.ReminderAndLimitResponse, err
 	}
 
-	return types.ReminderMessage{TaskOptSuccessful: true}, nil
+	t, err := s.allDailyAppLimitTask()
+	if err != nil {
+		return types.ReminderMessage{TaskOptSuccessful: true}, err
+	}
+
+	t.TaskOptSuccessful = true
+	return t, nil
 }
 
 func (s *Service) removeTask(msg types.Task) (types.ReminderMessage, error) {
