@@ -16,8 +16,6 @@ func CreateIndexHTML() error {
 	parentPath := filepath.Dir(cwd)
 
 	p := fmt.Sprintf("%s/agent/internal/frontend/desktop/index.html", parentPath)
-
-	fmt.Println(p)
 	indexHTML, err := os.Create(p)
 	if err != nil {
 		return fmt.Errorf("failed to create output file: %v", err)
