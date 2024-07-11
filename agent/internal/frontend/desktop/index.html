@@ -1,0 +1,83 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/assets/styles/index.css"><link rel="stylesheet" href="/assets/styles/screentime.css"><script src="assets/javascript/script.out.js"></script><script src="assets/libraries/htmx.min.js"></script><script src="assets/libraries/echarts.min.js"></script><title>ScreenTimePage</title></head><body><div class="page"><div class="menu"><div class="hold-animation"><div class="wrap-animation"><div class="animation" id="lottie-animation"></div></div><div class="quote-animation"><p>'If You Can't Measure It, You Can't Manage It'</p></div><script src="assets/libraries/lottie.min.js"></script><script>
+		document.addEventListener( 'DOMContentLoaded', function ()
+		{
+			lottie.loadAnimation( {
+				container: document.getElementById( 'lottie-animation' ),
+				renderer: 'svg',
+				loop: true,
+				autoplay: true,
+				path: "assets/animation/Animation - 1712666371830.json"
+			} );
+		} );
+
+		</script></div><div class="menu-items"><nav><ul><li class="wide"><a href="/screentime" class="links" tabindex="0"><img src="assets/svg/no_1.svg" class="icon">Screentime</a></li><li class="wide"><a href="#" class="links wide" tabindex="0"><img src="assets/svg/no_3.svg" class="icon">Analytics</a></li><li class="wide"><a href="/tasks" class="links wide" tabindex="0"><img src="assets/svg/no_4.svg" class="icon" style="vertical-align: top;"><div class="long-text" style="display: inline-block;">Tasks</div></a></li><li class="wide"><a href="#" class="links wide" tabindex="0"><img src="assets/svg/no_2.svg" class="icon">ToDo</a></li><li class="hidden"><a href="#" class="links" tabindex="0"><img src="assets/svg/no_5_settings.svg" class="icon">Settings</a></li><li class="hidden"><a href="#" class="links" tabindex="0"><img src="assets/svg/no_6_logout.svg" class="icon">Logout</a></li><li class="narrow" title="Screentime"><a href="#" class="links" tabindex="0"><img src="assets/svg/no_1.svg" class="icon"></a></li><li class="narrow" title="Analytics"><a href="#" class="links" tabindex="0"><img src="assets/svg/no_3.svg" class="icon"></a></li><li class="narrow" title="Alerts &amp; Remainder"><a href="#" class="links" tabindex="0"><img src="assets/svg/no_4.svg" class="icon"></a></li><li class="narrow" title="ToDo  "><a href="#" class="links" tabindex="0"><img src="assets/svg/no_2.svg" class="icon"></a></li><li class="narrow" title="Settings"><a href="#" class="links" tabindex="0"><img src="assets/svg/no_5_settings.svg" class="icon"></a></li><li class="narrow" title="Logout"><a href="#" class="links" tabindex="0"><img src="assets/svg/no_6_logout.svg" class="icon"></a></li></ul></nav><script>
+		document.addEventListener( 'keydown', function ( e )
+		{
+			const focusedElement = document.activeElement;
+			if ( !focusedElement.classList.contains( 'links' ) ) {
+				return;
+			}
+
+			let toFocus = null;
+			switch ( e.key ) {
+				case 'ArrowDown':
+					console.log('Arrow Down');
+					toFocus = focusedElement.parentElement.nextElementSibling;
+					if ( toFocus ) toFocus = toFocus.querySelector( '.links' );
+					break;
+				case 'ArrowUp':
+					console.log('Arrow Up');
+					toFocus = focusedElement.parentElement.previousElementSibling;
+					if ( toFocus ) toFocus = toFocus.querySelector( '.links' );
+					break;
+			}
+
+			if ( toFocus ) {
+				toFocus.focus();
+				e.preventDefault();
+			}
+		} );
+		</script></div></div><div class="main"><div class="header"><pre id="ascii-art">
++-+-+-+-+-+-+-+-+-+
+|L|i|S|c|r|e|M|o|n|
++-+-+-+-+-+-+-+-+-+</pre><a href="#"><img src="assets/svg/no_5_settings.svg" alt="" class="icon header-btn"></a> <a href="#"><img src="assets/svg/no_6_logout.svg" alt="" class="icon header-btn"></a></div><div class="chart-wrapper"><div id="echart" hx-swap-oob="true"></div></div><div class="chart-controls"><div class="left-controls"><div class="select-month"><select name="month" class="month" hx-get="/weekStat?week=month" hx-vals="js{month: this.value}" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML"><option value="" id="placeholder" disabled selected>Last 3 Month</option> <option class="option" value="June">June</option><option class="option" value="May">May</option><option class="option" value="April">April</option></select></div><button class="left-controls__btn img backward-arrow" hx-get="/weekStat?week=backward" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML"><img class="chart__controls--img" src="assets/svg/angle-left-svgrepo-com.svg" alt=""></button> <button class="left-controls__btn text" hx-get="/weekStat?week=lastweek" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">Last Week</button> <button class="left-controls__btn text" id="thisWeekButton" hx-get="/weekStat?week=thisweek" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">This Week</button> <button class="left-controls__btn img forward-arrow" hx-get="/weekStat?week=forward" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML"><img class="chart__controls--img" src="assets/svg/angle-right-svgrepo-com.svg" alt=""></button></div><div class="spacing"></div><script>
+			document.addEventListener( 'DOMContentLoaded', function ()
+			{
+				const thisWeekButton = document.querySelector( '#thisWeekButton' );
+				if ( thisWeekButton ) {
+					thisWeekButton.click();
+				}	
+			});
+		</script></div><div class="chart-highlight" id="highlight" hx-swap-obb="true"><ul></ul><script>
+			function openCategoryDialog(event) {
+				const trigger = event.target.parentElement.parentElement; // the li
+				const triggerIconElement = trigger.querySelector('img');
+				const icon = triggerIconElement.getAttribute('src');
+				const appName = trigger.querySelector('.appName').innerHTML;
+				const desktopCategories = trigger.querySelector('.desktopCategories').innerHTML;
+
+				event.stopPropagation();
+
+				// build the modal dialog
+				const dialog = document.getElementById('categoryDialog');
+				const imgElement = dialog.querySelector('form .head img');
+				const headerClassParagraph = dialog.querySelector('form .head p');
+				const dialogLegend = dialog.querySelector('form legend');
+				const dialogHiddenInput = dialog.querySelector('form fieldset+input');
+				const dialogDesktopCategoriesClass = dialog.querySelector('form div+div');
+				imgElement.setAttribute('src', icon);
+				imgElement.setAttribute('alt', appName);
+				dialogHiddenInput.setAttribute('value', appName);
+				headerClassParagraph.innerHTML = `<b>${appName}</b>`
+				dialogLegend.innerHTML = `Select a category for ${appName}:`
+				
+				if (desktopCategories === '' || desktopCategories.trim() === '') {
+					dialogDesktopCategoriesClass.style.display = 'none';
+				} else {
+					dialogDesktopCategoriesClass.innerHTML = `Application file category(s):\n${desktopCategories}`;
+				}
+
+				// show the modal dialog
+				dialog.showModal();
+			};
+		</script></div></div></div></body></html>
