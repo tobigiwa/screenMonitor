@@ -1,0 +1,173 @@
+package frontend
+
+templ sideBarMenu() {
+	<div class="menu">
+		@animation()
+		@menuItems()
+	</div>
+}
+
+templ animation() {
+	<div class="hold-animation">
+		<div class="wrap-animation">
+			<div class="animation" id="lottie-animation"></div>
+		</div>
+		<div class="quote-animation">
+			<p>'If You Can't Measure It, You Can't Manage It'</p>
+		</div>
+		<script src="assets/libraries/lottie.min.js"></script>
+		<script>
+		document.addEventListener( 'DOMContentLoaded', function ()
+		{
+			lottie.loadAnimation( {
+				container: document.getElementById( 'lottie-animation' ),
+				renderer: 'svg',
+				loop: true,
+				autoplay: true,
+				path: "assets/animation/Animation - 1712666371830.json"
+			} );
+		} );
+
+		</script>
+	</div>
+}
+
+templ menuItems() {
+	<div class="menu-items">
+		<nav>
+			<ul>
+				<li class="wide">
+					<a href="/screentime" class="links" tabindex="0">
+						<img
+							src="assets/svg/no_1.svg"
+							class="icon"
+						/>Screentime
+					</a>
+				</li>
+				<li class="wide">
+					<a href="#" class="links wide" tabindex="0">
+						<img
+							src="assets/svg/no_3.svg"
+							class="icon"
+						/>Analytics
+					</a>
+				</li>
+				<li class="wide">
+					<a href="/tasks" class="links wide" tabindex="0">
+						<img
+							src="assets/svg/no_4.svg"
+							class="icon"
+							style="vertical-align: top;"
+						/>
+						<div class="long-text" style="display: inline-block;">
+							// Alerts
+							// <br/>
+							// & Remainder
+							Tasks
+						</div>
+					</a>
+				</li>
+				<li class="wide">
+					<a href="#" class="links wide" tabindex="0">
+						<img
+							src="assets/svg/no_2.svg"
+							class="icon"
+						/>ToDo
+					</a>
+				</li>
+				<li class="hidden">
+					<a href="#" class="links" tabindex="0">
+						<img
+							src="assets/svg/no_5_settings.svg"
+							class="icon"
+						/>Settings
+					</a>
+				</li>
+				<li class="hidden">
+					<a href="#" class="links" tabindex="0">
+						<img
+							src="assets/svg/no_6_logout.svg"
+							class="icon"
+						/>Logout
+					</a>
+				</li>
+				<li class="narrow" title="Screentime">
+					<a href="#" class="links" tabindex="0">
+						<img
+							src="assets/svg/no_1.svg"
+							class="icon"
+						/>
+					</a>
+				</li>
+				<li class="narrow" title="Analytics">
+					<a href="#" class="links" tabindex="0">
+						<img
+							src="assets/svg/no_3.svg"
+							class="icon"
+						/>
+					</a>
+				</li>
+				<li class="narrow" title="Alerts & Remainder">
+					<a href="#" class="links" tabindex="0">
+						<img
+							src="assets/svg/no_4.svg"
+							class="icon"
+						/>
+					</a>
+				</li>
+				<li class="narrow" title="ToDo  ">
+					<a href="#" class="links" tabindex="0">
+						<img
+							src="assets/svg/no_2.svg"
+							class="icon"
+						/>
+					</a>
+				</li>
+				<li class="narrow" title="Settings">
+					<a href="#" class="links" tabindex="0">
+						<img
+							src="assets/svg/no_5_settings.svg"
+							class="icon"
+						/>
+					</a>
+				</li>
+				<li class="narrow" title="Logout">
+					<a href="#" class="links" tabindex="0">
+						<img
+							src="assets/svg/no_6_logout.svg"
+							class="icon"
+						/>
+					</a>
+				</li>
+			</ul>
+		</nav>
+		<script>
+		document.addEventListener( 'keydown', function ( e )
+		{
+			const focusedElement = document.activeElement;
+			if ( !focusedElement.classList.contains( 'links' ) ) {
+				return;
+			}
+
+			let toFocus = null;
+			switch ( e.key ) {
+				case 'ArrowDown':
+					console.log('Arrow Down');
+					toFocus = focusedElement.parentElement.nextElementSibling;
+					if ( toFocus ) toFocus = toFocus.querySelector( '.links' );
+					break;
+				case 'ArrowUp':
+					console.log('Arrow Up');
+					toFocus = focusedElement.parentElement.previousElementSibling;
+					if ( toFocus ) toFocus = toFocus.querySelector( '.links' );
+					break;
+			}
+
+			if ( toFocus ) {
+				toFocus.focus();
+				e.preventDefault();
+			}
+		} );
+		</script>
+	</div>
+}

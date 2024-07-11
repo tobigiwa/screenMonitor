@@ -1,0 +1,5 @@
+internal/frontend/node_modules/
+internal/frontend/assets/js/out*
+*templ.go
+*templ.txt
+index.html

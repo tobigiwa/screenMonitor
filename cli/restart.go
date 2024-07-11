@@ -4,9 +4,12 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cli
 
 import (
+	"LiScreMon/daemon"
 	"fmt"
 	"log"
-	"os/exec"
+	"log/slog"
+	helperFuncs "pkg/helper"
+	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -22,25 +25,37 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		err := exec.Command("LiScreMon", "start").Start()
-		if err != nil {
-			log.Println("error starting", err)
+
+		// cpuProfileFile, err := os.Create("cpuProfile.prof")
+		// if err != nil {
+		// 	panic(err)
+		// }
+		// defer cpuProfileFile.Close()
+		// if err := pprof.StartCPUProfile(cpuProfileFile); err != nil {
+		// 	panic(err)
+		// }
+		// defer pprof.StopCPUProfile()
+
+		if err := stopLiscrenMon(); err != nil {
+			fmt.Println("could not sucessfully shutdown running LiScreMon", err)
 			return
 		}
-		fmt.Println("LiSreMon is running again")
+		fmt.Println("LiScreMon would be restarting now...")
+		time.Sleep(2 * time.Second) // allow for all resources to be released
+
+		// logging
+		logger, logFile, err := helperFuncs.Logger("daemon.log")
+		if err != nil {
+			log.Fatalln(err) // exit
+		}
+		defer logFile.Close()
+
+		slog.SetDefault(logger)
+
+		daemon.DaemonServiceLinux(logger)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(backgroundCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// backgroundCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// backgroundCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

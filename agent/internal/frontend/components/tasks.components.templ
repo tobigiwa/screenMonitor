@@ -1,0 +1,69 @@
+package frontend
+
+import (
+	helperFuncs "pkg/helper"
+	"pkg/types"
+	"time"
+)
+
+templ ReminderTasks(tasks []types.Task) {
+	for _, t := range tasks {
+		<li>
+			<div class="remainder-tasks">
+				<div class="appInfo">
+					<p class="title"><span class="label"><i>title:</i></span> <span class="content">{ t.UI.Title }</span></p>
+					<p class="subtitle"><span class="label"><i>subtitle:</i></span> <span class="content">{ t.UI.Subtitle }</span></p>
+					<details>
+						<summary><span class="label"><i>See attached note</i></span></summary>
+						<p>{ t.UI.Notes }</p>
+					</details>
+					if t.Job == types.ReminderWithAppLaunch {
+						<div class="action">would launch: <img src={ getImageFilePath(t.AppName, t.Icon) } alt=""/> { t.AppName }</div>
+					}
+				</div>
+				<div class="edit-and-alerts">
+					<div class="edit-button">
+						<img title="delete reminder" src="/assets/svg/delete.svg" alt="delete" hx-post={ "/removeTask/" + t.UUID.String() } hx-swap="none" hx-select-oob="#task-holder:outerHTML"/>
+						<img title="edit reminder" src="/assets/svg/edit.svg" alt="delete"/>
+					</div>
+					<div class="alerts">
+						<p class="start"><span class="label"><i>Starts at:</i></span> <span class="content">{ formatTimeToHumanReadable(t.Reminder.StartTime) }</span></p>
+						if time.Now().Before(t.Reminder.StartTime.Add(intToDuration(-t.Reminder.AlertTimesInMinutes[0]))) {
+							<p class="remind">
+								<span class="label"><i>reminder at:</i></span>
+								<span class="content">{ formatTimeToHumanReadable(t.Reminder.StartTime.Add(intToDuration(-t.Reminder.AlertTimesInMinutes[0]))) }</span>
+							</p>
+						}
+						if time.Now().Before(t.Reminder.StartTime.Add(intToDuration(-t.Reminder.AlertTimesInMinutes[1]))) {
+							<p class="remind">
+								<span class="label"><i>reminder at:</i></span>
+								<span class="content">{ formatTimeToHumanReadable(t.Reminder.StartTime.Add(intToDuration(-t.Reminder.AlertTimesInMinutes[1]))) }</span>
+							</p>
+						}
+					</div>
+				</div>
+			</div>
+		</li>
+	}
+}
+
+templ AppLimitTasks(tasks []types.Task) {
+	for _, t := range  tasks {
+		<li>
+			<div class="limit-tasks">
+				<div class="appInfo">
+					<img src={ getImageFilePath(t.AppName, t.Icon) } alt={ t.AppName }/>
+					<p>{ t.AppName }</p>
+				</div>
+				<div class="limitInfo">
+					<p class="shade">{ helperFuncs.UsageTimeInHrsMin(t.TaskTime.AppLimit.Limit) }</p>
+					<p hidden class="uuid">{ t.UUID.String() }</p>
+					<div style="display: flex; gap: 1rem;">
+						<img title="delete app limit" src="/assets/svg/delete.svg" alt="delete" hx-post={ "/removeTask/" + t.UUID.String() + "?taskType=AppLimit" } hx-swap="none" hx-select-oob="#task-holder:outerHTML"/>
+						<img title="edit app limit" src="/assets/svg/edit-white.svg" alt="edit"/>
+					</div>
+				</div>
+			</div>
+		</li>
+	}
+}
