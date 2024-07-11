@@ -1,14 +1,20 @@
 package helper
 
 import (
+	"fmt"
 	"io"
 	"log/slog"
 	"os"
 )
 
-func Logger(logFilePath string) (*slog.Logger, *os.File, error) {
+func Logger(logFileName string) (*slog.Logger, *os.File, error) {
 
-	logFile, err := os.Create(logFilePath)
+	configDir, err := ConfigDir()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	logFile, err := os.Create(fmt.Sprintf("%s/%s", configDir, logFileName))
 	if err != nil {
 		return nil, nil, err
 	}

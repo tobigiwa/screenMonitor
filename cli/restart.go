@@ -6,6 +6,9 @@ package cli
 import (
 	"LiScreMon/daemon"
 	"fmt"
+	"log"
+	"log/slog"
+	helperFuncs "pkg/helper"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -39,7 +42,17 @@ to quickly create a Cobra application.`,
 		}
 		fmt.Println("LiScreMon would be restarting now...")
 		time.Sleep(2 * time.Second) // allow for all resources to be released
-		daemon.DaemonServiceLinux()
+
+		// logging
+		logger, logFile, err := helperFuncs.Logger("daemon.log")
+		if err != nil {
+			log.Fatalln(err) // exit
+		}
+		defer logFile.Close()
+
+		slog.SetDefault(logger)
+
+		daemon.DaemonServiceLinux(logger)
 	},
 }
 

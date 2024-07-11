@@ -18,14 +18,8 @@ import (
 
 func main() {
 
-	// config directory
-	configDir, err := helperFuncs.ConfigDir()
-	if err != nil {
-		log.Fatalln(err) // exit
-	}
-
 	// logging
-	logger, logFile, err := helperFuncs.Logger(fmt.Sprintf("%s/webserver.log", configDir))
+	logger, logFile, err := helperFuncs.Logger("webserver.log")
 	if err != nil {
 		log.Fatalln(err) // exit
 	}

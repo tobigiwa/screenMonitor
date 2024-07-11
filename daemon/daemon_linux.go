@@ -2,7 +2,7 @@ package daemon
 
 import (
 	db "LiScreMon/daemon/internal/database"
-	monitoring "LiScreMon/daemon/internal/monitoring/linux"
+	monitoring "LiScreMon/daemon/internal/screen/linux"
 	"LiScreMon/daemon/internal/service"
 
 	"context"
@@ -19,22 +19,13 @@ import (
 	"github.com/BurntSushi/xgbutil/xevent"
 )
 
-func DaemonServiceLinux() {
+func DaemonServiceLinux(logger *slog.Logger) {
 
 	// config directory
 	configDir, err := helperFuncs.ConfigDir()
 	if err != nil {
 		log.Fatalln(err) // exit
 	}
-
-	// logging
-	logger, logFile, err := helperFuncs.Logger(fmt.Sprintf("%s/daemon.log", configDir))
-	if err != nil {
-		log.Fatalln(err) // exit
-	}
-
-	slog.SetDefault(logger)
-
 	// database
 	badgerDB, err := db.NewBadgerDb(configDir + "/badgerDB/")
 	if err != nil {
@@ -92,6 +83,5 @@ func DaemonServiceLinux() {
 
 	service.StopTaskManger() // a different goroutine for managing taskManager, fired from service
 	badgerDB.Close()
-	logFile.Close()
 	close(sig)
 }

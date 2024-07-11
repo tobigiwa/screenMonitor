@@ -2,7 +2,7 @@ package service
 
 import (
 	db "LiScreMon/daemon/internal/database"
-	monitoring "LiScreMon/daemon/internal/monitoring/linux"
+	monitoring "LiScreMon/daemon/internal/screen/linux"
 	"LiScreMon/daemon/internal/tasks"
 
 	"cmp"
