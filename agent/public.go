@@ -9,10 +9,13 @@ import (
 	"os"
 )
 
-func NewDeskTopApp(logger *slog.Logger) (*backend.App, error) {
+func DesktopAgent(logger *slog.Logger) (*backend.App, error) {
 	if err := createIndexHTML(); err != nil {
 		return nil, fmt.Errorf("error creating index.html needed for desktopApp: %v", err)
 	}
+	return backend.NewApp(logger)
+}
+func BrowserAgent(logger *slog.Logger) (*backend.App, error) {
 	return backend.NewApp(logger)
 }
 

@@ -29,7 +29,7 @@ func main() {
 
 	slog.SetDefault(logger)
 
-	aa, err := agent.NewDeskTopApp(logger)
+	aa, err := agent.DesktopAgent(logger)
 	if err != nil {
 		if strings.Contains(err.Error(), "connection refused") {
 			log.Fatalln("daemon service is not running", err)

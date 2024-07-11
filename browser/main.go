@@ -27,7 +27,7 @@ func main() {
 
 	slog.SetDefault(logger)
 
-	app, err := webserver.NewApp(logger)
+	app, err := webserver.BrowserAgent(logger)
 	if err != nil {
 		if strings.Contains(err.Error(), "connection refused") {
 			log.Fatalln("daemon service is not running", err)
