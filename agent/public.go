@@ -9,9 +9,6 @@ import (
 	"os"
 )
 
-//go:embed internal/frontend/*
-// var Assets embed.FS
-
 func NewDeskTopApp(logger *slog.Logger) (*backend.App, error) {
 	if err := createIndexHTML(); err != nil {
 		return nil, fmt.Errorf("error creating index.html needed for desktopApp: %v", err)
