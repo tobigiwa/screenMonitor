@@ -2,13 +2,14 @@ module desktop
 
 go 1.22.1
 
+require github.com/wailsapp/wails/v2 v2.9.1
+
 replace agent v0.0.0 => ../agent
 
 replace pkg v0.0.0 => ../pkg
 
 require (
 	agent v0.0.0
-	github.com/wailsapp/wails/v2 v2.9.1
 	pkg v0.0.0
 )
 
