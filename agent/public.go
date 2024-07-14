@@ -4,18 +4,23 @@ import (
 	"agent/internal/backend"
 	frontend "agent/internal/frontend/components"
 	"context"
+	"embed"
 	"fmt"
 	"log/slog"
 	"os"
 )
 
+//go:embed internal/frontend/*
+var FrontendDirForWailsDev embed.FS
+
+func BrowserAgent(logger *slog.Logger) (*backend.App, error) {
+	return backend.NewApp(logger)
+}
+
 func DesktopAgent(logger *slog.Logger) (*backend.App, error) {
 	if err := createIndexHTML(); err != nil {
 		return nil, fmt.Errorf("error creating index.html needed for desktopApp: %v", err)
 	}
-	return backend.NewApp(logger)
-}
-func BrowserAgent(logger *slog.Logger) (*backend.App, error) {
 	return backend.NewApp(logger)
 }
 

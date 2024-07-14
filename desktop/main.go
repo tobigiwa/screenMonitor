@@ -51,6 +51,7 @@ func main() {
 		Width:  1024,
 		Height: 768,
 		AssetServer: &assetserver.Options{
+			// Assets:  agent.FrontendDirForWailsDev,
 			Assets:  assets,
 			Handler: aa.Routes(),
 		},
