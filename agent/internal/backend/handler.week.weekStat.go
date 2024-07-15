@@ -93,6 +93,7 @@ func (a *App) WeekStatHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err = weekStatResponse(msg.WeekStatResponse).Render(context.TODO(), w); err != nil {
 		a.serverError(w, err)
+		return
 	}
 	lastRequestSaturday = msg.WeekStatResponse.Keys[6]
 }

@@ -58,19 +58,19 @@ templ chartControls() {
 	<div class="chart-controls">
 		<div class="left-controls">
 			<div class="select-month">
-				<select name="month" class="month" hx-get="/weekStat?week=month" hx-vals="js{month: this.value}" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">
+				<select name="month" class="month" hx-get="/weekStat?week=month" hx-include="[month='this.value']" hx-vals="js:{nonce: Math.random()}" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">
 					<option value="" id="placeholder" disabled selected>Last 3 Month</option>
 					for _, v := range monthDropDownSelectArray(3) {
 						<option class="option" value={ v }>{ v }</option>
 					}
 				</select>
 			</div>
-			<button class="left-controls__btn img backward-arrow" hx-get="/weekStat?week=backward" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">
+			<button class="left-controls__btn img backward-arrow" hx-get="/weekStat?week=backward" hx-vals="js:{nonce: Math.random()}" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">
 				<img class="chart__controls--img" src="assets/svg/angle-left-svgrepo-com.svg" alt=""/>
 			</button>
-			<button class="left-controls__btn text" hx-get="/weekStat?week=lastweek" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">Last Week</button>
-			<button class="left-controls__btn text" id="thisWeekButton" hx-get="/weekStat?week=thisweek" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">This Week</button>
-			<button class="left-controls__btn img forward-arrow" hx-get="/weekStat?week=forward" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">
+			<button class="left-controls__btn text" hx-get="/weekStat?week=lastweek" hx-vals="js:{nonce: Math.random()}" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">Last Week</button>
+			<button class="left-controls__btn text" id="thisWeekButton" hx-get="/weekStat?week=thisweek" hx-vals="js:{nonce: Math.random()}" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">This Week</button>
+			<button class="left-controls__btn img forward-arrow" hx-get="/weekStat?week=forward" hx-vals="js:{nonce: Math.random()}" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">
 				<img class="chart__controls--img" src="assets/svg/angle-right-svgrepo-com.svg" alt=""/>
 			</button>
 		</div>

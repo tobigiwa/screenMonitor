@@ -27,22 +27,22 @@ func main() {
 
 	slog.SetDefault(logger)
 
-	app, err := webserver.BrowserAgent(logger)
+	BrowserAgent, err := webserver.BrowserAgent(logger)
 	if err != nil {
 		if strings.Contains(err.Error(), "connection refused") {
 			log.Fatalln("daemon service is not running", err)
 		}
-		log.Fatalln("error creating app:", err)
+		log.Fatalln("error creating BrowserAgent:", err)
 	}
 
-	_, err = app.CheckDaemonService()
+	_, err = BrowserAgent.CheckDaemonService()
 	if err != nil {
 		log.Fatalln("error connecting to daemon service:", err)
 	}
 
 	server := &http.Server{
 		Addr:     ":8080",
-		Handler:  app.Routes(),
+		Handler:  BrowserAgent.Routes(),
 		ErrorLog: slog.NewLogLogger(logger.Handler(), slog.LevelError),
 	}
 
@@ -59,7 +59,7 @@ func main() {
 	<-done
 	close(done)
 
-	if err := app.CloseDaemonConnection(); err != nil {
+	if err := BrowserAgent.CloseDaemonConnection(); err != nil {
 		fmt.Println("error closing socket connection with daemon, error:", err)
 	}
 
