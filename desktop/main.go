@@ -29,7 +29,7 @@ func main() {
 
 	slog.SetDefault(logger)
 
-	aa, err := agent.DesktopAgent(logger)
+	desktopAgent, err := agent.DesktopAgent(logger)
 	if err != nil {
 		if strings.Contains(err.Error(), "connection refused") {
 			log.Fatalln("daemon service is not running", err)
@@ -37,7 +37,7 @@ func main() {
 		log.Fatalln("error creating app:", err)
 	}
 
-	_, err = aa.CheckDaemonService()
+	_, err = desktopAgent.CheckDaemonService()
 	if err != nil {
 		log.Fatalln("error connecting to daemon service:", err)
 	}
@@ -51,9 +51,8 @@ func main() {
 		Width:  1024,
 		Height: 768,
 		AssetServer: &assetserver.Options{
-			// Assets:  agent.FrontendDirForWailsDev,
 			Assets:  assets,
-			Handler: aa.Routes(),
+			Handler: desktopAgent.Routes(),
 		},
 		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
 		OnStartup:        app.startup,

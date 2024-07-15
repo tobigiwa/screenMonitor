@@ -24,6 +24,5 @@ func Logger(logFileName string) (*slog.Logger, *os.File, error) {
 	}
 
 	jsonLogger := slog.NewTextHandler(io.MultiWriter(logFile, os.Stdout), &opts)
-
 	return slog.New(jsonLogger), logFile, nil
 }

@@ -61,6 +61,7 @@ func (a *App) AppStatHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err = appStatResponse(msg.AppStatResponse).Render(context.TODO(), w); err != nil {
 		a.serverError(w, fmt.Errorf("templ reander error:%w", err))
+		return
 	}
 }
 
