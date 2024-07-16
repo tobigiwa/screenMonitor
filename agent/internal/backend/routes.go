@@ -1,15 +1,19 @@
 package backend
 
-import "net/http"
+import (
+	views "agent/internal/frontend"
+	"io/fs"
+	"net/http"
+	"runtime"
+)
 
 func (a *App) Routes() *http.ServeMux {
 	mux := http.NewServeMux()
 
-	tmp := http.FileServer(http.Dir("/tmp/"))
-	mux.Handle("/tmp/", http.StripPrefix("/tmp", tmp))
+	var staticFiles = fs.FS(views.AssetDir)
+	staticFs, _ := fs.Sub(staticFiles, "assets")
 
-	fs := http.FileServer(http.Dir("../agent/internal/frontend/assets"))
-	mux.Handle("/assets/", http.StripPrefix("/assets", fs))
+	mux.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.FS(staticFs))))
 
 	// screentimePage
 	mux.HandleFunc("GET /screentime", a.IndexPageHandler)
@@ -25,6 +29,14 @@ func (a *App) Routes() *http.ServeMux {
 	mux.HandleFunc("POST /newReminder", a.newReminderHandler)
 	mux.HandleFunc("POST /newAppLimit", a.newAppLimitHandler)
 	mux.HandleFunc("POST /removeTask/{uuid}", a.removeTask)
+
+	switch runtime.GOOS {
+	case "linux":
+		mux.Handle("/tmp/", http.StripPrefix("/tmp/", http.FileServer(http.Dir("/tmp/"))))
+	case "windows":
+	case "darwin":
+	default:
+	}
 
 	return mux
 }

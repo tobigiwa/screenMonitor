@@ -3,8 +3,10 @@ package main
 import (
 	"context"
 	"embed"
+	"fmt"
 	"log"
 	"log/slog"
+	"os"
 	"strings"
 
 	"agent"
@@ -16,7 +18,7 @@ import (
 )
 
 //go:embed frontend/*
-var assets embed.FS
+var assetDir embed.FS
 
 func main() {
 
@@ -28,6 +30,10 @@ func main() {
 	defer logFile.Close()
 
 	slog.SetDefault(logger)
+
+	if err := createIndexHTML(); err != nil {
+		log.Fatalln("ensure compilation is in the project root dir:", err)
+	}
 
 	desktopAgent, err := agent.DesktopAgent(logger)
 	if err != nil {
@@ -51,7 +57,7 @@ func main() {
 		Width:  1024,
 		Height: 768,
 		AssetServer: &assetserver.Options{
-			Assets:  assets,
+			Assets:  assetDir,
 			Handler: desktopAgent.Routes(),
 		},
 		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
@@ -78,4 +84,25 @@ func NewApp() *App {
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+}
+
+func createIndexHTML() error {
+
+	projectDir, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+
+	indexHTMLfilepath := fmt.Sprintf("%s/frontend/index.html", projectDir)
+
+	file, err := os.Create(indexHTMLfilepath)
+	if err != nil {
+		return err
+	}
+
+	if err = agent.IndexPage().Render(context.TODO(), file); err != nil {
+		return fmt.Errorf("could not generate index.html: %v", err)
+	}
+
+	return nil
 }
