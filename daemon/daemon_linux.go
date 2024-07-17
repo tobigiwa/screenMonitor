@@ -4,9 +4,9 @@ import (
 	db "LiScreMon/daemon/internal/database"
 	monitoring "LiScreMon/daemon/internal/screen/linux"
 	"LiScreMon/daemon/internal/service"
+	"path/filepath"
 
 	"context"
-	"fmt"
 	"log"
 	"log/slog"
 	"os"
@@ -15,9 +15,40 @@ import (
 	"time"
 
 	helperFuncs "pkg/helper"
+	"pkg/types"
 
 	"github.com/BurntSushi/xgbutil/xevent"
 )
+
+func init() {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		log.Fatalln("error at init fn:", err) // exit
+	}
+
+	configDir := filepath.Join(homeDir, "liScreMon")
+	logDir := filepath.Join(configDir, "logs")
+
+	for _, dir := range [2]string{configDir, logDir} {
+		if err = os.MkdirAll(dir, 0755); err != nil {
+			log.Fatalln("error at init fn:", err) // exit
+		}
+	}
+
+	jsonConfigFile := filepath.Join(configDir, "config.json")
+	file, err := os.Create(jsonConfigFile)
+	if err != nil {
+		log.Fatalln("error at init fn:", err) // exit
+	}
+
+	byteData, err := helperFuncs.EncodeJSON(types.ConfigFile{Name: "LiScreMon", Description: "Linux Screen Monitoring", Version: "1.0.0"})
+	if err != nil {
+		log.Fatalln("error at init fn:", err) // exit
+	}
+
+	file.Write(byteData)
+	file.Close()
+}
 
 func DaemonServiceLinux(logger *slog.Logger) {
 
@@ -27,7 +58,7 @@ func DaemonServiceLinux(logger *slog.Logger) {
 		log.Fatalln(err) // exit
 	}
 	// database
-	badgerDB, err := db.NewBadgerDb(configDir + "/badgerDB/")
+	badgerDB, err := db.NewBadgerDb(filepath.Join(configDir, "badgerDB"))
 	if err != nil {
 		log.Fatalln(err) // exit
 	}
@@ -42,7 +73,7 @@ func DaemonServiceLinux(logger *slog.Logger) {
 	}
 
 	go func() {
-		if err := service.StartService(fmt.Sprintf("%s/socket/", configDir), badgerDB); err != nil {
+		if err := service.StartService(filepath.Join(configDir, "socket"), badgerDB); err != nil {
 			log.Println("error starting service", err)
 			sig <- syscall.SIGTERM // if service.StartService fails, send a signal to close the program
 		}

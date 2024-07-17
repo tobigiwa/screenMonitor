@@ -182,3 +182,10 @@ type AppLimit struct {
 	Today          Date    `json:"today"`
 	IsLimitReached bool    `json:"isLimitReached"`
 }
+
+type ConfigFile struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Version     string `json:"version"`
+	BrowserAddr string `json:"browserAddr"`
+}

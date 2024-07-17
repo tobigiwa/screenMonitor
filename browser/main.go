@@ -4,6 +4,7 @@ import (
 	webserver "agent"
 	"net"
 	helperFuncs "pkg/helper"
+	"pkg/types"
 	"runtime"
 	"time"
 
@@ -69,6 +70,8 @@ func main() {
 
 	url := fmt.Sprintf("http://127.0.0.1:%d/screentime", port)
 
+	_ = writeURLtoJSONConfigFile(url)
+
 	go func() {
 		fmt.Printf("Server is running on %s\n", url)
 		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
@@ -131,4 +134,29 @@ func openURLInBrowser(url string) *exec.Cmd {
 
 	args = append(args, url)
 	return exec.Command(cmd, args...)
+}
+
+func writeURLtoJSONConfigFile(url string) error {
+	configFile, err := helperFuncs.JSONConfigFile()
+	if err != nil {
+		return err
+	}
+
+	byteData, err := os.ReadFile(configFile)
+	if err != nil {
+		return err
+	}
+
+	config, err := helperFuncs.DecodeJSON[types.ConfigFile](byteData)
+	if err != nil {
+		return err
+	}
+
+	config.BrowserAddr = url
+
+	if byteData, err = helperFuncs.EncodeJSON(config); err != nil {
+		return err
+	}
+
+	return os.WriteFile(configFile, byteData, 0644)
 }

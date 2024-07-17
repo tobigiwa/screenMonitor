@@ -28,7 +28,7 @@ const baseTpl = `
 
 	goecharts_{{ .ChartID | safeJS }}.on('click', function (params) {
 		const thatDay = goecharts_{{ .ChartID | safeJS }}.getOption().legend[0].data[params.dataIndex]
-		htmx.ajax('GET', '/dayStat?day=' + thatDay, {target:'#echart', swap:'innerHTML'})
+		htmx.ajax('GET','/dayStat?day=' + thatDay + '&nonce=' + Math.random(), {target:'#echart', swap:'innerHTML'})
 	});
 	
 </script>`

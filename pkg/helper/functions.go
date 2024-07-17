@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"path/filepath"
 	"pkg/types"
 	"strings"
 	"time"
@@ -189,15 +190,19 @@ func ConfigDir() (string, error) {
 		return "", err
 	}
 
-	configDir := homeDir + "/liScreMon"
+	configDir := filepath.Join(homeDir, "liScreMon")
 
-	if err := os.MkdirAll(configDir, 0755); err != nil {
-		return "", err
-	}
-
-	types.AppLogoFilePath = configDir + "/liscremon.jpeg"
+	types.AppLogoFilePath = filepath.Join(configDir, "liscremon.jpeg")
 
 	return configDir, nil
+}
+
+func JSONConfigFile() (string, error) {
+	configDir, err := ConfigDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(configDir, "config.json"), nil
 }
 
 func NotifyWithBeep(title, subtitle string) {

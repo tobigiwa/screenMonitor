@@ -8,6 +8,7 @@ import (
 	"io"
 	"net"
 	"os"
+	"path/filepath"
 	helperFuncs "pkg/helper"
 	"pkg/types"
 	"syscall"
@@ -53,7 +54,7 @@ func domainSocket(socketDir string) (*net.UnixListener, error) {
 		return nil, fmt.Errorf("error creating socket dir:%w", err)
 	}
 
-	socketFilePath := socketDir + "daemon.sock"
+	socketFilePath := filepath.Join(socketDir, "daemon.sock")
 
 	syscall.Unlink(socketFilePath)
 

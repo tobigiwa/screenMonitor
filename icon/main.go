@@ -2,10 +2,23 @@ package main
 
 import (
 	"fmt"
+	"go/build"
+	"log"
+	"os"
+	"os/exec"
+	"path/filepath"
+	helperFuncs "pkg/helper"
+	"pkg/types"
+	"runtime"
+	"strings"
 	"time"
 
 	"fyne.io/systray"
 	"fyne.io/systray/example/icon"
+)
+
+var (
+	broswerProcess *os.Process
 )
 
 func main() {
@@ -31,77 +44,118 @@ func addQuitItem() {
 
 func onReady() {
 	systray.SetTemplateIcon(icon.Data, icon.Data)
-	systray.SetTitle("Awesome App")
-	systray.SetTooltip("Lantern")
+	systray.SetTitle("LiScreMon")
+	systray.SetTooltip("Linux Screen Monitor")
 	addQuitItem()
 
 	// We can manipulate the systray in other goroutines
 	go func() {
 		systray.SetTemplateIcon(icon.Data, icon.Data)
-		systray.SetTitle("Awesome App")
-		systray.SetTooltip("Pretty awesome棒棒嗒")
-		// trayOpenedCount := 0
-		// mOpenedCount := systray.AddMenuItem("Tray opened count", "Tray opened count")
-		mChange := systray.AddMenuItem("Change Me", "Change Me")
-		mChecked := systray.AddMenuItemCheckbox("Checked", "Check Me", true)
-		mEnabled := systray.AddMenuItem("Enabled", "Enabled")
-		// Sets the icon of a menu item. Only available on Mac.
-		mEnabled.SetTemplateIcon(icon.Data, icon.Data)
+		systray.SetTitle("LiScreMon")
+		systray.SetTooltip("Linux Screen Monitor")
 
-		systray.AddMenuItem("Ignored", "Ignored")
+		launchBrowser := systray.AddMenuItem("Launch browser view", "Launch browser view")
+		launchBrowserSubOne := launchBrowser.AddSubMenuItem("View in browser", "")
+		launchBrowserSubTwo := launchBrowser.AddSubMenuItem("Close browser view", "")
+		launchBrowserSubTwo.Disable()
 
-		subMenuTop := systray.AddMenuItem("SubMenuTop", "SubMenu Test (top)")
-		subMenuMiddle := subMenuTop.AddSubMenuItem("SubMenuMiddle", "SubMenu Test (middle)")
-		subMenuBottom := subMenuMiddle.AddSubMenuItemCheckbox("SubMenuBottom - Toggle Panic!", "SubMenu Test (bottom) - Hide/Show Panic!", false)
-		subMenuMiddle.AddSeparator()
-		subMenuBottom2 := subMenuMiddle.AddSubMenuItem("SubMenuBottom - Panic!", "SubMenu Test (bottom)")
-
-		systray.AddSeparator()
-		mToggle := systray.AddMenuItem("Toggle", "Toggle some menu items")
-		shown := true
-		toggle := func() {
-			if shown {
-				subMenuBottom.Check()
-				subMenuBottom2.Hide()
-				mEnabled.Hide()
-				shown = false
-			} else {
-				subMenuBottom.Uncheck()
-				subMenuBottom2.Show()
-				mEnabled.Show()
-				shown = true
-			}
-		}
-		mReset := systray.AddMenuItem("Reset", "Reset all items")
+		launchDesktop := systray.AddMenuItem("Launch desktop view", "Launch desktop view")
 
 		for {
 			select {
-			case <-mChange.ClickedCh:
-				mChange.SetTitle("I've Changed")
-			case <-mChecked.ClickedCh:
-				if mChecked.Checked() {
-					mChecked.Uncheck()
-					mChecked.SetTitle("Unchecked")
+			case <-launchBrowserSubOne.ClickedCh:
+				if strings.Contains(launchBrowser.String(), "running 🟢") {
+					jumpToBrowserView()
 				} else {
-					mChecked.Check()
-					mChecked.SetTitle("Checked")
+					launchBrowserView()
+					launchBrowserSubTwo.Enable()
+					launchBrowser.SetTitle("Browser view: running 🟢")
 				}
-			case <-mEnabled.ClickedCh:
-				mEnabled.SetTitle("Disabled")
-				mEnabled.Disable()
-			case <-subMenuBottom2.ClickedCh:
-				panic("panic button pressed")
-			case <-subMenuBottom.ClickedCh:
-				toggle()
-			case <-mReset.ClickedCh:
-				systray.ResetMenu()
-				addQuitItem()
-			case <-mToggle.ClickedCh:
-				toggle()
-				// case <-systray.TrayOpenedCh:
-				// 	trayOpenedCount++
-				// 	mOpenedCount.SetTitle(fmt.Sprintf("Tray opened count: %d", trayOpenedCount))
+
+			case <-launchBrowserSubTwo.ClickedCh:
+				broswerProcess.Signal(os.Interrupt)
+				broswerProcess.Release()
+				launchBrowserSubTwo.Disable()
+				launchBrowser.SetTitle("Launch browser view")
+
+			case <-launchDesktop.ClickedCh:
+				if launchDesktop.Checked() {
+					launchDesktop.Uncheck()
+					launchDesktop.SetTitle("Unchecked")
+				} else {
+					launchDesktop.Check()
+					launchDesktop.SetTitle("Checked")
+				}
+
 			}
 		}
 	}()
 }
+
+func jumpToBrowserView() {
+	path, err := helperFuncs.JSONConfigFile()
+	if err != nil {
+		helperFuncs.NotifyWithBeep("Operation failed", "Could not launch LiScreMon broswer view.")
+		fmt.Println(err)
+		return
+	}
+	byteData, err := os.ReadFile(path)
+	if err != nil {
+		helperFuncs.NotifyWithBeep("Operation failed", "Could not launch LiScreMon broswer view.")
+		fmt.Println(err)
+		return
+	}
+	config, err := helperFuncs.DecodeJSON[types.ConfigFile](byteData)
+	if err != nil {
+		helperFuncs.NotifyWithBeep("Operation failed", "Could not launch LiScreMon broswer view.")
+		fmt.Println(err)
+		return
+	}
+
+	portAddres := config.BrowserAddr
+
+	if runtime.GOOS == "linux" {
+		cmd := exec.Command("xdg-open", portAddres)
+		if err := cmd.Start(); err != nil {
+			helperFuncs.NotifyWithBeep("Operation failed", "Could not launch LiScreMon broswer view.")
+			fmt.Println(err)
+			return
+		}
+
+		cmd.Wait()
+	}
+
+	if runtime.GOOS == "windows" {
+		notImplemented()
+	}
+}
+
+func launchBrowserView() {
+	var (
+		gopath string
+		cmd    *exec.Cmd
+	)
+
+	if gopath = build.Default.GOPATH; gopath == "" {
+		if gopath = os.Getenv("GOPATH"); gopath == "" {
+			log.Fatalln("cannot build program, unable to determine GOPATH")
+		}
+	}
+
+	if runtime.GOOS == "linux" {
+		gopathBin := filepath.Join(gopath, "bin", "browser")
+		cmd = exec.Command(gopathBin)
+	}
+
+	if runtime.GOOS == "windows" {
+		notImplemented()
+	}
+
+	if err := cmd.Start(); err != nil {
+		fmt.Println(err)
+	}
+
+	broswerProcess = cmd.Process
+}
+
+func notImplemented() {}
