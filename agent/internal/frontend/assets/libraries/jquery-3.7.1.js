@@ -4952,7 +4952,7 @@ jQuery.event = {
 
 		// Handle multiple events separated by a space
 		types = ( types || "" ).match( rnothtmlwhite ) || [ "" ];
-		t = types.length;
+		t = utils.length;
 		while ( t-- ) {
 			tmp = rtypenamespace.exec( types[ t ] ) || [];
 			type = origType = tmp[ 1 ];
@@ -5034,7 +5034,7 @@ jQuery.event = {
 
 		// Once for each type.namespace in types; type may be omitted
 		types = ( types || "" ).match( rnothtmlwhite ) || [ "" ];
-		t = types.length;
+		t = utils.length;
 		while ( t-- ) {
 			tmp = rtypenamespace.exec( types[ t ] ) || [];
 			type = origType = tmp[ 1 ];
@@ -5740,11 +5740,11 @@ jQuery.fn.extend( {
 	},
 	off: function( types, selector, fn ) {
 		var handleObj, type;
-		if ( types && types.preventDefault && types.handleObj ) {
+		if ( types && utils.preventDefault && utils.handleObj ) {
 
 			// ( event )  dispatched jQuery.Event
-			handleObj = types.handleObj;
-			jQuery( types.delegateTarget ).off(
+			handleObj = utils.handleObj;
+			jQuery( utils.delegateTarget ).off(
 				handleObj.namespace ?
 					handleObj.origType + "." + handleObj.namespace :
 					handleObj.origType,

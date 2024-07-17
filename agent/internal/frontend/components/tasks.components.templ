@@ -1,12 +1,11 @@
 package frontend
 
 import (
-	helperFuncs "pkg/helper"
-	"pkg/types"
 	"time"
+	utils "utils"
 )
 
-templ ReminderTasks(tasks []types.Task) {
+templ ReminderTasks(tasks []utils.Task) {
 	for _, t := range tasks {
 		<li>
 			<div class="remainder-tasks">
@@ -17,7 +16,7 @@ templ ReminderTasks(tasks []types.Task) {
 						<summary><span class="label"><i>See attached note</i></span></summary>
 						<p>{ t.UI.Notes }</p>
 					</details>
-					if t.Job == types.ReminderWithAppLaunch {
+					if t.Job == utils.ReminderWithAppLaunch {
 						<div class="action">would launch: <img src={ getImageFilePath(t.AppName, t.Icon) } alt=""/> { t.AppName }</div>
 					}
 				</div>
@@ -47,7 +46,7 @@ templ ReminderTasks(tasks []types.Task) {
 	}
 }
 
-templ AppLimitTasks(tasks []types.Task) {
+templ AppLimitTasks(tasks []utils.Task) {
 	for _, t := range  tasks {
 		<li>
 			<div class="limit-tasks">
@@ -56,7 +55,7 @@ templ AppLimitTasks(tasks []types.Task) {
 					<p>{ t.AppName }</p>
 				</div>
 				<div class="limitInfo">
-					<p class="shade">{ helperFuncs.UsageTimeInHrsMin(t.TaskTime.AppLimit.Limit) }</p>
+					<p class="shade">{ utils.UsageTimeInHrsMin(t.TaskTime.AppLimit.Limit) }</p>
 					<p hidden class="uuid">{ t.UUID.String() }</p>
 					<div style="display: flex; gap: 1rem;">
 						<img title="delete app limit" src="/assets/svg/delete.svg" alt="delete" hx-post={ "/removeTask/" + t.UUID.String() + "?taskType=AppLimit" } hx-swap="none" hx-select-oob="#task-holder:outerHTML"/>

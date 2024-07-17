@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"agent"
-	helperFuncs "pkg/helper"
+	utils "utils"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -23,7 +23,7 @@ var assetDir embed.FS
 func main() {
 
 	// logging
-	logger, logFile, err := helperFuncs.Logger("desktop.log")
+	logger, logFile, err := utils.Logger("desktop.log")
 	if err != nil {
 		log.Fatalln(err) // exit
 	}

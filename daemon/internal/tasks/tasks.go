@@ -4,35 +4,35 @@ import (
 	monitoring "LiScreMon/daemon/internal/screen/linux"
 	"fmt"
 	"os/exec"
-	"pkg/types"
+
 	"reflect"
 	"time"
 
-	helperFuncs "pkg/helper"
+	utils "utils"
 
 	"github.com/go-co-op/gocron/v2"
 	"github.com/google/uuid"
 )
 
 type TaskManagerDbRequirement interface {
-	GetTaskByAppName(appName string) ([]types.Task, error)
-	GetAllTask() ([]types.Task, error)
+	GetTaskByAppName(appName string) ([]utils.Task, error)
+	GetAllTask() ([]utils.Task, error)
 	RemoveTask(id uuid.UUID) error
-	AddTask(task types.Task) error
+	AddTask(task utils.Task) error
 	GetAppTodayActiveStatSoFar(appName string) (float64, error)
 }
 
 type TaskManager struct {
 	dbHandle TaskManagerDbRequirement
 	gocron   gocron.Scheduler
-	channel  chan types.Task
+	channel  chan utils.Task
 }
 
 func newTaskManger(dbHandle TaskManagerDbRequirement) *TaskManager {
 	var tm TaskManager
 	tm.dbHandle = dbHandle
 	tm.gocron, _ = gocron.NewScheduler()
-	tm.channel = make(chan types.Task)
+	tm.channel = make(chan utils.Task)
 	return &tm
 }
 
@@ -41,17 +41,17 @@ func (tm *TaskManager) CloseChan() error {
 		fmt.Println("error shutting down gocron Scheduler:", err)
 		return err
 	}
-	tm.channel <- types.Task{}
+	tm.channel <- utils.Task{}
 	return nil
 }
 
-func (tm *TaskManager) SendTaskToTaskManager(task types.Task) error {
+func (tm *TaskManager) SendTaskToTaskManager(task utils.Task) error {
 	if err := tm.dbHandle.AddTask(task); err != nil {
 		return fmt.Errorf("error adding task to db: %w", err)
 	}
 
 	if reflect.ValueOf(task).IsZero() {
-		return types.ErrZeroValueTask
+		return utils.ErrZeroValueTask
 	}
 
 	tm.channel <- task
@@ -64,7 +64,7 @@ func StartTaskManger(dbHandle TaskManagerDbRequirement) (*TaskManager, error) {
 
 	tasks, err := tm.dbHandle.GetAllTask()
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", types.ErrTaskMangerNotStarted.Error(), err)
+		return nil, fmt.Errorf("%s: %w", utils.ErrTaskMangerNotStarted.Error(), err)
 	}
 
 	go tm.disperseTask()
@@ -72,21 +72,21 @@ func StartTaskManger(dbHandle TaskManagerDbRequirement) (*TaskManager, error) {
 	for _, task := range tasks {
 
 		switch {
-		case task.Job != types.DailyAppLimit: // i.e reminders
+		case task.Job != utils.DailyAppLimit: // i.e reminders
 			if task.Reminder.StartTime.Before(time.Now()) { // this is a double-check, the reminder should have been removed when done
 				if err := tm.dbHandle.RemoveTask(task.UUID); err != nil {
-					return nil, fmt.Errorf("%s %+v :err %w", types.ErrDeletingTask.Error(), task, err)
+					return nil, fmt.Errorf("%s %+v :err %w", utils.ErrDeletingTask.Error(), task, err)
 				}
 			}
 
-		case task.Job == types.DailyAppLimit: // this is a double-check, the oneTime app limit should have been removed when done
-			if task.AppLimit.OneTime && task.AppLimit.Today != helperFuncs.Today() { // whether it reached limit or not,for a new day, the limit does not matter again, hence why it is a dailyLimit.
+		case task.Job == utils.DailyAppLimit: // this is a double-check, the oneTime app limit should have been removed when done
+			if task.AppLimit.OneTime && task.AppLimit.Today != utils.Today() { // whether it reached limit or not,for a new day, the limit does not matter again, hence why it is a dailyLimit.
 				if err := tm.dbHandle.RemoveTask(task.UUID); err != nil {
-					return nil, fmt.Errorf("%s: %+v :%w", types.ErrDeletingTask.Error(), task, err)
+					return nil, fmt.Errorf("%s: %+v :%w", utils.ErrDeletingTask.Error(), task, err)
 				}
 			}
 
-			if task.AppLimit.IsLimitReached && task.AppLimit.Today == helperFuncs.Today() {
+			if task.AppLimit.IsLimitReached && task.AppLimit.Today == utils.Today() {
 				// limit has been reached...and limit was reached that very day
 				continue
 			}
@@ -114,13 +114,13 @@ func (tm *TaskManager) disperseTask() {
 		fmt.Printf("task received   %+v\n\n", task)
 
 		switch task.Job {
-		case types.ReminderWithNoAppLaunch:
+		case utils.ReminderWithNoAppLaunch:
 			tm.reminderWithNoAppLaunch(task)
 
-		case types.ReminderWithAppLaunch:
+		case utils.ReminderWithAppLaunch:
 			tm.reminderWithAppLaunch(task)
 
-		case types.DailyAppLimit:
+		case utils.DailyAppLimit:
 			timeSofar, _ := tm.dbHandle.GetAppTodayActiveStatSoFar(task.AppName)
 			monitoring.AddNewLimit(task, timeSofar)
 		}
@@ -129,7 +129,7 @@ func (tm *TaskManager) disperseTask() {
 
 }
 
-func (tm *TaskManager) reminderWithNoAppLaunch(task types.Task) {
+func (tm *TaskManager) reminderWithNoAppLaunch(task utils.Task) {
 
 	tm.preNotify(task)
 
@@ -149,7 +149,7 @@ func (tm *TaskManager) reminderWithNoAppLaunch(task types.Task) {
 
 }
 
-func (tm *TaskManager) reminderWithAppLaunch(task types.Task) {
+func (tm *TaskManager) reminderWithAppLaunch(task utils.Task) {
 	tm.preNotify(task)
 
 	tm.gocron.NewJob(
@@ -177,7 +177,7 @@ func (tm *TaskManager) reminderWithAppLaunch(task types.Task) {
 	)
 }
 
-func (tm *TaskManager) preNotify(task types.Task) {
+func (tm *TaskManager) preNotify(task utils.Task) {
 
 	for i := 0; i < 2; i++ {
 		var t time.Time
@@ -200,22 +200,22 @@ func preNotifyAlert(taskTitle string, durationbeforeTask int, withSound bool) {
 	title := fmt.Sprintf("%d minutes to your task", durationbeforeTask)
 
 	if withSound {
-		helperFuncs.NotifyWithBeep(title, taskTitle)
+		utils.NotifyWithBeep(title, taskTitle)
 		return
 	}
 
-	helperFuncs.NotifyWithoutBeep(title, taskTitle)
+	utils.NotifyWithoutBeep(title, taskTitle)
 }
 
-func reminderAlert(task types.UItextInfo, withSound bool) {
+func reminderAlert(task utils.UItextInfo, withSound bool) {
 	title := fmt.Sprintf("Task: %s", task.Title)
 
 	if withSound {
-		helperFuncs.NotifyWithBeep(title, task.Subtitle)
+		utils.NotifyWithBeep(title, task.Subtitle)
 		return
 	}
 
-	helperFuncs.NotifyWithoutBeep(title, task.Subtitle)
+	utils.NotifyWithoutBeep(title, task.Subtitle)
 }
 
 func (tm *TaskManager) RemoveTask(taskUUID uuid.UUID) {

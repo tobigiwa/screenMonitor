@@ -1,7 +1,7 @@
 package chart
 
 import (
-	"pkg/types"
+	"utils"
 
 	"github.com/go-echarts/go-echarts/v2/opts"
 )
@@ -50,8 +50,8 @@ const pieChartOptions = `{
 	}`
 
 type PieChartData struct {
-	PieData  []types.AppStat
-	DayTotal types.Stats
+	PieData  []utils.AppStat
+	DayTotal utils.Stats
 	Date     string
 }
 

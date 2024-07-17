@@ -3,10 +3,10 @@ package main
 import (
 	webserver "agent"
 	"net"
-	helperFuncs "pkg/helper"
-	"pkg/types"
+
 	"runtime"
 	"time"
+	"utils"
 
 	"context"
 	"errors"
@@ -24,7 +24,7 @@ import (
 func main() {
 
 	// logging
-	logger, logFile, err := helperFuncs.Logger("webserver.log")
+	logger, logFile, err := utils.Logger("webserver.log")
 	if err != nil {
 		log.Fatalln(err) // exit
 	}
@@ -137,7 +137,7 @@ func openURLInBrowser(url string) *exec.Cmd {
 }
 
 func writeURLtoJSONConfigFile(url string) error {
-	configFile, err := helperFuncs.JSONConfigFile()
+	configFile, err := utils.JSONConfigFile()
 	if err != nil {
 		return err
 	}
@@ -147,14 +147,14 @@ func writeURLtoJSONConfigFile(url string) error {
 		return err
 	}
 
-	config, err := helperFuncs.DecodeJSON[types.ConfigFile](byteData)
+	config, err := utils.DecodeJSON[utils.ConfigFile](byteData)
 	if err != nil {
 		return err
 	}
 
 	config.BrowserAddr = url
 
-	if byteData, err = helperFuncs.EncodeJSON(config); err != nil {
+	if byteData, err = utils.EncodeJSON(config); err != nil {
 		return err
 	}
 

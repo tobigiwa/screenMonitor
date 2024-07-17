@@ -3,8 +3,8 @@ package database
 import (
 	"errors"
 	"fmt"
-	helperFuncs "pkg/helper"
-	"pkg/types"
+
+	utils "utils"
 
 	"slices"
 
@@ -12,7 +12,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (bs *BadgerDBStore) getAllTasks() ([]types.Task, error) {
+func (bs *BadgerDBStore) getAllTasks() ([]utils.Task, error) {
 	byteData, err := bs.Get(dbTaskKey)
 
 	if err != nil {
@@ -28,16 +28,16 @@ func (bs *BadgerDBStore) getAllTasks() ([]types.Task, error) {
 	}
 
 	if len(byteData) == 0 {
-		return []types.Task{}, nil
+		return []utils.Task{}, nil
 	}
-	return helperFuncs.DecodeJSON[[]types.Task](byteData)
+	return utils.DecodeJSON[[]utils.Task](byteData)
 }
 
-func (bs *BadgerDBStore) GetAllTask() ([]types.Task, error) {
+func (bs *BadgerDBStore) GetAllTask() ([]utils.Task, error) {
 	return bs.GetTaskByAppName("all")
 }
 
-func (bs *BadgerDBStore) GetTaskByAppName(appName string) ([]types.Task, error) {
+func (bs *BadgerDBStore) GetTaskByAppName(appName string) ([]utils.Task, error) {
 	if appName == "" {
 		return nil, errors.New("appName is empty")
 	}
@@ -52,7 +52,7 @@ func (bs *BadgerDBStore) GetTaskByAppName(appName string) ([]types.Task, error) 
 		return taskArry, nil
 	}
 
-	requestedTaskArr := make([]types.Task, 0, len(taskArry))
+	requestedTaskArr := make([]utils.Task, 0, len(taskArry))
 	for i := 0; i < len(taskArry); i++ {
 		if taskArry[i].AppName == appName {
 			requestedTaskArr = append(requestedTaskArr, taskArry[i])
@@ -61,12 +61,12 @@ func (bs *BadgerDBStore) GetTaskByAppName(appName string) ([]types.Task, error) 
 	return slices.Clip(requestedTaskArr), nil
 }
 
-func (bs *BadgerDBStore) GetTaskByUUID(taskID uuid.UUID) (types.Task, error) {
+func (bs *BadgerDBStore) GetTaskByUUID(taskID uuid.UUID) (utils.Task, error) {
 
 	taskArry, err := bs.getAllTasks()
 	if err != nil {
 		fmt.Println("error came from here:", err)
-		return types.Task{}, err
+		return utils.Task{}, err
 	}
 
 	for _, task := range taskArry {
@@ -75,10 +75,10 @@ func (bs *BadgerDBStore) GetTaskByUUID(taskID uuid.UUID) (types.Task, error) {
 		}
 	}
 
-	return types.Task{}, errors.New("task does not exist")
+	return utils.Task{}, errors.New("task does not exist")
 }
 
-func (bs *BadgerDBStore) AddTask(task types.Task) error {
+func (bs *BadgerDBStore) AddTask(task utils.Task) error {
 	taskArry, err := bs.getAllTasks()
 	if err != nil {
 		return err
@@ -86,22 +86,22 @@ func (bs *BadgerDBStore) AddTask(task types.Task) error {
 
 	if bs.checkIfLimitAppExist(task, taskArry) {
 		fmt.Println("this happened")
-		return types.ErrLimitAppExist
+		return utils.ErrLimitAppExist
 	}
 
 	taskArry = append(taskArry, task)
 
-	byteData, err := helperFuncs.EncodeJSON(taskArry)
+	byteData, err := utils.EncodeJSON(taskArry)
 	if err != nil {
 		return err
 	}
 	return bs.setOrUpdateKeyValue(dbTaskKey, byteData)
 }
 
-func (bs BadgerDBStore) checkIfLimitAppExist(task types.Task, tasks []types.Task) bool {
+func (bs BadgerDBStore) checkIfLimitAppExist(task utils.Task, tasks []utils.Task) bool {
 
 	for i := 0; i < len(tasks); i++ {
-		if tasks[i].Job == types.DailyAppLimit {
+		if tasks[i].Job == utils.DailyAppLimit {
 			if tasks[i].AppName == task.AppName {
 				return true
 			}
@@ -115,11 +115,11 @@ func (bs *BadgerDBStore) RemoveTask(id uuid.UUID) error {
 	if err != nil {
 		return err
 	}
-	newTaskArray := slices.DeleteFunc(taskArray, func(s types.Task) bool {
+	newTaskArray := slices.DeleteFunc(taskArray, func(s utils.Task) bool {
 		return s.UUID == id
 	})
 
-	byteData, err := helperFuncs.EncodeJSON(newTaskArray)
+	byteData, err := utils.EncodeJSON(newTaskArray)
 	if err != nil {
 		return err
 	}
@@ -134,14 +134,14 @@ func (bs *BadgerDBStore) UpdateAppLimitStatus(taskID uuid.UUID) error {
 
 	for i := 0; i < len(taskArry); i++ {
 		if task := taskArry[i]; task.UUID == taskID {
-			task.AppLimit.Today = helperFuncs.Today()
+			task.AppLimit.Today = utils.Today()
 			task.AppLimit.IsLimitReached = true
 			taskArry[i] = task
 			break
 		}
 	}
 
-	byteData, err := helperFuncs.EncodeJSON(taskArry)
+	byteData, err := utils.EncodeJSON(taskArry)
 	if err != nil {
 		return err
 	}

@@ -2,10 +2,9 @@ package frontend
 
 import (
 	"html/template"
-	helperFuncs "pkg/helper"
-	"pkg/types"
 	"reflect"
 	"strings"
+	utils "utils"
 )
 
 templ IndexPage() {
@@ -33,13 +32,13 @@ templ IndexPage() {
 templ screentimeTimePage() {
 	<div class="main">
 		@header()
-		@chartWrapper("", types.NoAppIconCategoryAndCmdLine)
+		@chartWrapper("", utils.NoAppIconCategoryAndCmdLine)
 		@chartControls()
 		@chartHighlight(nil, 0, nil, "")
 	</div>
 }
 
-templ chartWrapper(chart template.HTML, info types.AppIconCategoryAndCmdLine) {
+templ chartWrapper(chart template.HTML, info utils.AppIconCategoryAndCmdLine) {
 	<div class="chart-wrapper">
 		<div id="echart" hx-swap-oob="true">
 			@templ.Raw(chart)
@@ -87,7 +86,7 @@ templ chartControls() {
 	</div>
 }
 
-templ chartHighlight(appDetails []types.ApplicationDetail, totalWeekUsage float64, allCategory []types.Category, anyDay string) {
+templ chartHighlight(appDetails []utils.ApplicationDetail, totalWeekUsage float64, allCategory []utils.Category, anyDay string) {
 	<div class="chart-highlight" id="highlight" hx-swap-obb="true">
 		<ul>
 			for _, app := range appDetails {
@@ -103,16 +102,16 @@ templ chartHighlight(appDetails []types.ApplicationDetail, totalWeekUsage float6
 						if app.AppInfo.IsCategorySet && app.AppInfo.Category.String() != "" {
 							<button disabled class="category" style="color:white;">{ app.AppInfo.Category.String() }</button>
 						} else {
-							if helperFuncs.IsInCurrentWeekDate(types.Date(anyDay)) {
+							if utils.IsInCurrentWeekDate(utils.Date(anyDay)) {
 								<button class="category" onclick="openCategoryDialog(event)">Selct application catergory</button>
 								@setCategoryDialog(allCategory)
 							}
 						}
 					</div>
-					if percentageUse := helperFuncs.PercentagesString(app.Usage, totalWeekUsage); percentageUse == "NaN" {
+					if percentageUse := utils.PercentagesString(app.Usage, totalWeekUsage); percentageUse == "NaN" {
 						<div class="appStat" style="font-style:italic;">0% of weeks usage</div>
 					} else {
-						<div class="appStat" style="font-style:italic;">{ percentageUse } of weeks usage: { helperFuncs.UsageTimeInHrsMin(app.Usage) }</div>
+						<div class="appStat" style="font-style:italic;">{ percentageUse } of weeks usage: { utils.UsageTimeInHrsMin(app.Usage) }</div>
 					}
 				</li>
 			}
@@ -153,7 +152,7 @@ templ chartHighlight(appDetails []types.ApplicationDetail, totalWeekUsage float6
 	</div>
 }
 
-templ setCategoryDialog(allCategory []types.Category) {
+templ setCategoryDialog(allCategory []utils.Category) {
 	<dialog class="select-category" id="categoryDialog">
 		<form method="post" action="/setCategory">
 			<div class="head">

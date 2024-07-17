@@ -6,11 +6,11 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"pkg/types"
+
 	"strings"
 	"time"
 
-	helperFuncs "pkg/helper"
+	utils "utils"
 
 	views "agent/internal/frontend/components"
 
@@ -24,63 +24,63 @@ func (a *App) WeekStatHandler(w http.ResponseWriter, r *http.Request) {
 	endpoint := strings.TrimPrefix(r.URL.Path, "/")
 
 	var (
-		msg types.Message
+		msg utils.Message
 		err error
 	)
 
 	switch query {
 	case "thisweek":
-		msg = types.Message{
+		msg = utils.Message{
 			Endpoint:        endpoint,
-			WeekStatRequest: helperFuncs.SaturdayOfTheWeek(time.Now()),
+			WeekStatRequest: utils.SaturdayOfTheWeek(time.Now()),
 		}
 
 	case "lastweek":
-		msg = types.Message{
+		msg = utils.Message{
 			Endpoint:        endpoint,
-			WeekStatRequest: helperFuncs.ReturnLastWeekSaturday(time.Now()),
+			WeekStatRequest: utils.ReturnLastWeekSaturday(time.Now()),
 		}
 
 	case "month":
-		var firstSaturdayOfTheMonth types.Date
+		var firstSaturdayOfTheMonth utils.Date
 		var q string
 		if q = r.URL.Query().Get("month"); q == "" {
 			a.clientError(w, http.StatusBadRequest, errors.New("query param:month: cannot be empty"))
 			return
 		}
-		if firstSaturdayOfTheMonth = helperFuncs.FirstSaturdayOfTheMonth(q); firstSaturdayOfTheMonth == "" {
+		if firstSaturdayOfTheMonth = utils.FirstSaturdayOfTheMonth(q); firstSaturdayOfTheMonth == "" {
 			a.clientError(w, http.StatusBadRequest, errors.New("query param:month: invalid data"))
 			return
 		}
-		msg = types.Message{
+		msg = utils.Message{
 			Endpoint:        endpoint,
 			WeekStatRequest: firstSaturdayOfTheMonth,
 		}
 
 	case "backward", "forward":
 		var t time.Time
-		if t, err = time.Parse(types.TimeFormat, lastRequestSaturday); err != nil {
+		if t, err = time.Parse(utils.TimeFormat, lastRequestSaturday); err != nil {
 			a.clientError(w, http.StatusBadRequest, errors.New("header value 'lastSaturday' invalide"))
 			return
 		}
 
 		if query == "backward" {
-			msg = types.Message{
+			msg = utils.Message{
 				Endpoint:        endpoint,
-				WeekStatRequest: helperFuncs.ReturnLastWeekSaturday(t),
+				WeekStatRequest: utils.ReturnLastWeekSaturday(t),
 			}
 		}
 
 		if query == "forward" {
-			msg = types.Message{
+			msg = utils.Message{
 				Endpoint:        endpoint,
-				WeekStatRequest: helperFuncs.ReturnNexWeektSaturday(t),
+				WeekStatRequest: utils.ReturnNexWeektSaturday(t),
 			}
 
-			if helperFuncs.IsFutureDate(t) {
-				msg = types.Message{
+			if utils.IsFutureDate(t) {
+				msg = utils.Message{
 					Endpoint:        endpoint,
-					WeekStatRequest: helperFuncs.SaturdayOfTheWeek(time.Now()), // show current week
+					WeekStatRequest: utils.SaturdayOfTheWeek(time.Now()), // show current week
 				}
 			}
 		}
@@ -98,7 +98,7 @@ func (a *App) WeekStatHandler(w http.ResponseWriter, r *http.Request) {
 	lastRequestSaturday = msg.WeekStatResponse.Keys[6]
 }
 
-func weekStatResponse(w types.WeekStatMessage) templ.Component {
+func weekStatResponse(w utils.WeekStatMessage) templ.Component {
 	return views.WeekStatTempl(
 		chart.WeekStatBarChart(chart.BarChartData{
 			XAxis:       w.FormattedDay[:],

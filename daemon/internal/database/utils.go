@@ -6,11 +6,12 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"pkg/types"
+
 	"runtime"
 	"slices"
 	"strings"
 	"time"
+	"utils"
 )
 
 func IsFutureWeek(t time.Time) bool {
@@ -39,15 +40,14 @@ func IsPastWeek(t time.Time) bool {
 	return inputWeek < currentWeek
 }
 
-func daysInThatWeek(w time.Time) [7]types.Date {
-	var arr [7]types.Date
+func daysInThatWeek(w time.Time) [7]utils.Date {
+	var arr [7]utils.Date
 	startOftheWeek := w.AddDate(0, 0, -int(w.Weekday()))
 	for i := 0; i < 7; i++ {
-		arr[i] = types.Date(fmt.Sprint(startOftheWeek.AddDate(0, 0, i).Format(types.TimeFormat)))
+		arr[i] = utils.Date(fmt.Sprint(startOftheWeek.AddDate(0, 0, i).Format(utils.TimeFormat)))
 	}
 	return arr
 }
-
 
 func getDesktopCategoryAndCmd(appName string) (dotDesktopFileInfo, error) {
 	var r dotDesktopFileInfo

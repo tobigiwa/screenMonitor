@@ -7,11 +7,11 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	helperFuncs "pkg/helper"
-	"pkg/types"
+
 	"runtime"
 	"strings"
 	"time"
+	"utils"
 
 	"fyne.io/systray"
 	"fyne.io/systray/example/icon"
@@ -79,13 +79,6 @@ func onReady() {
 				launchBrowser.SetTitle("Launch browser view")
 
 			case <-launchDesktop.ClickedCh:
-				if launchDesktop.Checked() {
-					launchDesktop.Uncheck()
-					launchDesktop.SetTitle("Unchecked")
-				} else {
-					launchDesktop.Check()
-					launchDesktop.SetTitle("Checked")
-				}
 
 			}
 		}
@@ -93,21 +86,21 @@ func onReady() {
 }
 
 func jumpToBrowserView() {
-	path, err := helperFuncs.JSONConfigFile()
+	path, err := utils.JSONConfigFile()
 	if err != nil {
-		helperFuncs.NotifyWithBeep("Operation failed", "Could not launch LiScreMon broswer view.")
+		utils.NotifyWithBeep("Operation failed", "Could not launch LiScreMon broswer view.")
 		fmt.Println(err)
 		return
 	}
 	byteData, err := os.ReadFile(path)
 	if err != nil {
-		helperFuncs.NotifyWithBeep("Operation failed", "Could not launch LiScreMon broswer view.")
+		utils.NotifyWithBeep("Operation failed", "Could not launch LiScreMon broswer view.")
 		fmt.Println(err)
 		return
 	}
-	config, err := helperFuncs.DecodeJSON[types.ConfigFile](byteData)
+	config, err := utils.DecodeJSON[utils.ConfigFile](byteData)
 	if err != nil {
-		helperFuncs.NotifyWithBeep("Operation failed", "Could not launch LiScreMon broswer view.")
+		utils.NotifyWithBeep("Operation failed", "Could not launch LiScreMon broswer view.")
 		fmt.Println(err)
 		return
 	}
@@ -117,7 +110,7 @@ func jumpToBrowserView() {
 	if runtime.GOOS == "linux" {
 		cmd := exec.Command("xdg-open", portAddres)
 		if err := cmd.Start(); err != nil {
-			helperFuncs.NotifyWithBeep("Operation failed", "Could not launch LiScreMon broswer view.")
+			utils.NotifyWithBeep("Operation failed", "Could not launch LiScreMon broswer view.")
 			fmt.Println(err)
 			return
 		}

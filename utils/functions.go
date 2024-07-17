@@ -1,4 +1,4 @@
-package helper
+package utils
 
 import (
 	"encoding/json"
@@ -6,7 +6,6 @@ import (
 	"math"
 	"os"
 	"path/filepath"
-	"pkg/types"
 	"strings"
 	"time"
 
@@ -16,7 +15,7 @@ import (
 func EncodeJSON[T any](tyPe T) ([]byte, error) {
 	encoded, err := json.Marshal(tyPe)
 	if err != nil {
-		return nil, fmt.Errorf("%v:%w", err, types.ErrSerialization)
+		return nil, fmt.Errorf("%v:%w", err, ErrSerialization)
 	}
 	return encoded, nil
 }
@@ -25,7 +24,7 @@ func DecodeJSON[T any](data []byte) (T, error) {
 	var result T
 	err := json.Unmarshal(data, &result)
 	if err != nil {
-		return result, fmt.Errorf("%v:%w", err, types.ErrDeserialization)
+		return result, fmt.Errorf("%v:%w", err, ErrDeserialization)
 	}
 	return result, nil
 }
@@ -52,20 +51,20 @@ func AddOrdinalSuffix(n int) string {
 	}
 }
 
-func ParseKey(key types.Date) (time.Time, error) {
-	return time.Parse(types.TimeFormat, string(key))
+func ParseKey(key Date) (time.Time, error) {
+	return time.Parse(TimeFormat, string(key))
 }
-func Today() types.Date {
-	return types.Date(time.Now().Format(types.TimeFormat))
+func Today() Date {
+	return Date(time.Now().Format(TimeFormat))
 }
-func FormattedDay(date types.Date) string {
+func FormattedDay(date Date) string {
 	day, _ := ParseKey(date)
 	dayWithSuffix := AddOrdinalSuffix(day.Day())
 	weekDay := strings.TrimSuffix(day.Weekday().String(), "day")
 	return fmt.Sprintf("%v. %v", weekDay, dayWithSuffix)
 }
 
-func MonthAndYear(date types.Date) (month, year string) {
+func MonthAndYear(date Date) (month, year string) {
 	day, _ := ParseKey(date)
 	y, mon, _ := day.Date()
 	month, year = mon.String(), fmt.Sprint(y)
@@ -84,12 +83,12 @@ func PercentagesString(part, total float64) string {
 	return fmt.Sprintf("%.0f%%", p)
 }
 
-func SaturdayOfTheWeek(t time.Time) types.Date {
+func SaturdayOfTheWeek(t time.Time) Date {
 	daysUntilSaturday := 6 - int(t.Weekday())
-	return types.Date(t.AddDate(0, 0, daysUntilSaturday).Format(types.TimeFormat))
+	return Date(t.AddDate(0, 0, daysUntilSaturday).Format(TimeFormat))
 }
 
-func FirstSaturdayOfTheMonth(month string) types.Date {
+func FirstSaturdayOfTheMonth(month string) Date {
 	t, err := time.Parse("January", month)
 	if err != nil {
 		return ""
@@ -99,7 +98,7 @@ func FirstSaturdayOfTheMonth(month string) types.Date {
 
 	for {
 		if firstDayOfMonth.Weekday() == time.Saturday {
-			return types.Date(firstDayOfMonth.Format(types.TimeFormat))
+			return Date(firstDayOfMonth.Format(TimeFormat))
 		}
 		firstDayOfMonth = firstDayOfMonth.AddDate(0, 0, 1)
 	}
@@ -121,17 +120,17 @@ func LastSaturdayOfTheMonth(month string) string {
 			break
 		}
 	}
-	return s.Format(types.TimeFormat)
+	return s.Format(TimeFormat)
 }
 
-func ReturnLastWeekSaturday(t time.Time) types.Date {
+func ReturnLastWeekSaturday(t time.Time) Date {
 
 	if t.Weekday() == time.Saturday {
-		return types.Date(t.AddDate(0, 0, -7).Format(types.TimeFormat))
+		return Date(t.AddDate(0, 0, -7).Format(TimeFormat))
 	}
 
 	daysSinceSaturday := int(t.Weekday()+1) % 7
-	return types.Date(t.AddDate(0, 0, -daysSinceSaturday).Format(types.TimeFormat))
+	return Date(t.AddDate(0, 0, -daysSinceSaturday).Format(TimeFormat))
 }
 
 func IsFutureDate(t time.Time) bool {
@@ -140,16 +139,16 @@ func IsFutureDate(t time.Time) bool {
 	return nextWeekDay.After(today)
 }
 
-func ReturnNexWeektSaturday(saturday time.Time) types.Date {
-	return types.Date(saturday.AddDate(0, 0, 7).Format(types.TimeFormat))
+func ReturnNexWeektSaturday(saturday time.Time) Date {
+	return Date(saturday.AddDate(0, 0, 7).Format(TimeFormat))
 }
 
 func FormattedToDay() time.Time {
-	t, _ := ParseKey(types.Date(time.Now().Format(types.TimeFormat)))
+	t, _ := ParseKey(Date(time.Now().Format(TimeFormat)))
 	return t
 }
 
-func AllTheDaysInMonth(year, month string) ([]types.Date, error) {
+func AllTheDaysInMonth(year, month string) ([]Date, error) {
 	t, err := time.Parse("2006 January", year+" "+month)
 	if err != nil {
 		return nil, fmt.Errorf("parse %w", err)
@@ -158,17 +157,17 @@ func AllTheDaysInMonth(year, month string) ([]types.Date, error) {
 	fmt.Println(t.Day(), t.Month(), t.Year())
 	lastDayOfTheGivenMonth := time.Date(t.Year(), t.Month()+1, 0, 0, 0, 0, 0, t.Location()).Day()
 
-	dates := make([]types.Date, 0, lastDayOfTheGivenMonth)
+	dates := make([]Date, 0, lastDayOfTheGivenMonth)
 
 	for day := 1; day <= lastDayOfTheGivenMonth; day++ {
-		dates = append(dates, types.Date(time.Date(t.Year(), t.Month(), day, 0, 0, 0, 0, t.Location()).Format(types.TimeFormat)))
+		dates = append(dates, Date(time.Date(t.Year(), t.Month(), day, 0, 0, 0, 0, t.Location()).Format(TimeFormat)))
 	}
 
 	return dates, nil
 }
 
 func ValidDateType(s string) bool {
-	return types.DateTypeRegexPattern.MatchString(s)
+	return DateTypeRegexPattern.MatchString(s)
 }
 
 func IsInCurrentWeekTime(t time.Time) bool {
@@ -179,7 +178,7 @@ func IsInCurrentWeekTime(t time.Time) bool {
 	return currentWeek == tWeek && now.Year() == t.Year()
 }
 
-func IsInCurrentWeekDate(d types.Date) bool {
+func IsInCurrentWeekDate(d Date) bool {
 	// t, _ := d.ToTime()
 	return SaturdayOfTheWeek(time.Now()) == d
 }
@@ -192,7 +191,7 @@ func ConfigDir() (string, error) {
 
 	configDir := filepath.Join(homeDir, "liScreMon")
 
-	types.AppLogoFilePath = filepath.Join(configDir, "liscremon.jpeg")
+	AppLogoFilePath = filepath.Join(configDir, "liscremon.jpeg")
 
 	return configDir, nil
 }
@@ -206,8 +205,8 @@ func JSONConfigFile() (string, error) {
 }
 
 func NotifyWithBeep(title, subtitle string) {
-	beeep.Alert(title, subtitle, types.AppLogoFilePath)
+	beeep.Alert(title, subtitle, AppLogoFilePath)
 }
 func NotifyWithoutBeep(title, subtitle string) {
-	beeep.Notify(title, subtitle, types.AppLogoFilePath)
+	beeep.Notify(title, subtitle, AppLogoFilePath)
 }

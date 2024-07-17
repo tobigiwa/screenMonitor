@@ -4,11 +4,11 @@ go 1.22.1
 
 replace agent v0.0.0 => ../agent
 
-replace pkg v0.0.0 => ../pkg
+replace utils v0.0.0 => ../utils
 
 require (
 	agent v0.0.0
-	pkg v0.0.0
+	utils v0.0.0
 )
 
 require (

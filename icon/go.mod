@@ -2,11 +2,11 @@ module appIcon
 
 go 1.22.1
 
-replace pkg v0.0.0 => ../pkg
+replace utils v0.0.0 => ../utils
 
 require (
 	fyne.io/systray v1.11.0
-	pkg v0.0.0
+	utils v0.0.0
 )
 
 require (

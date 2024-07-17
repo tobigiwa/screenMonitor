@@ -2,13 +2,13 @@ module agent
 
 go 1.22.1
 
-replace pkg v0.0.0 => ../pkg
+replace utils v0.0.0 => ../utils
 
 require (
 	github.com/a-h/templ v0.2.747
 	github.com/go-echarts/go-echarts/v2 v2.4.0-rc2
 	github.com/google/uuid v1.6.0
-	pkg v0.0.0
+	utils v0.0.0
 )
 
 require (

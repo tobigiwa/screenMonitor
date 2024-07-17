@@ -2,15 +2,15 @@ package database
 
 import (
 	"errors"
-	helperFuncs "pkg/helper"
-	"pkg/types"
+
 	"slices"
+	utils "utils"
 
 	badger "github.com/dgraph-io/badger/v4"
 )
 
-func (bs *BadgerDBStore) GetAppIconCategoryAndCmdLine(appNames []string) ([]types.AppIconCategoryAndCmdLine, error) {
-	result := make([]types.AppIconCategoryAndCmdLine, len(appNames))
+func (bs *BadgerDBStore) GetAppIconCategoryAndCmdLine(appNames []string) ([]utils.AppIconCategoryAndCmdLine, error) {
+	result := make([]utils.AppIconCategoryAndCmdLine, len(appNames))
 	bs.db.View(func(txn *badger.Txn) error {
 
 		for i := 0; i < len(appNames); i++ {
@@ -18,17 +18,17 @@ func (bs *BadgerDBStore) GetAppIconCategoryAndCmdLine(appNames []string) ([]type
 			appName := appNames[i]
 			item, err := txn.Get(dbAppKey(appName))
 			if err != nil {
-				result[i] = types.AppIconCategoryAndCmdLine{AppName: appName}
+				result[i] = utils.AppIconCategoryAndCmdLine{AppName: appName}
 				continue
 			}
 			byteData, err := item.ValueCopy(nil)
 			if err != nil {
-				result[i] = types.AppIconCategoryAndCmdLine{AppName: appName}
+				result[i] = utils.AppIconCategoryAndCmdLine{AppName: appName}
 				continue
 			}
-			app, err := helperFuncs.DecodeJSON[AppInfo](byteData)
+			app, err := utils.DecodeJSON[AppInfo](byteData)
 			if err != nil {
-				result[i] = types.AppIconCategoryAndCmdLine{AppName: appName}
+				result[i] = utils.AppIconCategoryAndCmdLine{AppName: appName}
 				continue
 			}
 
@@ -41,40 +41,40 @@ func (bs *BadgerDBStore) GetAppIconCategoryAndCmdLine(appNames []string) ([]type
 	return result, nil
 }
 
-func (bs *BadgerDBStore) AppWeeklyStat(appName string, anyDayInTheWeek types.Date) (types.AppRangeStat, error) {
-	date, _ := helperFuncs.ParseKey(anyDayInTheWeek)
+func (bs *BadgerDBStore) AppWeeklyStat(appName string, anyDayInTheWeek utils.Date) (utils.AppRangeStat, error) {
+	date, _ := utils.ParseKey(anyDayInTheWeek)
 	days := daysInThatWeek(date)
 	return bs.appRangeStat(appName, days[:])
 }
 
-func (bs *BadgerDBStore) AppMonthlyStat(appName, month, year string) (types.AppRangeStat, error) {
-	dates, err := helperFuncs.AllTheDaysInMonth(year, month)
+func (bs *BadgerDBStore) AppMonthlyStat(appName, month, year string) (utils.AppRangeStat, error) {
+	dates, err := utils.AllTheDaysInMonth(year, month)
 	if err != nil {
-		return types.AppRangeStat{}, err
+		return utils.AppRangeStat{}, err
 	}
 	return bs.appRangeStat(appName, dates)
 }
 
-func (bs *BadgerDBStore) AppDateRangeStat(appName string, start, end types.Date) (types.AppRangeStat, error) {
-	startDate, _ := helperFuncs.ParseKey(start)
-	endDate, _ := helperFuncs.ParseKey(end)
+func (bs *BadgerDBStore) AppDateRangeStat(appName string, start, end utils.Date) (utils.AppRangeStat, error) {
+	startDate, _ := utils.ParseKey(start)
+	endDate, _ := utils.ParseKey(end)
 
 	if !endDate.After(startDate) {
-		return types.AppRangeStat{}, errors.New("end date is not after start date")
+		return utils.AppRangeStat{}, errors.New("end date is not after start date")
 	}
 
-	dates := make([]types.Date, 0, 31)
+	dates := make([]utils.Date, 0, 31)
 	for d := startDate; !d.After(endDate); d = d.AddDate(0, 0, 1) {
-		dates = append(dates, types.Date(d.Format(types.TimeFormat)))
+		dates = append(dates, utils.Date(d.Format(utils.TimeFormat)))
 	}
 
 	return bs.appRangeStat(appName, slices.Clip(dates))
 }
 
-func (bs *BadgerDBStore) appRangeStat(appName string, dateRange []types.Date) (types.AppRangeStat, error) {
+func (bs *BadgerDBStore) appRangeStat(appName string, dateRange []utils.Date) (utils.AppRangeStat, error) {
 
 	var (
-		result types.AppRangeStat
+		result utils.AppRangeStat
 		app    AppInfo
 		err    error
 	)
@@ -89,20 +89,20 @@ func (bs *BadgerDBStore) appRangeStat(appName string, dateRange []types.Date) (t
 			return err
 		}
 
-		app, err = helperFuncs.DecodeJSON[AppInfo](byteData)
+		app, err = utils.DecodeJSON[AppInfo](byteData)
 		if err != nil {
 			return err
 		}
 		return nil
 	}); err != nil {
-		return types.AppRangeStat{}, err
+		return utils.AppRangeStat{}, err
 	}
 
-	var stat types.Stats
-	arr := make([]types.GenericKeyValue[types.Date, types.Stats], len(dateRange))
+	var stat utils.Stats
+	arr := make([]utils.GenericKeyValue[utils.Date, utils.Stats], len(dateRange))
 	for i := 0; i < len(dateRange); i++ {
 		dayStat := app.ScreenStat[dateRange[i]]
-		arr[i] = types.GenericKeyValue[types.Date, types.Stats]{Key: dateRange[i], Value: dayStat}
+		arr[i] = utils.GenericKeyValue[utils.Date, utils.Stats]{Key: dateRange[i], Value: dayStat}
 		stat.Active += dayStat.Active
 		stat.Inactive += dayStat.Inactive
 		stat.Open += dayStat.Open
@@ -117,26 +117,26 @@ func (bs *BadgerDBStore) appRangeStat(appName string, dateRange []types.Date) (t
 	return result, nil
 }
 
-func (bs *BadgerDBStore) SetAppCategory(appName string, category types.Category) error {
+func (bs *BadgerDBStore) SetAppCategory(appName string, category utils.Category) error {
 	byteData, err := bs.Get(dbAppKey(appName))
 	if err != nil {
 		return err
 	}
-	appInfo, err := helperFuncs.DecodeJSON[AppInfo](byteData)
+	appInfo, err := utils.DecodeJSON[AppInfo](byteData)
 	if err != nil {
 		return err
 	}
 	appInfo.Category = category
 	appInfo.IsCategorySet = true
 
-	byteData, err = helperFuncs.EncodeJSON(appInfo)
+	byteData, err = utils.EncodeJSON(appInfo)
 	if err != nil {
 		return err
 	}
 
 	return bs.setOrUpdateKeyValue(dbAppKey(appName), byteData)
 }
-func (bs *BadgerDBStore) GetAllACategories() ([]types.Category, error) {
+func (bs *BadgerDBStore) GetAllACategories() ([]utils.Category, error) {
 	byteData, err := bs.Get(dbCategoryKey)
 
 	if err != nil {
@@ -144,7 +144,7 @@ func (bs *BadgerDBStore) GetAllACategories() ([]types.Category, error) {
 			return nil, err
 		}
 
-		byteData, err := helperFuncs.EncodeJSON(types.DefalutCategory)
+		byteData, err := utils.EncodeJSON(utils.DefalutCategory)
 		if err != nil {
 			return nil, err
 		}
@@ -153,14 +153,14 @@ func (bs *BadgerDBStore) GetAllACategories() ([]types.Category, error) {
 			return nil, err
 		}
 
-		return types.DefalutCategory, nil
+		return utils.DefalutCategory, nil
 	}
 
-	return helperFuncs.DecodeJSON[[]types.Category](byteData)
+	return utils.DecodeJSON[[]utils.Category](byteData)
 }
 
-func (bs *BadgerDBStore) GetAllApp() ([]types.AppIconCategoryAndCmdLine, error) {
-	res := make([]types.AppIconCategoryAndCmdLine, 0, 30)
+func (bs *BadgerDBStore) GetAllApp() ([]utils.AppIconCategoryAndCmdLine, error) {
+	res := make([]utils.AppIconCategoryAndCmdLine, 0, 30)
 
 	err := bs.db.View(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
@@ -177,7 +177,7 @@ func (bs *BadgerDBStore) GetAllApp() ([]types.AppIconCategoryAndCmdLine, error) 
 					err error
 				)
 
-				if app, err = helperFuncs.DecodeJSON[AppInfo](val); err != nil {
+				if app, err = utils.DecodeJSON[AppInfo](val); err != nil {
 					return err
 				}
 
@@ -209,7 +209,7 @@ func (bs *BadgerDBStore) GetAppByName(appName string) (AppInfo, error) {
 	if err != nil {
 		return AppInfo{}, err
 	}
-	return helperFuncs.DecodeJSON[AppInfo](byteData)
+	return utils.DecodeJSON[AppInfo](byteData)
 }
 
 func (bs *BadgerDBStore) GetAppTodayActiveStatSoFar(appName string) (float64, error) {
@@ -217,16 +217,16 @@ func (bs *BadgerDBStore) GetAppTodayActiveStatSoFar(appName string) (float64, er
 	if err != nil {
 		return 0, err
 	}
-	return appInfo.ScreenStat[helperFuncs.Today()].Active, nil
+	return appInfo.ScreenStat[utils.Today()].Active, nil
 }
 
-func (bs *BadgerDBStore) GetAllAppWithCmdLine() ([]types.AppIconCategoryAndCmdLine, error) {
+func (bs *BadgerDBStore) GetAllAppWithCmdLine() ([]utils.AppIconCategoryAndCmdLine, error) {
 	r, err := bs.GetAllApp()
 	if err != nil {
 		return nil, err
 	}
 
-	r = slices.DeleteFunc(r, func(i types.AppIconCategoryAndCmdLine) bool {
+	r = slices.DeleteFunc(r, func(i utils.AppIconCategoryAndCmdLine) bool {
 		return !i.IsCmdLineSet
 	})
 	return r, nil

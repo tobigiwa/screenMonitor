@@ -14,8 +14,7 @@ import (
 	"syscall"
 	"time"
 
-	helperFuncs "pkg/helper"
-	"pkg/types"
+	"utils"
 
 	"github.com/BurntSushi/xgbutil/xevent"
 )
@@ -41,7 +40,7 @@ func init() {
 		log.Fatalln("error at init fn:", err) // exit
 	}
 
-	byteData, err := helperFuncs.EncodeJSON(types.ConfigFile{Name: "LiScreMon", Description: "Linux Screen Monitoring", Version: "1.0.0"})
+	byteData, err := utils.EncodeJSON(utils.ConfigFile{Name: "LiScreMon", Description: "Linux Screen Monitoring", Version: "1.0.0"})
 	if err != nil {
 		log.Fatalln("error at init fn:", err) // exit
 	}
@@ -53,7 +52,7 @@ func init() {
 func DaemonServiceLinux(logger *slog.Logger) {
 
 	// config directory
-	configDir, err := helperFuncs.ConfigDir()
+	configDir, err := utils.ConfigDir()
 	if err != nil {
 		log.Fatalln(err) // exit
 	}

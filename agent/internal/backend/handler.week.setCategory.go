@@ -3,7 +3,8 @@ package backend
 import (
 	"fmt"
 	"net/http"
-	"pkg/types"
+	"utils"
+
 	"strings"
 )
 
@@ -11,11 +12,11 @@ func (a *App) SetCategory(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	val := r.Form.Get("category")
 	appName := r.Form.Get("appName")
-	category := types.Category(val)
+	category := utils.Category(val)
 
-	msg := types.Message{
+	msg := utils.Message{
 		Endpoint: strings.TrimPrefix(r.URL.Path, "/"),
-		SetCategoryRequest: types.SetCategoryRequest{
+		SetCategoryRequest: utils.SetCategoryRequest{
 			AppName:  appName,
 			Category: category,
 		},

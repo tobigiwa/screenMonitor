@@ -7,7 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"pkg/types"
+	"utils"
+
 	"strings"
 
 	"github.com/a-h/templ"
@@ -25,7 +26,7 @@ func (a *App) AppStatHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var (
-		msg types.Message
+		msg utils.Message
 		err error
 	)
 
@@ -40,7 +41,7 @@ func (a *App) AppStatHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		msg.AppStatRequest.StatRange = queryRange
-		msg.AppStatRequest.Start = types.Date(start)
+		msg.AppStatRequest.Start = utils.Date(start)
 	case "month":
 		msg.AppStatRequest.StatRange = queryRange
 		msg.AppStatRequest.Month = ""
@@ -65,7 +66,7 @@ func (a *App) AppStatHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func appStatResponse(w types.AppStatMessage) templ.Component {
+func appStatResponse(w utils.AppStatMessage) templ.Component {
 	return views.AppStatTempl(
 		chart.AppStatBarChart(
 			chart.BarChartData{

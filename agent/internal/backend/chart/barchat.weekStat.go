@@ -3,7 +3,7 @@ package chart
 import (
 	"fmt"
 	"html/template"
-	helperFuncs "pkg/helper"
+	utils "utils"
 
 	"github.com/go-echarts/go-echarts/v2/charts"
 	"github.com/go-echarts/go-echarts/v2/opts"
@@ -31,7 +31,7 @@ func WeekStatBarChart(data BarChartData) template.HTML {
 				FontSize:   20,
 				FontFamily: "system-ui",
 			},
-			Subtitle: fmt.Sprintf("from %s - %s %s. Total Uptime of %s", data.XAxis[0], data.XAxis[6], data.Month, helperFuncs.UsageTimeInHrsMin(data.TotalUptime)),
+			Subtitle: fmt.Sprintf("from %s - %s %s. Total Uptime of %s", data.XAxis[0], data.XAxis[6], data.Month, utils.UsageTimeInHrsMin(data.TotalUptime)),
 			SubtitleStyle: &opts.TextStyle{
 				Color:      "black",
 				FontWeight: "bold",

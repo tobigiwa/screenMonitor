@@ -11,10 +11,10 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.8.0
-	pkg v0.0.0
+	utils v0.0.0
 )
 
-replace pkg v0.0.0 => ./pkg
+replace utils v0.0.0 => ./utils
 
 require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect

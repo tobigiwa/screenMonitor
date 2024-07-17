@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"log"
 	"log/slog"
-	helperFuncs "pkg/helper"
 	"time"
+	utils "utils"
 
 	"github.com/spf13/cobra"
 )
@@ -44,7 +44,7 @@ to quickly create a Cobra application.`,
 		time.Sleep(2 * time.Second) // allow for all resources to be released
 
 		// logging
-		logger, logFile, err := helperFuncs.Logger("daemon.log")
+		logger, logFile, err := utils.Logger("daemon.log")
 		if err != nil {
 			log.Fatalln(err) // exit
 		}
