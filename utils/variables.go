@@ -20,11 +20,7 @@ var (
 	NoMessage                   = Message{}
 	NoAppIconCategoryAndCmdLine = AppIconCategoryAndCmdLine{}
 	InvalidDateType             = Date("")
-)
-
-var (
 	DateTypeRegexPattern = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`)
-	AppLogoFilePath      string
 )
 
 const (

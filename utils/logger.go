@@ -9,10 +9,7 @@ import (
 
 func Logger(logFileName string) (*slog.Logger, *os.File, error) {
 
-	configDir, err := ConfigDir()
-	if err != nil {
-		return nil, nil, err
-	}
+	configDir := APP_CONFIG_DIR
 
 	logFile, err := os.Create(filepath.Join(configDir, "logs", logFileName))
 	if err != nil {

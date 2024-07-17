@@ -79,6 +79,9 @@ func onReady() {
 				launchBrowser.SetTitle("Launch browser view")
 
 			case <-launchDesktop.ClickedCh:
+				if launcDesktopView() != nil {
+					utils.NotifyWithBeep("Operation failed", "Could not launch LiScreMon desktop app.")
+				}
 
 			}
 		}
@@ -86,30 +89,20 @@ func onReady() {
 }
 
 func jumpToBrowserView() {
-	path, err := utils.JSONConfigFile()
-	if err != nil {
-		utils.NotifyWithBeep("Operation failed", "Could not launch LiScreMon broswer view.")
-		fmt.Println(err)
-		return
-	}
-	byteData, err := os.ReadFile(path)
-	if err != nil {
-		utils.NotifyWithBeep("Operation failed", "Could not launch LiScreMon broswer view.")
-		fmt.Println(err)
-		return
-	}
-	config, err := utils.DecodeJSON[utils.ConfigFile](byteData)
-	if err != nil {
-		utils.NotifyWithBeep("Operation failed", "Could not launch LiScreMon broswer view.")
-		fmt.Println(err)
-		return
-	}
+	var (
+		portAddres string
+		err        error
+		cmd        *exec.Cmd
+	)
 
-	portAddres := config.BrowserAddr
+	if portAddres, err = getBrowserRunningAddr(); err != nil {
+		utils.NotifyWithBeep("Operation failed", "Could not launch LiScreMon broswer view.")
+		fmt.Println(err)
+		return
+	}
 
 	if runtime.GOOS == "linux" {
-		cmd := exec.Command("xdg-open", portAddres)
-		if err := cmd.Start(); err != nil {
+		if cmd = exec.Command("xdg-open", portAddres); cmd.Start() != nil {
 			utils.NotifyWithBeep("Operation failed", "Could not launch LiScreMon broswer view.")
 			fmt.Println(err)
 			return
@@ -124,16 +117,9 @@ func jumpToBrowserView() {
 }
 
 func launchBrowserView() {
-	var (
-		gopath string
-		cmd    *exec.Cmd
-	)
+	var cmd *exec.Cmd
 
-	if gopath = build.Default.GOPATH; gopath == "" {
-		if gopath = os.Getenv("GOPATH"); gopath == "" {
-			log.Fatalln("cannot build program, unable to determine GOPATH")
-		}
-	}
+	gopath := getGOPATH()
 
 	if runtime.GOOS == "linux" {
 		gopathBin := filepath.Join(gopath, "bin", "browser")
@@ -151,4 +137,48 @@ func launchBrowserView() {
 	broswerProcess = cmd.Process
 }
 
+func launcDesktopView() error {
+	var cmd *exec.Cmd
+
+	gopath := getGOPATH()
+
+	if runtime.GOOS == "linux" {
+		gopathBin := filepath.Join(gopath, "bin", "desktop")
+		cmd = exec.Command(gopathBin)
+	}
+
+	if runtime.GOOS == "windows" {
+		notImplemented()
+	}
+
+	if err := cmd.Start(); err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	return nil
+}
+
 func notImplemented() {}
+
+func getBrowserRunningAddr() (string, error) {
+	byteData, err := os.ReadFile(utils.APP_JSON_CONFIG_FILE_PATH)
+	if err != nil {
+		return "", err
+	}
+	config, err := utils.DecodeJSON[utils.ConfigFile](byteData)
+	if err != nil {
+		return "", err
+	}
+	return config.BrowserAddr, nil
+}
+
+func getGOPATH() string {
+	var gopath string
+	if gopath = build.Default.GOPATH; gopath == "" {
+		if gopath = os.Getenv("GOPATH"); gopath == "" {
+			log.Fatalln("cannot build program, unable to determine GOPATH")
+		}
+	}
+	return gopath
+}

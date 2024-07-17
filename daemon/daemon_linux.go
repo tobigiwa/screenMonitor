@@ -19,43 +19,11 @@ import (
 	"github.com/BurntSushi/xgbutil/xevent"
 )
 
-func init() {
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		log.Fatalln("error at init fn:", err) // exit
-	}
-
-	configDir := filepath.Join(homeDir, "liScreMon")
-	logDir := filepath.Join(configDir, "logs")
-
-	for _, dir := range [2]string{configDir, logDir} {
-		if err = os.MkdirAll(dir, 0755); err != nil {
-			log.Fatalln("error at init fn:", err) // exit
-		}
-	}
-
-	jsonConfigFile := filepath.Join(configDir, "config.json")
-	file, err := os.Create(jsonConfigFile)
-	if err != nil {
-		log.Fatalln("error at init fn:", err) // exit
-	}
-
-	byteData, err := utils.EncodeJSON(utils.ConfigFile{Name: "LiScreMon", Description: "Linux Screen Monitoring", Version: "1.0.0"})
-	if err != nil {
-		log.Fatalln("error at init fn:", err) // exit
-	}
-
-	file.Write(byteData)
-	file.Close()
-}
-
 func DaemonServiceLinux(logger *slog.Logger) {
 
 	// config directory
-	configDir, err := utils.ConfigDir()
-	if err != nil {
-		log.Fatalln(err) // exit
-	}
+	configDir := utils.APP_CONFIG_DIR
+
 	// database
 	badgerDB, err := db.NewBadgerDb(filepath.Join(configDir, "badgerDB"))
 	if err != nil {

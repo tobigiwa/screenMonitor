@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
-	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -183,30 +181,9 @@ func IsInCurrentWeekDate(d Date) bool {
 	return SaturdayOfTheWeek(time.Now()) == d
 }
 
-func ConfigDir() (string, error) {
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		return "", err
-	}
-
-	configDir := filepath.Join(homeDir, "liScreMon")
-
-	AppLogoFilePath = filepath.Join(configDir, "liscremon.jpeg")
-
-	return configDir, nil
-}
-
-func JSONConfigFile() (string, error) {
-	configDir, err := ConfigDir()
-	if err != nil {
-		return "", err
-	}
-	return filepath.Join(configDir, "config.json"), nil
-}
-
 func NotifyWithBeep(title, subtitle string) {
-	beeep.Alert(title, subtitle, AppLogoFilePath)
+	beeep.Alert(title, subtitle, APP_LOGO_FILE_PATH)
 }
 func NotifyWithoutBeep(title, subtitle string) {
-	beeep.Notify(title, subtitle, AppLogoFilePath)
+	beeep.Notify(title, subtitle, APP_LOGO_FILE_PATH)
 }

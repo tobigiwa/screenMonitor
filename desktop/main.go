@@ -7,6 +7,7 @@ import (
 	"log"
 	"log/slog"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"agent"
@@ -87,22 +88,20 @@ func (a *App) startup(ctx context.Context) {
 }
 
 func createIndexHTML() error {
-
-	projectDir, err := os.Getwd()
+	cwd, err := os.Getwd()
 	if err != nil {
 		return err
 	}
+	fmt.Println(cwd)
 
-	indexHTMLfilepath := fmt.Sprintf("%s/frontend/index.html", projectDir)
-
-	file, err := os.Create(indexHTMLfilepath)
+	file, err := os.Create(filepath.Join(cwd, "frontend", "index.html"))
 	if err != nil {
 		return err
 	}
+	defer file.Close()
 
 	if err = agent.IndexPage().Render(context.TODO(), file); err != nil {
 		return fmt.Errorf("could not generate index.html: %v", err)
 	}
-
 	return nil
 }

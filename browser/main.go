@@ -137,10 +137,7 @@ func openURLInBrowser(url string) *exec.Cmd {
 }
 
 func writeURLtoJSONConfigFile(url string) error {
-	configFile, err := utils.JSONConfigFile()
-	if err != nil {
-		return err
-	}
+	configFile := utils.APP_JSON_CONFIG_FILE_PATH
 
 	byteData, err := os.ReadFile(configFile)
 	if err != nil {
