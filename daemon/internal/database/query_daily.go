@@ -4,16 +4,16 @@ import (
 	"cmp"
 	"errors"
 	"fmt"
-	helperFuncs "pkg/helper"
-	"pkg/types"
+
 	"slices"
+	utils "utils"
 
 	badger "github.com/dgraph-io/badger/v4"
 )
 
-func (bs *BadgerDBStore) GetDay(date types.Date) (DailyStat, error) {
+func (bs *BadgerDBStore) GetDay(date utils.Date) (DailyStat, error) {
 
-	if day, _ := helperFuncs.ParseKey(date); day.After(helperFuncs.FormattedToDay()) {
+	if day, _ := utils.ParseKey(date); day.After(utils.FormattedToDay()) {
 		return ZeroValueDailyStat, ErrFutureDay
 	}
 
@@ -28,18 +28,18 @@ func (bs *BadgerDBStore) GetDay(date types.Date) (DailyStat, error) {
 		return bs.getDailyAppStat(date)
 	}
 
-	dayStat, err := helperFuncs.DecodeJSON[DailyStat](byteData)
+	dayStat, err := utils.DecodeJSON[DailyStat](byteData)
 	if err != nil {
 		return ZeroValueDailyStat, err
 	}
 	return dayStat, nil
 }
 
-func (bs *BadgerDBStore) getDailyAppStat(day types.Date) (DailyStat, error) {
+func (bs *BadgerDBStore) getDailyAppStat(day utils.Date) (DailyStat, error) {
 	var (
 		result       DailyStat
-		dayTotalData types.Stats
-		arr          = make([]types.AppStat, 0, 20)
+		dayTotalData utils.Stats
+		arr          = make([]utils.AppStat, 0, 20)
 	)
 
 	err := bs.db.View(func(txn *badger.Txn) error {
@@ -55,11 +55,11 @@ func (bs *BadgerDBStore) getDailyAppStat(day types.Date) (DailyStat, error) {
 
 				var (
 					app            AppInfo
-					appStatArrData types.AppStat
+					appStatArrData utils.AppStat
 					err            error
 				)
 
-				if app, err = helperFuncs.DecodeJSON[AppInfo](v); err != nil {
+				if app, err = utils.DecodeJSON[AppInfo](v); err != nil {
 					return err
 				}
 
@@ -90,7 +90,7 @@ func (bs *BadgerDBStore) getDailyAppStat(day types.Date) (DailyStat, error) {
 		return ZeroValueDailyStat, err
 	}
 
-	slices.SortFunc(arr, func(a, b types.AppStat) int {
+	slices.SortFunc(arr, func(a, b utils.AppStat) int {
 		return cmp.Compare(b.Usage.Active, a.Usage.Active)
 	})
 
@@ -99,8 +99,8 @@ func (bs *BadgerDBStore) getDailyAppStat(day types.Date) (DailyStat, error) {
 	result.DayTotal.Open = dayTotalData.Open
 	result.EachApp = arr
 
-	if day != helperFuncs.Today() {
-		byteData, _ := helperFuncs.EncodeJSON(result)
+	if day != utils.Today() {
+		byteData, _ := utils.EncodeJSON(result)
 		err := bs.setOrUpdateKeyValue(dbDayKey(day), byteData)
 		if err != nil {
 			fmt.Println("ERROR WRITING NEW DAY ENTRY", day, "ERROR IS:", err)

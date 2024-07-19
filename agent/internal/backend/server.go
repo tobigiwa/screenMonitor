@@ -9,8 +9,10 @@ import (
 	"log/slog"
 	"net"
 	"os"
-	helperFuncs "pkg/helper"
-	"pkg/types"
+	"path/filepath"
+	"runtime"
+
+	utils "utils"
 )
 
 type App struct {
@@ -32,15 +34,22 @@ func NewApp(logger *slog.Logger) (*App, error) {
 
 func listenToDaemonService() (net.Conn, error) {
 	var (
-		unix     = "unix"
-		homeDir  string
-		err      error
-		unixAddr *net.UnixAddr
+		unix      = "unix"
+		homeDir   string
+		socketDir string
+		err       error
+		unixAddr  *net.UnixAddr
 	)
 	if homeDir, err = os.UserHomeDir(); err != nil {
 		return nil, err
 	}
-	socketDir := homeDir + "/liScreMon/socket/daemon.sock"
+
+	if runtime.GOOS == "linux" {
+		socketDir = filepath.Join(homeDir, "liScreMon", "socket", "daemon.sock")
+	}
+	if runtime.GOOS == "windows" {
+		notImplemented()
+	}
 
 	if unixAddr, err = net.ResolveUnixAddr(unix, socketDir); err != nil {
 		return nil, err
@@ -53,22 +62,22 @@ func listenToDaemonService() (net.Conn, error) {
 	return conn, nil
 }
 
-func (a *App) CheckDaemonService() (types.Message, error) {
-	msg := types.Message{
+func (a *App) CheckDaemonService() (utils.Message, error) {
+	msg := utils.Message{
 		Endpoint:    "startConnection",
 		StatusCheck: "I wish this project prospered.",
 	}
 	return a.commWithDaemonService(msg)
 }
 
-func (a *App) commWithDaemonService(msg types.Message) (types.Message, error) {
-	bytesData, err := helperFuncs.EncodeJSON(msg) // encode message in byte
+func (a *App) commWithDaemonService(msg utils.Message) (utils.Message, error) {
+	bytesData, err := utils.EncodeJSON(msg) // encode message in byte
 	if err != nil {
-		return types.NoMessage, fmt.Errorf("encode %w", err)
+		return utils.NoMessage, fmt.Errorf("encode %w", err)
 	}
 
 	if _, err = a.daemonConn.Write(bytesData); err != nil { // write to socket
-		return types.NoMessage, fmt.Errorf("write %w", err)
+		return utils.NoMessage, fmt.Errorf("write %w", err)
 	}
 
 	var dataBuf bytes.Buffer
@@ -80,7 +89,7 @@ func (a *App) commWithDaemonService(msg types.Message) (types.Message, error) {
 			if errors.Is(err, io.EOF) {
 				break
 			}
-			return types.NoMessage, fmt.Errorf("read error from socket %w", err)
+			return utils.NoMessage, fmt.Errorf("read error from socket %w", err)
 		}
 
 		if n > 0 {
@@ -92,12 +101,14 @@ func (a *App) commWithDaemonService(msg types.Message) (types.Message, error) {
 		}
 	}
 
-	if msg, err = helperFuncs.DecodeJSON[types.Message](dataBuf.Bytes()); err != nil {
-		return types.NoMessage, err
+	if msg, err = utils.DecodeJSON[utils.Message](dataBuf.Bytes()); err != nil {
+		return utils.NoMessage, err
 	}
 
 	if msg.IsError {
-		return types.NoMessage, fmt.Errorf(msg.Error)
+		return utils.NoMessage, fmt.Errorf(msg.Error)
 	}
 	return msg, nil
 }
+
+func notImplemented() {}

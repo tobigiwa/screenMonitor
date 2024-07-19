@@ -4,22 +4,22 @@ import (
 	"cmp"
 	"errors"
 	"fmt"
-	helperFuncs "pkg/helper"
-	"pkg/types"
+
 	"slices"
+	utils "utils"
 
 	badger "github.com/dgraph-io/badger/v4"
 )
 
-func (bs *BadgerDBStore) GetWeek(day types.Date) (WeeklyStat, error) {
+func (bs *BadgerDBStore) GetWeek(day utils.Date) (WeeklyStat, error) {
 
-	anyDayInTheWeek := types.Date(day)
-	date, _ := helperFuncs.ParseKey(anyDayInTheWeek)
+	anyDayInTheWeek := utils.Date(day)
+	date, _ := utils.ParseKey(anyDayInTheWeek)
 	if IsFutureWeek(date) {
 		return ZeroValueWeeklyStat, ErrFutureWeek
 	}
 
-	saturdayOfThatWeek := helperFuncs.SaturdayOfTheWeek(date)
+	saturdayOfThatWeek := utils.SaturdayOfTheWeek(date)
 
 	byteData, err := bs.Get(dbWeekKey(saturdayOfThatWeek))
 	errKeyNotFound := errors.Is(err, badger.ErrKeyNotFound)
@@ -32,22 +32,22 @@ func (bs *BadgerDBStore) GetWeek(day types.Date) (WeeklyStat, error) {
 		return bs.getWeeklyAppStat(anyDayInTheWeek)
 	}
 
-	weekStat, err := helperFuncs.DecodeJSON[WeeklyStat](byteData)
+	weekStat, err := utils.DecodeJSON[WeeklyStat](byteData)
 	if err != nil {
 		return ZeroValueWeeklyStat, err
 	}
 	return weekStat, nil
 }
 
-func (bs *BadgerDBStore) getWeeklyAppStat(anyDayInTheWeek types.Date) (WeeklyStat, error) {
+func (bs *BadgerDBStore) getWeeklyAppStat(anyDayInTheWeek utils.Date) (WeeklyStat, error) {
 
 	var (
 		result     WeeklyStat
-		weekTotal  types.Stats
-		tmpStorage = make(map[string]types.Stats, 20)
+		weekTotal  utils.Stats
+		tmpStorage = make(map[string]utils.Stats, 20)
 	)
 
-	date, _ := helperFuncs.ParseKey(anyDayInTheWeek)
+	date, _ := utils.ParseKey(anyDayInTheWeek)
 	allConcernedDays := daysInThatWeek(date)
 
 	err := bs.db.View(func(txn *badger.Txn) error {
@@ -57,7 +57,7 @@ func (bs *BadgerDBStore) getWeeklyAppStat(anyDayInTheWeek types.Date) (WeeklySta
 
 			dayStat, err := bs.GetDay(day)
 			if err != nil {
-				result.DayByDayTotal[i] = types.GenericKeyValue[types.Date, types.Stats]{Key: day, Value: types.Stats{}}
+				result.DayByDayTotal[i] = utils.GenericKeyValue[utils.Date, utils.Stats]{Key: day, Value: utils.Stats{}}
 				continue
 			}
 
@@ -93,12 +93,12 @@ func (bs *BadgerDBStore) getWeeklyAppStat(anyDayInTheWeek types.Date) (WeeklySta
 	}
 
 	size := len(tmpStorage)
-	eachAppSlice := make([]types.AppStat, 0, size)
+	eachAppSlice := make([]utils.AppStat, 0, size)
 	for app, stat := range tmpStorage {
-		eachAppSlice = append(eachAppSlice, types.AppStat{AppName: app, Usage: stat})
+		eachAppSlice = append(eachAppSlice, utils.AppStat{AppName: app, Usage: stat})
 	}
 
-	slices.SortFunc(eachAppSlice, func(a, b types.AppStat) int {
+	slices.SortFunc(eachAppSlice, func(a, b utils.AppStat) int {
 		return cmp.Compare(b.Usage.Active, a.Usage.Active)
 	})
 
@@ -106,7 +106,7 @@ func (bs *BadgerDBStore) getWeeklyAppStat(anyDayInTheWeek types.Date) (WeeklySta
 	result.EachApp = eachAppSlice
 
 	if IsPastWeek(date) {
-		byteData, _ := helperFuncs.EncodeJSON(result)
+		byteData, _ := utils.EncodeJSON(result)
 		saturdayOfThatWeek := allConcernedDays[6]
 		err := bs.setOrUpdateKeyValue(dbWeekKey(saturdayOfThatWeek), byteData)
 		if err != nil {

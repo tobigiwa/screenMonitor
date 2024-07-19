@@ -6,9 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	helperFuncs "pkg/helper"
-	"pkg/types"
+
 	"strings"
+	utils "utils"
 
 	views "agent/internal/frontend/components"
 
@@ -24,19 +24,19 @@ func (a *App) DayStatHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !helperFuncs.ValidDateType(query) {
+	if !utils.ValidDateType(query) {
 		a.clientError(w, http.StatusBadRequest, errors.New("query param:day: inavalid string format"))
 		return
 	}
 
 	var (
-		msg types.Message
+		msg utils.Message
 		err error
 	)
 
-	msg = types.Message{
+	msg = utils.Message{
 		Endpoint:       endpoint,
-		DayStatRequest: types.Date(query),
+		DayStatRequest: utils.Date(query),
 	}
 
 	if msg, err = a.commWithDaemonService(msg); err != nil {
@@ -48,7 +48,7 @@ func (a *App) DayStatHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func dayStatResponse(w types.DayStatMessage) templ.Component {
+func dayStatResponse(w utils.DayStatMessage) templ.Component {
 	return views.DayStatTempl(
 		chart.DayStatPieChart(
 			chart.PieChartData{

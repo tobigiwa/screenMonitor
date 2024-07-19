@@ -1,8 +1,8 @@
 package frontend
 
-import "pkg/types"
+import "utils"
 
-templ TasksPage(taskType string, allApps []types.AppIconCategoryAndCmdLine) {
+templ TasksPage(taskType string, allApps []utils.AppIconCategoryAndCmdLine) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
@@ -42,7 +42,7 @@ templ TasksPage(taskType string, allApps []types.AppIconCategoryAndCmdLine) {
 	</html>
 }
 
-templ reminderAndLimitPage(allApps []types.AppIconCategoryAndCmdLine) {
+templ reminderAndLimitPage(allApps []utils.AppIconCategoryAndCmdLine) {
 	<div class="main">
 		@header()
 		@reminderAndLimitHeaderSection()
@@ -65,7 +65,7 @@ templ RenderTasks(isEmpty bool, taskType templ.Component) {
 	}
 }
 
-templ reminderAndLimitDialog(allApps []types.AppIconCategoryAndCmdLine) {
+templ reminderAndLimitDialog(allApps []utils.AppIconCategoryAndCmdLine) {
 	@reminderDialog()
 	@limitDialog(allApps)
 	<script>
@@ -294,7 +294,7 @@ templ reminderDialog() {
 	</dialog>
 }
 
-templ limitDialog(allApp []types.AppIconCategoryAndCmdLine) {
+templ limitDialog(allApp []utils.AppIconCategoryAndCmdLine) {
 	// <dialog class="limit-dialog">
 	<div id="appLimit-dialog">
 		<form id="appLimit-form" hx-post="/newAppLimit" hx-swap="none" hx-select-oob="#task-holder:outerHTML">

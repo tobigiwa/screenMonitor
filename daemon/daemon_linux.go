@@ -4,9 +4,9 @@ import (
 	db "LiScreMon/daemon/internal/database"
 	monitoring "LiScreMon/daemon/internal/screen/linux"
 	"LiScreMon/daemon/internal/service"
+	"path/filepath"
 
 	"context"
-	"fmt"
 	"log"
 	"log/slog"
 	"os"
@@ -14,7 +14,7 @@ import (
 	"syscall"
 	"time"
 
-	helperFuncs "pkg/helper"
+	"utils"
 
 	"github.com/BurntSushi/xgbutil/xevent"
 )
@@ -22,12 +22,10 @@ import (
 func DaemonServiceLinux(logger *slog.Logger) {
 
 	// config directory
-	configDir, err := helperFuncs.ConfigDir()
-	if err != nil {
-		log.Fatalln(err) // exit
-	}
+	configDir := utils.APP_CONFIG_DIR
+
 	// database
-	badgerDB, err := db.NewBadgerDb(configDir + "/badgerDB/")
+	badgerDB, err := db.NewBadgerDb(filepath.Join(configDir, "badgerDB"))
 	if err != nil {
 		log.Fatalln(err) // exit
 	}
@@ -42,7 +40,7 @@ func DaemonServiceLinux(logger *slog.Logger) {
 	}
 
 	go func() {
-		if err := service.StartService(fmt.Sprintf("%s/socket/", configDir), badgerDB); err != nil {
+		if err := service.StartService(filepath.Join(configDir, "socket"), badgerDB); err != nil {
 			log.Println("error starting service", err)
 			sig <- syscall.SIGTERM // if service.StartService fails, send a signal to close the program
 		}

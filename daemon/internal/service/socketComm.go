@@ -8,9 +8,10 @@ import (
 	"io"
 	"net"
 	"os"
-	helperFuncs "pkg/helper"
-	"pkg/types"
+	"path/filepath"
+
 	"syscall"
+	utils "utils"
 )
 
 func NewService(db *db.BadgerDBStore) (*Service, error) {
@@ -53,7 +54,7 @@ func domainSocket(socketDir string) (*net.UnixListener, error) {
 		return nil, fmt.Errorf("error creating socket dir:%w", err)
 	}
 
-	socketFilePath := socketDir + "daemon.sock"
+	socketFilePath := filepath.Join(socketDir, "daemon.sock")
 
 	syscall.Unlink(socketFilePath)
 
@@ -91,7 +92,7 @@ func (s *Service) handleConnection(listener *net.UnixListener) {
 func (s *Service) treatMessage(c net.Conn) {
 	for {
 		var (
-			msg types.Message
+			msg utils.Message
 			err error
 			n   int
 		)
@@ -107,7 +108,7 @@ func (s *Service) treatMessage(c net.Conn) {
 			continue
 		}
 
-		if msg, err = helperFuncs.DecodeJSON[types.Message](buf[:n]); err != nil {
+		if msg, err = utils.DecodeJSON[utils.Message](buf[:n]); err != nil {
 			fmt.Println("error decoding socket message", err)
 			c.Close()
 			return
@@ -116,7 +117,7 @@ func (s *Service) treatMessage(c net.Conn) {
 		switch msg.Endpoint {
 
 		case "startConnection":
-			msg = types.Message{StatusCheck: "OK"}
+			msg = utils.Message{StatusCheck: "OK"}
 
 		case "closeConnection":
 			closeConnection(c)
@@ -157,7 +158,7 @@ func (s *Service) treatMessage(c net.Conn) {
 			msg.IsError, msg.Error = true, err.Error()
 		}
 
-		bytes, err := helperFuncs.EncodeJSON(msg)
+		bytes, err := utils.EncodeJSON(msg)
 		if err != nil {
 			msg.Error = fmt.Sprintf("error encoding response in serviceInstance: %s: %s", msg.Error, err.Error())
 		}

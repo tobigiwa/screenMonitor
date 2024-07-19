@@ -2,7 +2,7 @@ package monitoring
 
 import (
 	"fmt"
-	"pkg/types"
+
 	"time"
 
 	db "LiScreMon/daemon/internal/database"
@@ -10,6 +10,7 @@ import (
 	"github.com/BurntSushi/xgb/xproto"
 	"github.com/BurntSushi/xgbutil"
 	"github.com/BurntSushi/xgbutil/xevent"
+	"utils"
 )
 
 var (
@@ -53,7 +54,7 @@ func InitMonitoring(db *db.BadgerDBStore) (X11Monitor, error) {
 	monitor = X11Monitor{
 		X11Connection:  x11Conn,
 		Db:             db,
-		windowChangeCh: make(chan types.GenericKeyValue[xproto.Window, float64], 1),
+		windowChangeCh: make(chan utils.GenericKeyValue[xproto.Window, float64], 1),
 	}
 
 	if err = setRootEventMask(x11Conn); err != nil {

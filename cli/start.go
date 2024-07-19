@@ -7,7 +7,7 @@ import (
 	"LiScreMon/daemon"
 	"log"
 	"log/slog"
-	helperFuncs "pkg/helper"
+	utils "utils"
 
 	"github.com/spf13/cobra"
 )
@@ -37,7 +37,7 @@ var startCmd = &cobra.Command{
 		// 	panic(err)
 		// }
 		// defer pprof.StopCPUProfile()
-		logger, logFile, err := helperFuncs.Logger("daemon.log")
+		logger, logFile, err := utils.Logger("daemon.log")
 		if err != nil {
 			log.Fatalln(err) // exit
 		}

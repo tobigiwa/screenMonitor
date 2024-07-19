@@ -2,17 +2,17 @@ package database
 
 import (
 	"fmt"
-	helperFuncs "pkg/helper"
-	"pkg/types"
+
 	"strings"
 	"time"
+	utils "utils"
 
 	"github.com/BurntSushi/xgb/xproto"
 	badger "github.com/dgraph-io/badger/v4"
 	"github.com/pkg/errors"
 )
 
-func (bs *BadgerDBStore) WriteUsage(data types.ScreenTime) error {
+func (bs *BadgerDBStore) WriteUsage(data utils.ScreenTime) error {
 	return bs.db.Update(func(txn *badger.Txn) error {
 
 		var (
@@ -39,21 +39,21 @@ func (bs *BadgerDBStore) WriteUsage(data types.ScreenTime) error {
 			return err
 		}
 
-		if app, err = helperFuncs.DecodeJSON[AppInfo](valCopy); err != nil {
+		if app, err = utils.DecodeJSON[AppInfo](valCopy); err != nil {
 			return err
 		}
 
 		updateAppInfoForOldApp(data.WindowID, &app)
 		app.AppName = data.AppName // !!!needs removing...
-		fmt.Printf("Existing appName:%v, time so far is: %v:%v, brought in %f\n\n", data.AppName, app.ScreenStat[helperFuncs.Today()].Active, app.ScreenStat[helperFuncs.Today()].Open, data.Duration)
+		fmt.Printf("Existing appName:%v, time so far is: %v:%v, brought in %f\n\n", data.AppName, app.ScreenStat[utils.Today()].Active, app.ScreenStat[utils.Today()].Open, data.Duration)
 		return updateAppStats(data, &app, txn)
 
 	})
 }
 
-func updateAppStats(data types.ScreenTime, app *AppInfo, txn *badger.Txn) error {
+func updateAppStats(data utils.ScreenTime, app *AppInfo, txn *badger.Txn) error {
 
-	todayStat, ok := app.ScreenStat[helperFuncs.Today()]
+	todayStat, ok := app.ScreenStat[utils.Today()]
 
 	if !ok { // we live to see a new day!!! 😎😎😎
 		now := time.Now()
@@ -68,33 +68,33 @@ func updateAppStats(data types.ScreenTime, app *AppInfo, txn *badger.Txn) error 
 	}
 
 	switch data.Type {
-	case types.Active:
+	case utils.Active:
 		todayStat.Active += data.Duration
 		todayStat.ActiveTimeData = append(todayStat.ActiveTimeData, data.Interval)
-	case types.Inactive:
+	case utils.Inactive:
 		todayStat.Inactive += data.Duration
-	case types.Open:
+	case utils.Open:
 		todayStat.Open += data.Duration
 	}
 
-	app.ScreenStat[helperFuncs.Today()] = todayStat
+	app.ScreenStat[utils.Today()] = todayStat
 
-	byteData, err := helperFuncs.EncodeJSON(app)
+	byteData, err := utils.EncodeJSON(app)
 	if err != nil {
 		return err
 	}
 	return txn.Set(dbAppKey(data.AppName), byteData)
 }
 
-func updateYesterday(screenType types.ScreenType, app *AppInfo, yesterdayDuration float64) {
+func updateYesterday(screenType utils.ScreenType, app *AppInfo, yesterdayDuration float64) {
 
 	yesterdayStat := app.ScreenStat[yesterday()]
 	switch screenType {
-	case types.Active:
+	case utils.Active:
 		yesterdayStat.Active += yesterdayDuration
-	case types.Inactive:
+	case utils.Inactive:
 		yesterdayStat.Inactive += yesterdayDuration
-	case types.Open:
+	case utils.Open:
 		yesterdayStat.Open += yesterdayDuration
 	}
 	app.ScreenStat[yesterday()] = yesterdayStat
@@ -111,7 +111,7 @@ func addAppInfoForNewApp(windowId xproto.Window, app *AppInfo) {
 		if len(r.desktopCategories) != 0 {
 			app.DesktopCategories = r.desktopCategories
 			for _, c := range r.desktopCategories {
-				if category, ok := types.CategoryMap[strings.ToLower(c)]; ok {
+				if category, ok := utils.CategoryMap[strings.ToLower(c)]; ok {
 					app.Category = category
 					app.IsCategorySet = true
 					break
@@ -143,7 +143,7 @@ func updateAppInfoForOldApp(windowId xproto.Window, app *AppInfo) {
 				app.DesktopCategories = r.desktopCategories
 				for _, c := range r.desktopCategories {
 					fmt.Printf("currently in category selection for app %s with c '%s'\n", app.AppName, strings.ToLower(c))
-					if category, ok := types.CategoryMap[strings.ToLower(c)]; ok {
+					if category, ok := utils.CategoryMap[strings.ToLower(c)]; ok {
 						app.Category = category
 						app.IsCategorySet = true
 						break
@@ -154,5 +154,3 @@ func updateAppInfoForOldApp(windowId xproto.Window, app *AppInfo) {
 		}
 	}
 }
-
-

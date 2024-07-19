@@ -3,7 +3,7 @@ package chart
 import (
 	"fmt"
 	"html/template"
-	helperFuncs "pkg/helper"
+	"utils"
 
 	"github.com/go-echarts/go-echarts/v2/charts"
 	"github.com/go-echarts/go-echarts/v2/opts"
@@ -32,7 +32,7 @@ func DayStatPieChart(data PieChartData) template.HTML {
 				FontSize:   20,
 				FontFamily: "system-ui",
 			},
-			Subtitle: fmt.Sprintf("For %s. Total Uptime of %s", data.Date, helperFuncs.UsageTimeInHrsMin(data.DayTotal.Active)),
+			Subtitle: fmt.Sprintf("For %s. Total Uptime of %s", data.Date, utils.UsageTimeInHrsMin(data.DayTotal.Active)),
 			SubtitleStyle: &opts.TextStyle{
 				Color:      "black",
 				FontWeight: "bold",
@@ -63,7 +63,7 @@ func DayStatPieChart(data PieChartData) template.HTML {
 	pie.AddSeries("Daily uptime", pieItems(data)).SetSeriesOptions(
 		charts.WithLabelOpts(
 			opts.Label{
-				Show:         opts.Bool(true),
+				Show:      opts.Bool(true),
 				FontStyle: "italic",
 			}),
 

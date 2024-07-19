@@ -3,8 +3,8 @@ package database
 import (
 	"bytes"
 	"fmt"
-	helperFuncs "pkg/helper"
-	"pkg/types"
+
+	utils "utils"
 
 	badger "github.com/dgraph-io/badger/v4"
 )
@@ -183,19 +183,19 @@ func ExampleOf_opsFunc(v []byte) ([]byte, error) {
 		err error
 	)
 
-	if app, err = helperFuncs.DecodeJSON[AppInfo](v); err != nil {
+	if app, err = utils.DecodeJSON[AppInfo](v); err != nil {
 		return nil, err
 	}
 
 	if app.AppName == "Google-chrome" {
-		app.ScreenStat[helperFuncs.Today()] = types.Stats{}
-		fmt.Println(app.AppName, app.ScreenStat[helperFuncs.Today()].Active)
+		app.ScreenStat[utils.Today()] = utils.Stats{}
+		fmt.Println(app.AppName, app.ScreenStat[utils.Today()].Active)
 	}
 
 	// a := app.AppName
-	// app.AppIconCategoryAndCmdLine = types.NoAppIconCategoryAndCmdLine
+	// app.AppIconCategoryAndCmdLine = utils.NoAppIconCategoryAndCmdLine
 	// app.AppName = a
 	// fmt.Println(app.AppName, app.IsCategorySet, app.DesktopCategories, "category-", app.Category, app.IsCmdLineSet, app.CmdLine, app.IsIconSet)
 
-	return helperFuncs.EncodeJSON(app)
+	return utils.EncodeJSON(app)
 }

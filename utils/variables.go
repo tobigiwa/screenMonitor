@@ -1,17 +1,26 @@
-package types
+package utils
 
 import (
+	"fmt"
 	"regexp"
+)
+
+var (
+	ErrDeserialization = fmt.Errorf("error deserializing data")
+	ErrSerialization   = fmt.Errorf("error serializing data")
+	ErrLimitAppExist   = fmt.Errorf("limitApp task already exist")
+
+	ErrDeletingTask         = fmt.Errorf("err deleting old task")
+	ErrTaskMangerNotStarted = fmt.Errorf("taskManager could not be started")
+
+	ErrZeroValueTask = fmt.Errorf("sent task cannot be empty struct")
 )
 
 var (
 	NoMessage                   = Message{}
 	NoAppIconCategoryAndCmdLine = AppIconCategoryAndCmdLine{}
 	InvalidDateType             = Date("")
-)
-var (
-	DateTypeRegexPattern = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`)
-	AppLogoFilePath      string
+	DateTypeRegexPattern        = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`)
 )
 
 const (

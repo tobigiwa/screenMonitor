@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log"
-	helperFuncs "pkg/helper"
-	"pkg/types"
+
 	"time"
+	utils "utils"
 
 	"github.com/BurntSushi/xgb/xproto"
 	"github.com/BurntSushi/xgbutil/xevent"
@@ -80,12 +80,12 @@ func (x11 *X11Monitor) sendFiftyEightSecsUsage() {
 
 	netActiveWindow.TimeStamp = time.Now()
 
-	if err := x11.Db.WriteUsage(types.ScreenTime{
+	if err := x11.Db.WriteUsage(utils.ScreenTime{
 		WindowID: netActiveWindow.WindowID,
 		AppName:  netActiveWindow.WindowName,
-		Type:     types.Active,
+		Type:     utils.Active,
 		Duration: oneMinuteUsage,
-		Interval: types.TimeInterval{Start: oneMinuteTimeStamp, End: time.Now()},
+		Interval: utils.TimeInterval{Start: oneMinuteTimeStamp, End: time.Now()},
 	}); err != nil {
 		log.Fatalln("write to db error:", err)
 	}
@@ -93,7 +93,7 @@ func (x11 *X11Monitor) sendFiftyEightSecsUsage() {
 
 var LimitApp = make(map[string]limitWindow, 20)
 
-func AddNewLimit(t types.Task, timesofar float64) {
+func AddNewLimit(t utils.Task, timesofar float64) {
 	if timesofar < t.AppLimit.Limit {
 		LimitApp[t.AppName] = limitWindow{
 			windowInfo: windowInfo{WindowName: t.AppName},
@@ -118,9 +118,9 @@ func (x11 *X11Monitor) appLimitReached(taskID uuid.UUID) error {
 	}
 
 	title := fmt.Sprintf("Usage Limit reached for %s", task.AppName)
-	subtitle := fmt.Sprintf("App: %s Usage Limit: %s", task.AppName, helperFuncs.UsageTimeInHrsMin(task.AppLimit.Limit))
+	subtitle := fmt.Sprintf("App: %s Usage Limit: %s", task.AppName, utils.UsageTimeInHrsMin(task.AppLimit.Limit))
 
-	helperFuncs.NotifyWithBeep(title, subtitle)
+	utils.NotifyWithBeep(title, subtitle)
 
 	if task.AppLimit.OneTime {
 		if err := x11.Db.RemoveTask(taskID); err != nil {
@@ -142,9 +142,9 @@ func (x11 *X11Monitor) appLimitLeftNotification(taskID uuid.UUID, left string) e
 	}
 
 	title := fmt.Sprintf("%s minute usage left for %s", left, task.AppName)
-	subtitle := fmt.Sprintf("App: %s; Usage Limit: %s", task.AppName, helperFuncs.UsageTimeInHrsMin(task.AppLimit.Limit))
+	subtitle := fmt.Sprintf("App: %s; Usage Limit: %s", task.AppName, utils.UsageTimeInHrsMin(task.AppLimit.Limit))
 
-	helperFuncs.NotifyWithoutBeep(title, subtitle)
+	utils.NotifyWithoutBeep(title, subtitle)
 
 	return nil
 }

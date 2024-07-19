@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"pkg/types"
+
 	"strconv"
 	"strings"
 	"time"
@@ -14,13 +14,13 @@ import (
 	"github.com/a-h/templ"
 	"github.com/google/uuid"
 
-	helperFuncs "pkg/helper"
+	utils "utils"
 )
 
 func (a *App) tasksPage(w http.ResponseWriter, r *http.Request) {
 
 	var err error
-	msg := types.Message{
+	msg := utils.Message{
 		Endpoint: strings.TrimPrefix(r.URL.Path, "/"),
 	}
 
@@ -36,7 +36,7 @@ func (a *App) tasksPage(w http.ResponseWriter, r *http.Request) {
 func (a *App) ReminderTasksHandler(w http.ResponseWriter, r *http.Request) {
 
 	var err error
-	msg := types.Message{
+	msg := utils.Message{
 		Endpoint: strings.TrimPrefix(r.URL.Path, "/"),
 	}
 
@@ -59,7 +59,7 @@ func (a *App) ReminderTasksHandler(w http.ResponseWriter, r *http.Request) {
 func (a *App) appLimitTasksHandler(w http.ResponseWriter, r *http.Request) {
 
 	var err error
-	msg := types.Message{
+	msg := utils.Message{
 		Endpoint: strings.TrimPrefix(r.URL.Path, "/"),
 	}
 
@@ -86,7 +86,7 @@ func (a *App) newReminderHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var task types.Task
+	var task utils.Task
 
 	for key, value := range r.Form {
 		switch key {
@@ -143,9 +143,9 @@ func (a *App) newReminderHandler(w http.ResponseWriter, r *http.Request) {
 
 		case "app":
 			if task.AppName = value[0]; value[0] == "no-app" {
-				task.Job = types.ReminderWithNoAppLaunch
+				task.Job = utils.ReminderWithNoAppLaunch
 			} else {
-				task.Job = types.ReminderWithAppLaunch
+				task.Job = utils.ReminderWithAppLaunch
 			}
 
 		case "note":
@@ -154,7 +154,7 @@ func (a *App) newReminderHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	task.UUID = uuid.New()
-	msg := types.Message{
+	msg := utils.Message{
 		Endpoint:                strings.TrimPrefix(r.URL.Path, "/"),
 		ReminderAndLimitRequest: task,
 	}
@@ -176,8 +176,8 @@ func (a *App) newAppLimitHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var (
-		msg      types.Message
-		task     types.Task
+		msg      utils.Message
+		task     utils.Task
 		hrs, min int
 	)
 
@@ -216,7 +216,7 @@ func (a *App) newAppLimitHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			if isEveryDay {
 				task.AppLimit.OneTime = false
-				task.Job = types.DailyAppLimit
+				task.Job = utils.DailyAppLimit
 			}
 
 		case "exitApp":
@@ -239,16 +239,16 @@ func (a *App) newAppLimitHandler(w http.ResponseWriter, r *http.Request) {
 		a.clientError(w, http.StatusBadRequest, fmt.Errorf("cannot watch for zero-time limit"))
 		return
 	}
-	task.AppLimit.Today = helperFuncs.Today()
+	task.AppLimit.Today = utils.Today()
 	task.UUID = uuid.New()
 
-	msg = types.Message{
+	msg = utils.Message{
 		Endpoint:                strings.TrimPrefix(r.URL.Path, "/"),
 		ReminderAndLimitRequest: task,
 	}
 
 	if msg, err = a.commWithDaemonService(msg); err != nil {
-		if strings.Contains(err.Error(), types.ErrLimitAppExist.Error()) {
+		if strings.Contains(err.Error(), utils.ErrLimitAppExist.Error()) {
 			// return
 		}
 
@@ -277,7 +277,7 @@ func (a *App) removeTask(w http.ResponseWriter, r *http.Request) {
 
 	endpoint, pathParam := path[1], r.PathValue("uuid")
 
-	msg := types.Message{
+	msg := utils.Message{
 		Endpoint: endpoint,
 	}
 

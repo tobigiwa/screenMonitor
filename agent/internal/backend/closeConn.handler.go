@@ -3,17 +3,17 @@ package backend
 import (
 	"context"
 	"log/slog"
-	helperFuncs "pkg/helper"
-	"pkg/types"
+
+	utils "utils"
 )
 
 func (a *App) CloseDaemonConnection() error {
 
-	msg := types.Message{
+	msg := utils.Message{
 		Endpoint: "closeConnection",
 	}
 
-	bytes, err := helperFuncs.EncodeJSON(msg)
+	bytes, err := utils.EncodeJSON(msg)
 	if err != nil {
 		a.logger.Log(context.TODO(), slog.LevelError, err.Error())
 		return err

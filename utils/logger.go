@@ -1,20 +1,17 @@
-package helper
+package utils
 
 import (
-	"fmt"
 	"io"
 	"log/slog"
 	"os"
+	"path/filepath"
 )
 
 func Logger(logFileName string) (*slog.Logger, *os.File, error) {
 
-	configDir, err := ConfigDir()
-	if err != nil {
-		return nil, nil, err
-	}
+	configDir := APP_CONFIG_DIR
 
-	logFile, err := os.Create(fmt.Sprintf("%s/%s", configDir, logFileName))
+	logFile, err := os.Create(filepath.Join(configDir, "logs", logFileName))
 	if err != nil {
 		return nil, nil, err
 	}

@@ -1,4 +1,4 @@
-package types
+package utils
 
 import (
 	"errors"
@@ -181,4 +181,11 @@ type AppLimit struct {
 	ExitApp        bool    `json:"exitApp"`
 	Today          Date    `json:"today"`
 	IsLimitReached bool    `json:"isLimitReached"`
+}
+
+type ConfigFile struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Version     string `json:"version"`
+	BrowserAddr string `json:"browserAddr"`
 }

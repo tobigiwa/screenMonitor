@@ -3,8 +3,9 @@ package monitoring
 import (
 	"fmt"
 	"log"
-	"pkg/types"
+
 	"time"
+	"utils"
 
 	"github.com/BurntSushi/xgb/xproto"
 	"github.com/BurntSushi/xgbutil"
@@ -26,18 +27,18 @@ func (x11 *X11Monitor) windowChanged(x11Conn *xgbutil.XUtil, currActiveWindow xp
 
 	formerActiveWindow := netActiveWindow
 
-	x11.windowChangeCh <- types.GenericKeyValue[xproto.Window, float64]{Key: formerActiveWindow.WindowID, Value: time.Since(formerActiveWindow.TimeStamp).Hours()}
+	x11.windowChangeCh <- utils.GenericKeyValue[xproto.Window, float64]{Key: formerActiveWindow.WindowID, Value: time.Since(formerActiveWindow.TimeStamp).Hours()}
 
 	if formerActiveWindow.WindowName == "" { // this might be a not so needed check, cos -->
 		formerActiveWindow.WindowName, _ = getWindowClassName(x11Conn, currActiveWindow) // NET_ACTIVE_WINDOW SHOULD ALWAYS HAVE A NAME, if not, that is lost metric
 	}
 
-	s := types.ScreenTime{
+	s := utils.ScreenTime{
 		WindowID: formerActiveWindow.WindowID,
 		AppName:  formerActiveWindow.WindowName,
-		Type:     types.Active,
+		Type:     utils.Active,
 		Duration: time.Since(formerActiveWindow.TimeStamp).Hours(),
-		Interval: types.TimeInterval{Start: formerActiveWindow.TimeStamp, End: time.Now()},
+		Interval: utils.TimeInterval{Start: formerActiveWindow.TimeStamp, End: time.Now()},
 	}
 
 	fmt.Printf("New active window ID =====> %v:%v\ntime elapsed for last window %v:%v was %vsecs\n",
