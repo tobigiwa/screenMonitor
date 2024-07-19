@@ -3,12 +3,8 @@ package main
 import (
 	"context"
 	"embed"
-	"fmt"
 	"log"
 	"log/slog"
-	"os"
-	"path/filepath"
-	"strings"
 
 	"agent"
 	utils "utils"
@@ -17,6 +13,8 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
 )
+
+//go:generate go run gen.go
 
 //go:embed frontend/*
 var assetDir embed.FS
@@ -32,25 +30,13 @@ func main() {
 
 	slog.SetDefault(logger)
 
-	if err := createIndexHTML(); err != nil {
-		log.Fatalln("ensure compilation is in the project root dir:", err)
-	}
-
 	desktopAgent, err := agent.DesktopAgent(logger)
 	if err != nil {
-		if strings.Contains(err.Error(), "connection refused") {
-			log.Fatalln("daemon service is not running", err)
-		}
-		log.Fatalln("error creating app:", err)
-	}
-
-	_, err = desktopAgent.CheckDaemonService()
-	if err != nil {
-		log.Fatalln("error connecting to daemon service:", err)
+		log.Fatalln("error creating desktopAgent:", err) // exit
 	}
 
 	// Create an instance of the app structure
-	app := NewApp()
+	app := NewApp(desktopAgent)
 
 	// Create application with options
 	if err = wails.Run(&options.App{
@@ -63,45 +49,44 @@ func main() {
 		},
 		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
 		OnStartup:        app.startup,
+		// OnShutdown:       app.shutdown,
 		Bind: []interface{}{
 			app,
 		},
 	}); err != nil {
 		println("Error:", err.Error())
 	}
+
+	log.Println("we got a close")
+	desktopAgent.CloseDaemonConnection()
+}
+
+type AppInterface interface {
+	CheckDaemonService() (utils.Message, error)
+	CloseDaemonConnection() error
 }
 
 // App struct
 type App struct {
-	ctx context.Context
+	ctx          context.Context
+	desktopAgent AppInterface
 }
 
 // NewApp creates a new App application struct
-func NewApp() *App {
-	return &App{}
+func NewApp(d AppInterface) *App {
+	return &App{desktopAgent: d}
 }
 
 // startup is called when the app starts. The context is saved
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+	if _, err := a.desktopAgent.CheckDaemonService(); err != nil {
+		log.Fatalln("error connecting to daemon service:", err)
+	}
 }
 
-func createIndexHTML() error {
-	cwd, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-	fmt.Println(cwd)
-
-	file, err := os.Create(filepath.Join(cwd, "frontend", "index.html"))
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	if err = agent.IndexPage().Render(context.TODO(), file); err != nil {
-		return fmt.Errorf("could not generate index.html: %v", err)
-	}
-	return nil
+func (a *App) shutdown(ctx context.Context) {
+	log.Println("we got a close")
+	a.desktopAgent.CloseDaemonConnection()
 }

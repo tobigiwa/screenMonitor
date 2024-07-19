@@ -9,6 +9,8 @@ import (
 	"log/slog"
 	"net"
 	"os"
+	"path/filepath"
+	"runtime"
 
 	utils "utils"
 )
@@ -32,15 +34,22 @@ func NewApp(logger *slog.Logger) (*App, error) {
 
 func listenToDaemonService() (net.Conn, error) {
 	var (
-		unix     = "unix"
-		homeDir  string
-		err      error
-		unixAddr *net.UnixAddr
+		unix      = "unix"
+		homeDir   string
+		socketDir string
+		err       error
+		unixAddr  *net.UnixAddr
 	)
 	if homeDir, err = os.UserHomeDir(); err != nil {
 		return nil, err
 	}
-	socketDir := homeDir + "/liScreMon/socket/daemon.sock"
+
+	if runtime.GOOS == "linux" {
+		socketDir = filepath.Join(homeDir, "liScreMon", "socket", "daemon.sock")
+	}
+	if runtime.GOOS == "windows" {
+		notImplemented()
+	}
 
 	if unixAddr, err = net.ResolveUnixAddr(unix, socketDir); err != nil {
 		return nil, err
@@ -101,3 +110,5 @@ func (a *App) commWithDaemonService(msg utils.Message) (utils.Message, error) {
 	}
 	return msg, nil
 }
+
+func notImplemented() {}

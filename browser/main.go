@@ -17,7 +17,6 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
-	"strings"
 	"syscall"
 )
 
@@ -48,10 +47,7 @@ func main() {
 
 	BrowserAgent, err := webserver.BrowserAgent(logger)
 	if err != nil {
-		if strings.Contains(err.Error(), "connection refused") {
-			log.Fatalln("daemon service is not running", err)
-		}
-		log.Fatalln("error creating BrowserAgent:", err)
+		log.Fatalln("error creating BrowserAgent:", err) // exit
 	}
 
 	_, err = BrowserAgent.CheckDaemonService()
@@ -79,7 +75,7 @@ func main() {
 		}
 	}()
 
-	time.Sleep(500 * time.Millisecond) // waiting for the server to be up and running
+	time.Sleep(200 * time.Millisecond) // waiting for the server to be up and running
 	cmd := openURLInBrowser(url)
 	cmd.Start()
 
