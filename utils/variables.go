@@ -20,7 +20,7 @@ var (
 	NoMessage                   = Message{}
 	NoAppIconCategoryAndCmdLine = AppIconCategoryAndCmdLine{}
 	InvalidDateType             = Date("")
-	DateTypeRegexPattern = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`)
+	DateTypeRegexPattern        = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`)
 )
 
 const (
