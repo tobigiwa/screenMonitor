@@ -49,7 +49,7 @@ func main() {
 		},
 		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
 		OnStartup:        app.startup,
-		// OnShutdown:       app.shutdown,
+		OnShutdown:       app.shutdown,
 		Bind: []interface{}{
 			app,
 		},
@@ -73,8 +73,8 @@ type App struct {
 }
 
 // NewApp creates a new App application struct
-func NewApp(d AppInterface) *App {
-	return &App{desktopAgent: d}
+func NewApp(desktopApp AppInterface) *App {
+	return &App{desktopAgent: desktopApp}
 }
 
 // startup is called when the app starts. The context is saved
@@ -82,11 +82,10 @@ func NewApp(d AppInterface) *App {
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 	if _, err := a.desktopAgent.CheckDaemonService(); err != nil {
-		log.Fatalln("error connecting to daemon service:", err)
+		log.Fatalln("error connecting to daemon service:", err) // exit
 	}
 }
 
 func (a *App) shutdown(ctx context.Context) {
-	log.Println("we got a close")
 	a.desktopAgent.CloseDaemonConnection()
 }

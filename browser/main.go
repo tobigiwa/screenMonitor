@@ -2,6 +2,7 @@ package main
 
 import (
 	webserver "agent"
+	"flag"
 	"net"
 
 	"runtime"
@@ -31,11 +32,12 @@ func main() {
 
 	slog.SetDefault(logger)
 
+	devMode := flag.Bool("dev", false, "specify to run in devMode")
+	flag.Parse()
 	var count, port int
-
 	for {
 		count++
-		if port, err = findFreePort(); err != nil {
+		if port, err = findFreePort(*devMode); err != nil {
 			if count >= 5 {
 				log.Fatalf("error getting a free port for browser connection: err %v\n", err)
 			}
@@ -97,7 +99,10 @@ func main() {
 	fmt.Println("SERVER STOPPED GRACEFULLY")
 }
 
-func findFreePort() (int, error) {
+func findFreePort(devMode bool) (int, error) {
+	if devMode {
+		return 8080, nil
+	}
 	listener, err := net.Listen("tcp", ":0")
 	if err != nil {
 		return 0, err

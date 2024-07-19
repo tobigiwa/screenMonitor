@@ -47,7 +47,7 @@ func onReady() {
 
 		systray.AddSeparator()
 		about := systray.AddMenuItem("More Information", "More Information")
-		kill := about.AddSubMenuItem(fmt.Sprintf("Kill %s daemon service", title), fmt.Sprintf("Kill %s daemon service", title))
+		kill := about.AddSubMenuItem(fmt.Sprintf("Quit %s daemon service", title), fmt.Sprintf("Quit %s daemon service", title))
 		remove := about.AddSubMenuItem("Remove this Icon", "Remove this Icon")
 
 		for {
