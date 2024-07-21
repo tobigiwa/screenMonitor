@@ -1,4 +1,4 @@
-module appIcon
+module trayIcon
 
 go 1.22.1
 

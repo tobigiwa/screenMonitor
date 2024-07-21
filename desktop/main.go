@@ -54,11 +54,8 @@ func main() {
 			app,
 		},
 	}); err != nil {
-		println("Error:", err.Error())
+		logger.Error(err.Error())
 	}
-
-	log.Println("we got a close")
-	desktopAgent.CloseDaemonConnection()
 }
 
 type AppInterface interface {
