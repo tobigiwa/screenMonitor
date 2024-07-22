@@ -1,13 +1,20 @@
+// NOTE: The `database package` is used by all other packages in
+// daemon/internal, such it should be independent.
 package database
 
 import (
+	"bytes"
 	"fmt"
+	"image"
+	"image/color"
+	"image/png"
 
 	"strings"
 	"time"
 	utils "utils"
 
 	"github.com/BurntSushi/xgb/xproto"
+	"github.com/BurntSushi/xgbutil/ewmh"
 	badger "github.com/dgraph-io/badger/v4"
 	"github.com/pkg/errors"
 )
@@ -44,10 +51,8 @@ func (bs *BadgerDBStore) WriteUsage(data utils.ScreenTime) error {
 		}
 
 		updateAppInfoForOldApp(data.WindowID, &app)
-		app.AppName = data.AppName // !!!needs removing...
 		fmt.Printf("Existing appName:%v, time so far is: %v:%v, brought in %f\n\n", data.AppName, app.ScreenStat[utils.Today()].Active, app.ScreenStat[utils.Today()].Open, data.Duration)
 		return updateAppStats(data, &app, txn)
-
 	})
 }
 
@@ -131,7 +136,7 @@ func updateAppInfoForOldApp(windowId xproto.Window, app *AppInfo) {
 			app.IsIconSet = true
 		}
 	}
-	// fmt.Println("this app got here", app.AppName, !app.IsCmdLineSet && !app.IsCategorySet, app.IsCategorySet, app.IsCmdLineSet)
+
 	if !app.IsCmdLineSet && !app.IsCategorySet {
 		if r, err := getDesktopCategoryAndCmd(app.AppName); err == nil {
 			if r.cmdLine != "" {
@@ -153,4 +158,42 @@ func updateAppInfoForOldApp(windowId xproto.Window, app *AppInfo) {
 			fmt.Println("fetched info for old app", app.AppName, app.CmdLine, app.DesktopCategories, app.Category)
 		}
 	}
+}
+
+func GetWmIcon(windowID xproto.Window) ([]byte, error) {
+
+	icons, err := ewmh.WmIconGet(utils.X11Connection, windowID)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(icons) == 0 {
+		return nil, errors.New("no icon")
+	} else if len(icons) == 1 {
+		return wmIcon(icons[0])
+	} else {
+		lastIconIndex := len(icons) - 1 // it is usually more clear
+		return wmIcon(icons[lastIconIndex])
+	}
+}
+
+func wmIcon(icon ewmh.WmIcon) ([]byte, error) {
+
+	img := image.NewRGBA(image.Rect(0, 0, int(icon.Width), int(icon.Height)))
+	for i, u := range icon.Data {
+		x := i % int(icon.Width)
+		y := i / int(icon.Width)
+		r := uint8(u >> 16 & 0xFF)
+		g := uint8(u >> 8 & 0xFF)
+		b := uint8(u & 0xFF)
+		a := uint8(u >> 24 & 0xFF)
+		img.Set(x, y, color.RGBA{R: r, G: g, B: b, A: a})
+	}
+
+	buf := new(bytes.Buffer)
+	if err := png.Encode(buf, img); err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), nil
 }

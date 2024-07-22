@@ -1,3 +1,7 @@
+// Package tasks is meant to handle functionalities that
+// would need scheduling, the github.com/go-co-op/gocron/v2
+// library is used for that.
+// NOTE: This package already depends on `package screen`.
 package tasks
 
 import (

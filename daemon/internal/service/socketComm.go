@@ -1,3 +1,6 @@
+// `Package service` is the package that houses the
+// functionalites that attends to the need of the agent.
+// It can depend on all other packages/directories in `internal`.
 package service
 
 import (
@@ -32,17 +35,17 @@ func NewService(db *db.BadgerDBStore) (*Service, error) {
 
 func (s *Service) StartService(socketDir string, db *db.BadgerDBStore) error {
 
-	SocketConn, err := domainSocket(socketDir)
+	listener, err := unixDomainSocket(socketDir)
 	if err != nil {
 		return err
 	}
-	s.handleConnection(SocketConn) // blocking
+	s.handleConnection(listener) // blocking
 
-	SocketConn.Close()
+	listener.Close()
 	return nil
 }
 
-func domainSocket(socketDir string) (*net.UnixListener, error) {
+func unixDomainSocket(socketDir string) (*net.UnixListener, error) {
 
 	var (
 		conn     *net.UnixListener

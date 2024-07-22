@@ -7,10 +7,11 @@ import (
 
 	db "LiScreMon/daemon/internal/database"
 
+	"utils"
+
 	"github.com/BurntSushi/xgb/xproto"
 	"github.com/BurntSushi/xgbutil"
 	"github.com/BurntSushi/xgbutil/xevent"
-	"utils"
 )
 
 var (
@@ -40,16 +41,16 @@ func InitMonitoring(db *db.BadgerDBStore) (X11Monitor, error) {
 	for {
 		if x11Conn, err = xgbutil.NewConn(); err != nil { // we wait till we connect to X server
 			count++
-			time.Sleep(1 * time.Second)
-
-			if count > 20 {
+			if count > 10 { // 10 retries
 				return X11Monitor{}, fmt.Errorf("error connecting to X server:%w", err)
 			}
-
+			time.Sleep(1 * time.Second)
 			continue
 		}
 		break
 	}
+
+	utils.X11Connection = x11Conn
 
 	monitor = X11Monitor{
 		X11Connection:  x11Conn,

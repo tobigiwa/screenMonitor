@@ -68,37 +68,35 @@ templ RenderTasks(isEmpty bool, taskType templ.Component) {
 templ reminderAndLimitDialog(allApps []utils.AppIconCategoryAndCmdLine) {
 	@reminderDialog()
 	@limitDialog(allApps)
-	<script>
-		var appLimitdialog, form;
-		appLimitdialog = $( "#appLimit-dialog" ).dialog({
-				autoOpen: false,
-				height: 400,
-				width: 550,
-				modal: true,
-				buttons: {
-					"Create AppLimit": function() {
-						// $("#appLimit-form")[0];
-						// htmx.trigger(form, 'submit');
-						appLimitdialog.dialog( "close" );
-						console.log(createLimitButton)
-						var createLimitButton = $("#appLimit-form .submit")[0];
-						createLimitButton.click()
-					},
-					Cancel: function() {
-						appLimitdialog.dialog( "close" );
-					}
-				},
-				close: function() {
-					form[0].reset();
-				}
-			});
-
-			form = appLimitdialog.find( "form" );
-			
-			$("#limit-dialog__btn").button().click(function() {
-				appLimitdialog.dialog("open");
-			});
-	</script>
+	// <script>
+	// 	var appLimitdialog, form;
+	// 	appLimitdialog = $( "#appLimit-dialog" ).dialog({
+	// 			autoOpen: false,
+	// 			height: 400,
+	// 			width: 550,
+	// 			modal: true,
+	// 			buttons: {
+	// 				"Create AppLimit": function() {
+	// 					// $("#appLimit-form")[0];
+	// 					// htmx.trigger(form, 'submit');
+	// 					appLimitdialog.dialog( "close" );
+	// 					console.log(createLimitButton)
+	// 					var createLimitButton = $("#appLimit-form .submit")[0];
+	// 					createLimitButton.click()
+	// 				},
+	// 				Cancel: function() {
+	// 					appLimitdialog.dialog( "close" );
+	// 				}
+	// 			},
+	// 			close: function() {
+	// 				form[0].reset();
+	// 			}
+	// 		});
+	// 		form = appLimitdialog.find( "form" );
+	// 		$("#limit-dialog__btn").button().click(function() {
+	// 			appLimitdialog.dialog("open");
+	// 		});
+	// </script>
 }
 
 templ reminderAndLimitHeaderSection() {
@@ -121,6 +119,9 @@ templ reminderAndLimitHeaderSection() {
 				title="add new app limit"
 			>
 				<img
+					hx-post="/newAppLimit"
+					hx-swap="none"
+					hx-select-oob="#task-holder:outerHTML"
 					src="assets/svg/add.svg"
 				/>
 			</button>
@@ -295,78 +296,78 @@ templ reminderDialog() {
 }
 
 templ limitDialog(allApp []utils.AppIconCategoryAndCmdLine) {
-	// <dialog class="limit-dialog">
-	<div id="appLimit-dialog">
-		<form id="appLimit-form" hx-post="/newAppLimit" hx-swap="none" hx-select-oob="#task-holder:outerHTML">
-			<select
-				name="app"
-				is="ms-dropdown"
-				data-enable-auto-filter="false"
-				required
-			>
-				<option
-					value=""
-					data-description="select app to limit"
-				>Apps</option>
-				for _, app := range allApp {
-					<option value={ app.AppName } data-image={ getImageFilePath(app.AppName, app.Icon) } data-description={ app.Category.String() }>{ app.AppName }</option>
-				}
-			</select>
-			<div class="inline">
-				<input
-					type="number"
-					name="hrs"
-					min="0"
-					max="23"
-					placeholder="limit in Hrs; 0 - 23"
-				/>
-				<input
-					type="number"
-					name="min"
-					min="0"
-					max="59"
-					placeholder="limit in Minutes; 0 - 59"
-				/>
-			</div>
-			<div class="inline">
-				<div>
+	<dialog class="limit-dialog">
+		<div id="appLimit-dialog">
+			<form formmethod="dialog">
+				<select
+					name="app"
+					is="ms-dropdown"
+					data-enable-auto-filter="false"
+					required
+				>
+					<option
+						value=""
+						data-description="select app to limit"
+					>Apps</option>
+					for _, app := range allApp {
+						<option value={ app.AppName } data-image={ getImageFilePath(app.AppName, app.Icon) } data-description={ app.Category.String() }>{ app.AppName }</option>
+					}
+				</select>
+				<div class="inline">
 					<input
-						type="checkbox"
-						name="recurring"
-						value="true"
-						checked
+						type="number"
+						name="hrs"
+						min="0"
+						max="23"
+						placeholder="limit in Hrs; 0 - 23"
 					/>
-					<label
-						for="sound-notification-first"
-					>Everyday</label>
-				</div>
-				<div>
 					<input
-						type="checkbox"
-						name="exitApp"
-						value="true"
+						type="number"
+						name="min"
+						min="0"
+						max="59"
+						placeholder="limit in Minutes; 0 - 59"
 					/>
-					<label for="sound-notification-first">
-						Exit
-						app
-					</label>
 				</div>
-			</div>
-			<div class="button-container">
-				<button class="submit" type="submit">Create Limit</button>
-				<button
-					class="close-modal"
-					formmethod="dialog"
-					formnovalidate
-				>Close</button>
-			</div>
-		</form>
-		// <script type="text/javascript">
-		// 		const limitDialog = document.querySelector('.limit-dialog');
-		// 		document.querySelector('.limit-dialog__btn').addEventListener('click', () => {
-		// 			limitDialog.showModal();
-		// 		});
-		// </script>
-	</div>
-	// </dialog>
+				<div class="inline">
+					<div>
+						<input
+							type="checkbox"
+							name="recurring"
+							value="true"
+							checked
+						/>
+						<label
+							for="sound-notification-first"
+						>Everyday</label>
+					</div>
+					<div>
+						<input
+							type="checkbox"
+							name="exitApp"
+							value="true"
+						/>
+						<label for="sound-notification-first">
+							Exit
+							app
+						</label>
+					</div>
+				</div>
+				<div class="button-container">
+					<button class="submit" type="submit">Create Limit</button>
+					<button
+						class="close-modal"
+						formmethod="dialog"
+						formnovalidate
+					>Close</button>
+				</div>
+			</form>
+			<script type="text/javascript">
+					const limitDialog = document.querySelector('.limit-dialog');
+					document.querySelector('#limit-dialog__btn').addEventListener('click', () => {
+						limitDialog.showModal();
+					});
+			</script>
+		</div>
+	</dialog>
 }

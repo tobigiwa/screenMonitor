@@ -1,7 +1,9 @@
 package frontend
 
-import "html/template"
-import "utils"
+import (
+	"html/template"
+	"utils"
+)
 
 templ WeekStatTempl(chart template.HTML, totalWeekUsage float64, appDetails []utils.ApplicationDetail, allCategory []utils.Category, anyDay string) {
 	@chartWrapper(chart, utils.NoAppIconCategoryAndCmdLine)
