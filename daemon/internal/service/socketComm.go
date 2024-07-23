@@ -144,13 +144,13 @@ func (s *Service) treatMessage(c net.Conn) {
 		case "reminders":
 			msg.ReminderAndLimitResponse, err = s.allReminderTask()
 
-		case "appLimits":
+		case "limits":
 			msg.ReminderAndLimitResponse, err = s.allDailyAppLimitTask()
 
 		case "newReminder":
 			msg.ReminderAndLimitResponse, err = s.addNewReminder(msg.ReminderAndLimitRequest)
 
-		case "newAppLimit":
+		case "newLimit":
 			msg.ReminderAndLimitResponse, err = s.addNewLimitApp(msg.ReminderAndLimitRequest)
 
 		case "removeTask":

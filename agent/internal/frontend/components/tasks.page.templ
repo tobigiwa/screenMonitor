@@ -113,13 +113,13 @@ templ reminderAndLimitHeaderSection() {
 			</button>
 		</div>
 		<div class="limit-request">
-			<h2 class="applimitRequest" hx-get="/appLimits" hx-swap="none" hx-select-oob="#task-holder:outerHTML">App Limit</h2>
+			<h2 class="applimitRequest" hx-get="/limits" hx-swap="none" hx-select-oob="#task-holder:outerHTML">App Limit</h2>
 			<button
 				id="limit-dialog__btn"
 				title="add new app limit"
 			>
 				<img
-					hx-post="/newAppLimit"
+					hx-post="/newLimit"
 					hx-swap="none"
 					hx-select-oob="#task-holder:outerHTML"
 					src="assets/svg/add.svg"

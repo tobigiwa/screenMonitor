@@ -56,7 +56,7 @@ func (a *App) ReminderTasksHandler(w http.ResponseWriter, r *http.Request) {
 	views.RenderTasks(false, c).Render(context.TODO(), w)
 }
 
-func (a *App) appLimitTasksHandler(w http.ResponseWriter, r *http.Request) {
+func (a *App) limitTasksHandler(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 	msg := utils.Message{
@@ -167,7 +167,7 @@ func (a *App) newReminderHandler(w http.ResponseWriter, r *http.Request) {
 	views.TasksPage("", msg.ReminderAndLimitResponse.AllApps).Render(context.TODO(), w)
 }
 
-func (a *App) newAppLimitHandler(w http.ResponseWriter, r *http.Request) {
+func (a *App) newDaillyAppLimitHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("it got here")
 	err := r.ParseForm()
 	if err != nil {

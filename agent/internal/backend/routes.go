@@ -25,9 +25,9 @@ func (a *App) Routes() *http.ServeMux {
 	// ReminderAndLimitPage
 	mux.HandleFunc("GET /tasks", a.tasksPage)
 	mux.HandleFunc("GET /reminders", a.ReminderTasksHandler)
-	mux.HandleFunc("GET /appLimits", a.appLimitTasksHandler)
+	mux.HandleFunc("GET /limits", a.limitTasksHandler)
 	mux.HandleFunc("POST /newReminder", a.newReminderHandler)
-	mux.HandleFunc("POST /newAppLimit", a.newAppLimitHandler)
+	mux.HandleFunc("POST /newLimit", a.newDaillyAppLimitHandler)
 	mux.HandleFunc("POST /removeTask/{uuid}", a.removeTask)
 
 	switch runtime.GOOS {

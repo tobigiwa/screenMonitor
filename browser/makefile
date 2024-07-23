@@ -1,6 +1,6 @@
 dev:
-	@go run . -dev
+	@go generate && go run . -dev
 
 run:
-	@go run .
+	@go generate && go run .
 
