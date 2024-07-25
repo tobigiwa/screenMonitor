@@ -1,19 +1,19 @@
 package frontend
 
 templ sideBarMenu() {
-	<div class="menu">
+	<div class="flex flex-col gap-4 bg-zinc-800 min-h-full w-80 pt-14">
 		@animation()
 		@menuItems()
 	</div>
 }
 
 templ animation() {
-	<div class="hold-animation">
-		<div class="wrap-animation">
-			<div class="animation" id="lottie-animation"></div>
+	<div class="bg-zinc-800 flex flex-col items-center px-2.5 relative basis-16">
+		<div class="bg-black w-4/5 rounded-sm">
+			<div class="w-full h-full" id="lottie-animation"></div>
 		</div>
-		<div class="quote-animation">
-			<p>'If You Can't Measure It, You Can't Manage It'</p>
+		<div class="p-6 text-center">
+			<p class="text-white">'If You Can't Measure It, You Can't Manage It'</p>
 		</div>
 		<script src="assets/libraries/lottie.min.js"></script>
 		<script>
@@ -32,109 +32,142 @@ templ animation() {
 }
 
 templ menuItems() {
-	<div class="menu-items">
+	<div class="flex flex-col grow shrink">
 		<nav>
-			<ul>
-				<li class="wide">
-					<a href="/screentime" class="links" tabindex="0">
+			<ul class="p-0 flex flex-col gap-5 list-none">
+				<li class="scOne:hidden">
+					<a
+						href="/screentime"
+						class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800"
+						tabindex="0"
+					>
 						<img
 							src="assets/svg/no_1.svg"
-							class="icon"
+							class="w-12 h-9 mr-2"
 						/>Screentime
 					</a>
 				</li>
-				<li class="wide">
-					<a href="#" class="links wide" tabindex="0">
+				<li class="scOne:hidden">
+					<a href="#" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800 scOne:hidden" tabindex="0">
 						<img
 							src="assets/svg/no_3.svg"
-							class="icon"
+							class="w-12 h-9 mr-2"
 						/>Analytics
 					</a>
 				</li>
-				<li class="wide">
-					<a href="/tasks" class="links wide" tabindex="0">
+				<li class="scOne:hidden">
+					<a href="/tasks" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800 scOne:hidden" tabindex="0">
 						<img
 							src="assets/svg/no_4.svg"
-							class="icon"
+							class="w-12 h-9 mr-2"
 							style="vertical-align: top;"
 						/>
-						<div class="long-text" style="display: inline-block;">
-							// Alerts
-							// <br/>
-							// & Remainder
+						<div class="scTextOne:text-lg scTextTwo:text-sm inline-block">
 							Tasks
 						</div>
 					</a>
 				</li>
-				<li class="wide">
-					<a href="#" class="links wide" tabindex="0">
+				<li class="scOne:hidden">
+					<a href="#" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800 scOne:hidden" tabindex="0">
 						<img
 							src="assets/svg/no_2.svg"
-							class="icon"
+							class="w-12 h-9 mr-2"
 						/>ToDo
 					</a>
 				</li>
-				<li class="hidden">
-					<a href="#" class="links" tabindex="0">
+				<li class="scOne:hidden">
+					<a
+						href="#"
+						class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800"
+						tabindex="0"
+					>
 						<img
 							src="assets/svg/no_5_settings.svg"
-							class="icon"
+							class="w-12 h-9 mr-2"
 						/>Settings
 					</a>
 				</li>
-				<li class="hidden">
-					<a href="#" class="links" tabindex="0">
+				<li class="scOne:hidden">
+					<a
+						href="#"
+						class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800"
+						tabindex="0"
+					>
 						<img
 							src="assets/svg/no_6_logout.svg"
-							class="icon"
+							class="w-12 h-9 mr-2"
 						/>Logout
 					</a>
 				</li>
-				<li class="narrow" title="Screentime">
-					<a href="#" class="links" tabindex="0">
+				<li class="scOne:flex hidden" title="Screentime">
+					<a
+						href="#"
+						class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800"
+						tabindex="0"
+					>
 						<img
 							src="assets/svg/no_1.svg"
-							class="icon"
+							class="w-12 h-9 mr-2"
 						/>
 					</a>
 				</li>
-				<li class="narrow" title="Analytics">
-					<a href="#" class="links" tabindex="0">
+				<li class="scOne:flex hidden" title="Analytics">
+					<a
+						href="#"
+						class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800"
+						tabindex="0"
+					>
 						<img
 							src="assets/svg/no_3.svg"
-							class="icon"
+							class="w-12 h-9 mr-2"
 						/>
 					</a>
 				</li>
-				<li class="narrow" title="Alerts & Remainder">
-					<a href="#" class="links" tabindex="0">
+				<li class="scOne:flex hidden" title="Alerts & Remainder">
+					<a
+						href="#"
+						class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800"
+						tabindex="0"
+					>
 						<img
 							src="assets/svg/no_4.svg"
-							class="icon"
+							class="w-12 h-9 mr-2"
 						/>
 					</a>
 				</li>
-				<li class="narrow" title="ToDo  ">
-					<a href="#" class="links" tabindex="0">
+				<li class="scOne:flex hidden" title="ToDo  ">
+					<a
+						href="#"
+						class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800"
+						tabindex="0"
+					>
 						<img
 							src="assets/svg/no_2.svg"
-							class="icon"
+							class="w-12 h-9 mr-2"
 						/>
 					</a>
 				</li>
-				<li class="narrow" title="Settings">
-					<a href="#" class="links" tabindex="0">
+				<li class="scOne:flex hidden" title="Settings">
+					<a
+						href="#"
+						class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800"
+						tabindex="0"
+					>
 						<img
 							src="assets/svg/no_5_settings.svg"
-							class="icon"
+							class="w-12 h-9 mr-2"
 						/>
 					</a>
 				</li>
-				<li class="narrow" title="Logout">
-					<a href="#" class="links" tabindex="0">
+				<li class="scOne:flex hidden" title="Logout">
+					<a
+						href="#"
+						class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800"
+						tabindex="0"
+					>
 						<img
 							src="assets/svg/no_6_logout.svg"
-							class="icon"
+							class="w-12 h-9 mr-2"
 						/>
 					</a>
 				</li>

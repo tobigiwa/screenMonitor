@@ -5,6 +5,6 @@ fmt:
 	@templ fmt .
 
 live:
-	@templ generate --watch --proxy="http://localhost:8080" --open-browser=false -v
+	@go generate && templ generate --watch --proxy="http://localhost:8080" --open-browser=false -v
 
 run: build fmt live

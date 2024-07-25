@@ -13,7 +13,7 @@ templ IndexPage() {
 		<head>
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-			<link rel="stylesheet" href="/assets/styles/index.css"/>
+			// <link rel="stylesheet" href="/assets/styles/index.css"/>
 			<link rel="stylesheet" href="/assets/styles/output.css"/>
 			<link rel="stylesheet" href="/assets/styles/screentime.css"/>
 			<script src="assets/javascript/script.out.js"></script>
@@ -22,7 +22,7 @@ templ IndexPage() {
 			<title>ScreenTimePage</title>
 		</head>
 		<body>
-			<div class="page">
+			<div class="flex w-full">
 				@sideBarMenu()
 				@screentimeTimePage()
 			</div>
@@ -31,7 +31,7 @@ templ IndexPage() {
 }
 
 templ screentimeTimePage() {
-	<div class="main">
+	<div class="w-full bg-zinc-800">
 		@header()
 		@chartWrapper("", utils.NoAppIconCategoryAndCmdLine)
 		@chartControls()
@@ -40,12 +40,12 @@ templ screentimeTimePage() {
 }
 
 templ chartWrapper(chart template.HTML, info utils.AppIconCategoryAndCmdLine) {
-	<div class="chart-wrapper">
-		<div id="echart" hx-swap-oob="true">
+	<div class="">
+		<div id="echart" class="bg-white rounded w-99%" hx-swap-oob="true">
 			@templ.Raw(chart)
 			if !reflect.ValueOf(info).IsZero() {
 				if info.IsIconSet {
-					<img src={ getImageFilePath(info.AppName, info.Icon) } alt={ info.AppName } class="appIcon"/>
+					<img src={ getImageFilePath(info.AppName, info.Icon) } alt={ info.AppName } class="absolute w-5 h-5 top-1.5 left-1.5"/>
 				} else {
 					<img src="/assets/image/noAppImage.jpg" alt="noImage" class="appIcon"/>
 				}
@@ -55,26 +55,29 @@ templ chartWrapper(chart template.HTML, info utils.AppIconCategoryAndCmdLine) {
 }
 
 templ chartControls() {
-	<div class="chart-controls">
-		<div class="left-controls">
-			<div class="select-month">
-				<select name="month" class="month" hx-get="/weekStat?week=month" hx-include="[month='this.value']" hx-vals="js:{nonce: Math.random()}" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">
-					<option value="" id="placeholder" disabled selected>Last 3 Month</option>
-					for _, v := range monthDropDownSelectArray(3) {
-						<option class="option" value={ v }>{ v }</option>
-					}
-				</select>
-			</div>
-			<button class="left-controls__btn img backward-arrow" hx-get="/weekStat?week=backward" hx-vals="js:{nonce: Math.random()}" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">
-				<img class="chart__controls--img" src="assets/svg/angle-left-svgrepo-com.svg" alt=""/>
-			</button>
-			<button class="left-controls__btn text" hx-get="/weekStat?week=lastweek" hx-vals="js:{nonce: Math.random()}" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">Last Week</button>
-			<button class="left-controls__btn text" id="thisWeekButton" hx-get="/weekStat?week=thisweek" hx-vals="js:{nonce: Math.random()}" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">This Week</button>
-			<button class="left-controls__btn img forward-arrow" hx-get="/weekStat?week=forward" hx-vals="js:{nonce: Math.random()}" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">
-				<img class="chart__controls--img" src="assets/svg/angle-right-svgrepo-com.svg" alt=""/>
-			</button>
-		</div>
-		<div class="spacing"></div>
+	<div class="h-12 justify-start flex gap-4 rounded-t-none rounded-r-lg">
+		<select
+			name="month"
+			hx-get="/weekStat?week=month"
+			hx-include="[month='this.value']"
+			hx-vals="js:{nonce: Math.random()}"
+			hx-swap="none"
+			hx-select-oob="#echart:innerHTML,#highlight:outerHTML"
+			class="h-full bg-zinc-800 text-white rounded-none outline-none py-0 px-4 shadow-zinc-800"
+		>
+			<option value="" id="placeholder" disabled selected>Last 3 Month</option>
+			for _, v := range monthDropDownSelectArray(3) {
+				<option class="option" value={ v }>{ v }</option>
+			}
+		</select>
+		<button class="rounded-l bg-zinc-800 text-white font-bold hover:rounded-l hover:scale-110" hx-get="/weekStat?week=backward" hx-vals="js:{nonce: Math.random()}" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">
+			<img class="w-12" src="assets/svg/angle-left-svgrepo-com.svg" alt=""/>
+		</button>
+		<button class="rounded-l bg-zinc-800 text-white font-bold hover:rounded-l hover:scale-110" hx-get="/weekStat?week=lastweek" hx-vals="js:{nonce: Math.random()}" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">Last Week</button>
+		<button class="rounded-l bg-zinc-800 text-white font-bold hover:rounded-l hover:scale-110" id="thisWeekButton" hx-get="/weekStat?week=thisweek" hx-vals="js:{nonce: Math.random()}" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">This Week</button>
+		<button class="rounded-l bg-zinc-800 text-white font-bold hover:rounded-l hover:scale-110" hx-get="/weekStat?week=forward" hx-vals="js:{nonce: Math.random()}" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">
+			<img class="w-12" src="assets/svg/angle-right-svgrepo-com.svg" alt=""/>
+		</button>
 		<script>
 			document.addEventListener( 'DOMContentLoaded', function ()
 			{
@@ -88,20 +91,27 @@ templ chartControls() {
 }
 
 templ chartHighlight(appDetails []utils.ApplicationDetail, totalWeekUsage float64, allCategory []utils.Category, anyDay string) {
-	<div class="chart-highlight" id="highlight" hx-swap-obb="true">
-		<ul>
+	<div class="bg-zinc-800 rounded-sm overflow-y-auto min-h-chart-highlight max-h-chart-highlight" id="highlight" hx-swap-obb="true">
+		<ul class="p-0 m-0 w-99% list-none">
 			for _, app := range appDetails {
-				<li class="card" tabindex="10" hx-get={ string(templ.URL("/appStat?range=week&appName=" + app.AppInfo.AppName + "&start=" + anyDay)) } hx-vals="js:{nonce: Math.random()}" hx-swap="none" hx-select-oob="#echart:outerHTML">
+				<li
+					tabindex="10"
+					hx-get={ string(templ.URL("/appStat?range=week&appName=" + app.AppInfo.AppName + "&start=" + anyDay)) }
+					hx-vals="js:{nonce: Math.random()}"
+					hx-swap="none"
+					hx-select-oob="#echart:outerHTML"
+					class="flex justify-start items-center bg-zinc-800 outline-none text-white rounded-xl pr-1 mr-1 focus:text-black focus:bg-teal-700 focus:shadow-lg focus:scale-90 transition"
+				>
 					if app.AppInfo.IsIconSet {
-						<img src={ getImageFilePath(app.AppInfo.AppName, app.AppInfo.Icon) } alt={ app.AppInfo.AppName } class="app-icon"/>
+						<img src={ getImageFilePath(app.AppInfo.AppName, app.AppInfo.Icon) } alt={ app.AppInfo.AppName } class="h-12 rounded-md"/>
 					} else {
-						<img src="/assets/image/noAppImage.jpg" alt="noImage" class="app-icon"/>
+						<img src="/assets/image/noAppImage.jpg" alt="noImage" class="h-12 rounded-md"/>
 					}
-					<div class="info">
-						<div class="appName" style="font-size:large;font-weight:bold;">{ app.AppInfo.AppName }</div>
+					<div class="flex flex-col ml-4">
+						<div class="font-bold text-lg appName">{ app.AppInfo.AppName }</div>
 						<div class="desktopCategories" hidden>{ strings.Join(app.AppInfo.DesktopCategories, "  ") }</div>
 						if app.AppInfo.IsCategorySet && app.AppInfo.Category.String() != "" {
-							<button disabled class="category" style="color:white;">{ app.AppInfo.Category.String() }</button>
+							<button disabled class="category text-white">{ app.AppInfo.Category.String() }</button>
 						} else {
 							if utils.IsInCurrentWeekDate(utils.Date(anyDay)) {
 								<button class="category" onclick="openCategoryDialog(event)">Selct application catergory</button>
@@ -110,9 +120,9 @@ templ chartHighlight(appDetails []utils.ApplicationDetail, totalWeekUsage float6
 						}
 					</div>
 					if percentageUse := utils.PercentagesString(app.Usage, totalWeekUsage); percentageUse == "NaN" {
-						<div class="appStat" style="font-style:italic;">0% of weeks usage</div>
+						<div class="appStat ml-auto italic">0% of weeks usage</div>
 					} else {
-						<div class="appStat" style="font-style:italic;">{ percentageUse } of weeks usage: { utils.UsageTimeInHrsMin(app.Usage) }</div>
+						<div class="appStat ml-auto italic">{ percentageUse } of weeks usage: { utils.UsageTimeInHrsMin(app.Usage) }</div>
 					}
 				</li>
 			}

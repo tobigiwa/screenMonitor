@@ -1,7 +1,7 @@
 :root {
     box-sizing: border-box;
     --primary-color1: #198686;
-    --primary-color2: #303030;
+    --primary-color2: rgb(48, 48, 48);
     --black-color: black;
     --white-color: white;
 }
@@ -52,10 +52,10 @@ a {
 }
 
 
-.page {
+/* .page {
     display: inline-flex;
     width: 100%;
-}
+} */
 
 .menu {
     padding-top: 3.5rem;
@@ -134,7 +134,7 @@ a {
 
         & a {
             text-decoration: none;
-            font-size: larger;
+            font-size: large;
             font-weight: bold;
             font-style: italic;
             color: var(--white-color);
@@ -214,7 +214,7 @@ a {
 
 .main {
     background-color: var(--primary-color2);
-    width: 100%;
+    width: 100%;}
 
     .header {
         height: 4rem;
@@ -235,4 +235,3 @@ a {
             display: none;
         }
     }
-}
