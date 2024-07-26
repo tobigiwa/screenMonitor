@@ -13,9 +13,7 @@ templ IndexPage() {
 		<head>
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-			// <link rel="stylesheet" href="/assets/styles/index.css"/>
 			<link rel="stylesheet" href="/assets/styles/output.css"/>
-			<link rel="stylesheet" href="/assets/styles/screentime.css"/>
 			<script src="assets/javascript/script.out.js"></script>
 			<script src="assets/libraries/htmx.min.js"></script>
 			<script src="assets/libraries/echarts.min.js"></script>
@@ -40,14 +38,14 @@ templ screentimeTimePage() {
 }
 
 templ chartWrapper(chart template.HTML, info utils.AppIconCategoryAndCmdLine) {
-	<div class="">
+	<div class="relative">
 		<div id="echart" class="bg-white rounded w-99%" hx-swap-oob="true">
 			@templ.Raw(chart)
 			if !reflect.ValueOf(info).IsZero() {
 				if info.IsIconSet {
 					<img src={ getImageFilePath(info.AppName, info.Icon) } alt={ info.AppName } class="absolute w-5 h-5 top-1.5 left-1.5"/>
 				} else {
-					<img src="/assets/image/noAppImage.jpg" alt="noImage" class="appIcon"/>
+					<img src="/assets/image/noAppImage.jpg" alt="noImage" class="absolute w-5 h-5 top-1.5 left-1.5"/>
 				}
 			}
 		</div>
@@ -111,10 +109,10 @@ templ chartHighlight(appDetails []utils.ApplicationDetail, totalWeekUsage float6
 						<div class="font-bold text-lg appName">{ app.AppInfo.AppName }</div>
 						<div class="desktopCategories" hidden>{ strings.Join(app.AppInfo.DesktopCategories, "  ") }</div>
 						if app.AppInfo.IsCategorySet && app.AppInfo.Category.String() != "" {
-							<button disabled class="category text-white">{ app.AppInfo.Category.String() }</button>
+							<button disabled class="category min-w-full rounded-sm bg-zinc-800 text-white text-left">{ app.AppInfo.Category.String() }</button>
 						} else {
 							if utils.IsInCurrentWeekDate(utils.Date(anyDay)) {
-								<button class="category" onclick="openCategoryDialog(event)">Selct application catergory</button>
+								<button class="category min-w-full rounded-md bg-zinc-400 text-white text-left" onclick="openCategoryDialog(event)">Selct application catergory</button>
 								@setCategoryDialog(allCategory)
 							}
 						}

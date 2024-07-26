@@ -12,6 +12,7 @@ module.exports = {
       spacing: {
         '99%': '99%',
         'chart-highlight': 'calc(100vh - 37rem)',
+        'task-page': 'calc(100vh - 7rem)',
       }
     },
   },

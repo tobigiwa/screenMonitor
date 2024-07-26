@@ -8,22 +8,19 @@ templ TasksPage(taskType string, allApps []utils.AppIconCategoryAndCmdLine) {
 		<head>
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-			<link rel="stylesheet" href="/assets/styles/index.css"/>
-			<link rel="stylesheet" href="/assets/styles/tasks.css"/>
+			<link rel="stylesheet" href="/assets/styles/output.css"/>
+			<link rel="stylesheet" href="/assets/styles/task.css"/>
 			<link rel="stylesheet" href="/assets/styles/dd.min.css"/>
-			// <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.3/themes/base/jquery-ui.min.css" crossorigin="anonymous" referrerpolicy="no-referrer"/>
 			<link rel="stylesheet" href="/assets/styles/jquery-ui.min.css"/>
 			<script src="/assets/javascript/script.out.js"></script>
 			<script src="/assets/libraries/htmx.min.js"></script>
 			<script src="/assets/libraries/dd.min.js"></script>
-			// <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 			<script src="/assets/libraries/jquery-3.7.1.js"></script>
-			// <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.3/jquery-ui.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 			<script src="/assets/libraries/jquery-ui.js"></script>
 			<title>ScreenTime</title>
 		</head>
 		<body>
-			<div class="page">
+			<div class="flex w-full">
 				@sideBarMenu()
 				@reminderAndLimitPage(allApps)
 				@templ.JSONScript("id", taskType)
@@ -43,10 +40,10 @@ templ TasksPage(taskType string, allApps []utils.AppIconCategoryAndCmdLine) {
 }
 
 templ reminderAndLimitPage(allApps []utils.AppIconCategoryAndCmdLine) {
-	<div class="main">
+	<div class="w-full bg-zinc-800">
 		@header()
 		@reminderAndLimitHeaderSection()
-		<div class="reminder-limit__page">
+		<div class="max-h-max min-h-task-page bg-zinc-400">
 			@RenderTasks(true, templ.NopComponent)
 		</div>
 		@reminderAndLimitDialog(allApps)
@@ -55,7 +52,7 @@ templ reminderAndLimitPage(allApps []utils.AppIconCategoryAndCmdLine) {
 
 templ RenderTasks(isEmpty bool, taskType templ.Component) {
 	if isEmpty {
-		<div id="task-holder" hx-swap-oob="true" style="min-height: calc(100vh - 8rem); display: flex; justify-content: center; align-items: center; color:white">No Task</div>
+		<div id="task-holder" hx-swap-oob="true" class="flex justify-center items-center text-white" style="min-height: calc(100vh - 8rem);">No Task</div>
 	} else {
 		<div id="task-holder" hx-swap-oob="true">
 			<ul>
@@ -100,29 +97,29 @@ templ reminderAndLimitDialog(allApps []utils.AppIconCategoryAndCmdLine) {
 }
 
 templ reminderAndLimitHeaderSection() {
-	<div class="sticky-header">
-		<div class="reminder-request">
-			<h2 class="reminderRequest" hx-get="/reminders" hx-swap="none" hx-select-oob="#task-holder:outerHTML">Reminder</h2>
+	<div class="h-12 sticky top-0 z-10 bg-black text-white mb-1 rounded-md flex gap-8">
+		<div class="inline-flex justify-start items-center w-1/2 cursor-pointer">
+			<h2 class="m-0 p-0 w-full text-center hover:scale-90 font-bold text-lg" hx-get="/reminders" hx-swap="none" hx-select-oob="#task-holder:outerHTML">Reminder</h2>
 			<button
-				class="reminder-dialog__btn"
+				class="reminder-dialog__btn w-12 h-12 rounded-md cursor-alias bg-white "
 				title="add new reminder task"
 			>
 				<img
-					src="assets/svg/add.svg"
+					src="assets/svg/add2.svg"
+					class="h-8 w-10"
 				/>
 			</button>
 		</div>
-		<div class="limit-request">
-			<h2 class="applimitRequest" hx-get="/limits" hx-swap="none" hx-select-oob="#task-holder:outerHTML">App Limit</h2>
+		<div class="inline-flex justify-start items-center w-1/2 cursor-pointer">
+			<h2 class="m-0 p-0 w-full text-center hover:scale-90 font-bold text-lg" hx-get="/limits" hx-swap="none" hx-select-oob="#task-holder:outerHTML">App Limit</h2>
 			<button
+				class="w-12 h-12 rounded-md cursor-alias bg-white items-center"
 				id="limit-dialog__btn"
 				title="add new app limit"
 			>
 				<img
-					hx-post="/newLimit"
-					hx-swap="none"
-					hx-select-oob="#task-holder:outerHTML"
-					src="assets/svg/add.svg"
+					class="h-8 w-10"
+					src="assets/svg/add2.svg"
 				/>
 			</button>
 		</div>

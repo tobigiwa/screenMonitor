@@ -1,20 +1,20 @@
 .chart-wrapper {
     /* height: 30rem; set by the chart in the backend */
     position: relative;
-/* 
+
     #echart {
         width: 99%;
         background-color: rgb(255, 255, 255);
         border-radius: 5px;
-    } */
+    } 
 
-    /* .appIcon {
+    .appIcon {
         position: absolute;
         left: 1.2%;
         top: 1.5%;
         width: 20px;
         height: 20px;
-    } */
+    } 
 }
 
 .chart-controls {

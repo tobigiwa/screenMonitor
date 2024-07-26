@@ -8,8 +8,8 @@ import (
 templ WeekStatTempl(chart template.HTML, totalWeekUsage float64, appDetails []utils.ApplicationDetail, allCategory []utils.Category, anyDay string) {
 	@chartWrapper(chart, utils.NoAppIconCategoryAndCmdLine)
 	if len(appDetails) == 0 {
-		<div class="chart-highlight" id="highlight" hx-swap-obb="true" style="min-height: calc(100vh - 37rem); display: flex; justify-content: center; align-items: center;">
-			<div style="color: white;">There seems to be no usage this week 😢</div>
+		<div class="min-h-chart-highlight flex justify-center items-center" id="highlight" hx-swap-obb="true">
+			<div class="text-white">There seems to be no usage this week 😢</div>
 		</div>
 	} else {
 		@chartHighlight(appDetails, totalWeekUsage, allCategory, anyDay)
