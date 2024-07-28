@@ -19,7 +19,7 @@ templ IndexPage() {
 			<script src="assets/libraries/echarts.min.js"></script>
 			<title>ScreenTimePage</title>
 		</head>
-		<body>
+		<body class="m-0 p-0 h-full font-serif overflow-hidden">
 			<div class="flex w-full">
 				@sideBarMenu()
 				@screentimeTimePage()
@@ -53,30 +53,31 @@ templ chartWrapper(chart template.HTML, info utils.AppIconCategoryAndCmdLine) {
 }
 
 templ chartControls() {
-	<div class="h-12 justify-start flex gap-4 rounded-t-none rounded-r-lg">
-		<select
-			name="month"
-			hx-get="/weekStat?week=month"
-			hx-include="[month='this.value']"
-			hx-vals="js:{nonce: Math.random()}"
-			hx-swap="none"
-			hx-select-oob="#echart:innerHTML,#highlight:outerHTML"
-			class="h-full bg-zinc-800 text-white rounded-none outline-none py-0 px-4 shadow-zinc-800"
-		>
-			<option value="" id="placeholder" disabled selected>Last 3 Month</option>
-			for _, v := range monthDropDownSelectArray(3) {
-				<option class="option" value={ v }>{ v }</option>
-			}
-		</select>
-		<button class="rounded-l bg-zinc-800 text-white font-bold hover:rounded-l hover:scale-110" hx-get="/weekStat?week=backward" hx-vals="js:{nonce: Math.random()}" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">
-			<img class="w-12" src="assets/svg/angle-left-svgrepo-com.svg" alt=""/>
-		</button>
-		<button class="rounded-l bg-zinc-800 text-white font-bold hover:rounded-l hover:scale-110" hx-get="/weekStat?week=lastweek" hx-vals="js:{nonce: Math.random()}" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">Last Week</button>
-		<button class="rounded-l bg-zinc-800 text-white font-bold hover:rounded-l hover:scale-110" id="thisWeekButton" hx-get="/weekStat?week=thisweek" hx-vals="js:{nonce: Math.random()}" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">This Week</button>
-		<button class="rounded-l bg-zinc-800 text-white font-bold hover:rounded-l hover:scale-110" hx-get="/weekStat?week=forward" hx-vals="js:{nonce: Math.random()}" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">
-			<img class="w-12" src="assets/svg/angle-right-svgrepo-com.svg" alt=""/>
-		</button>
-		<script>
+	<div class="bg-black w-full">
+		<div class=" bg-zinc-800 h-12 inline-flex justify-start gap-4 text-lg border-dashed rounded-lg">
+			<select
+				name="month"
+				hx-get="/weekStat?week=month"
+				hx-include="[month='this.value']"
+				hx-vals="js:{nonce: Math.random()}"
+				hx-swap="none"
+				hx-select-oob="#echart:innerHTML,#highlight:outerHTML"
+				class="h-full bg-zinc-800 text-white rounded-none outline-none py-0 px-4 shadow-zinc-800"
+			>
+				<option value="" id="placeholder" disabled selected>Last 3 Month</option>
+				for _, v := range monthDropDownSelectArray(3) {
+					<option class="option" value={ v }>{ v }</option>
+				}
+			</select>
+			<button class="rounded-l bg-zinc-800 text-white font-bold hover:rounded-l hover:bg-zinc-400 " hx-get="/weekStat?week=backward" hx-vals="js:{nonce: Math.random()}" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">
+				<img class="w-12" src="assets/svg/angle-left-svgrepo-com.svg" alt=""/>
+			</button>
+			<button class="rounded-l bg-zinc-800 text-white font-bold hover:rounded-l hover:bg-zinc-400 hover:text-black max550:text-sm" hx-get="/weekStat?week=lastweek" hx-vals="js:{nonce: Math.random()}" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">Last Week</button>
+			<button class="rounded-l bg-zinc-800 text-white font-bold hover:rounded-l hover:bg-zinc-400 hover:text-black max550:text-sm" id="thisWeekButton" hx-get="/weekStat?week=thisweek" hx-vals="js:{nonce: Math.random()}" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">This Week</button>
+			<button class="rounded-l bg-zinc-800 text-white font-bold hover:rounded-l  hover:bg-zinc-400" hx-get="/weekStat?week=forward" hx-vals="js:{nonce: Math.random()}" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">
+				<img class="w-12" src="assets/svg/angle-right-svgrepo-com.svg" alt=""/>
+			</button>
+			<script>
 			document.addEventListener( 'DOMContentLoaded', function ()
 			{
 				const thisWeekButton = document.querySelector( '#thisWeekButton' );
@@ -85,6 +86,7 @@ templ chartControls() {
 				}	
 			});
 		</script>
+		</div>
 	</div>
 }
 
@@ -101,9 +103,9 @@ templ chartHighlight(appDetails []utils.ApplicationDetail, totalWeekUsage float6
 					class="flex justify-start items-center bg-zinc-800 outline-none text-white rounded-xl pr-1 mr-1 focus:text-black focus:bg-teal-700 focus:shadow-lg focus:scale-90 transition"
 				>
 					if app.AppInfo.IsIconSet {
-						<img src={ getImageFilePath(app.AppInfo.AppName, app.AppInfo.Icon) } alt={ app.AppInfo.AppName } class="h-12 rounded-md"/>
+						<img class="max550:hidden h-12 rounded-md" src={ getImageFilePath(app.AppInfo.AppName, app.AppInfo.Icon) } alt={ app.AppInfo.AppName }/>
 					} else {
-						<img src="/assets/image/noAppImage.jpg" alt="noImage" class="h-12 rounded-md"/>
+						<img class="max550:hidden h-12 rounded-md" src="/assets/image/noAppImage.jpg" alt="noImage"/>
 					}
 					<div class="flex flex-col ml-4">
 						<div class="font-bold text-lg appName">{ app.AppInfo.AppName }</div>
@@ -112,7 +114,7 @@ templ chartHighlight(appDetails []utils.ApplicationDetail, totalWeekUsage float6
 							<button disabled class="category min-w-full rounded-sm bg-zinc-800 text-white text-left">{ app.AppInfo.Category.String() }</button>
 						} else {
 							if utils.IsInCurrentWeekDate(utils.Date(anyDay)) {
-								<button class="category min-w-full rounded-md bg-zinc-400 text-white text-left" onclick="openCategoryDialog(event)">Selct application catergory</button>
+								<button class="category min-w-full rounded-md bg-zinc-400 text-white text-left" onclick="openCategoryDialog(event)">Select app catergory</button>
 								@setCategoryDialog(allCategory)
 							}
 						}

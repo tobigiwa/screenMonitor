@@ -5,11 +5,13 @@ templ header() {
 		<pre id="ascii-art" class="mr-auto">
 			{ getRandomArt() }
 		</pre>
-		<a href="#">
-			<img src="assets/svg/no_5_settings.svg" alt="" class="w-16 h-12 mr-2 pt-4 scTwo:hidden"/>
-		</a>
-		<a href="#">
-			<img src="assets/svg/no_6_logout.svg" alt="" class="w-16 h-12 mr-2  scTwo:hidden"/>
-		</a>
+		<div class="flex justify-center items-center gap-8">
+			<button class="focus:bg-teal-500 focus:scale-110 w-10 h-10 max650:hidden">
+				<a><img src="assets/svg/no_5_settings.svg" alt=""/></a>
+			</button>
+			<button class="focus:bg-teal-500 focus:scale-110 w-10 h-10 max650:hidden">
+				<a><img src="assets/svg/no_6_logout.svg" alt=""/></a>
+			</button>
+		</div>
 	</div>
 }

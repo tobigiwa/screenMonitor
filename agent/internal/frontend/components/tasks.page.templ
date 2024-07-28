@@ -9,7 +9,6 @@ templ TasksPage(taskType string, allApps []utils.AppIconCategoryAndCmdLine) {
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			<link rel="stylesheet" href="/assets/styles/output.css"/>
-			<link rel="stylesheet" href="/assets/styles/task.css"/>
 			<link rel="stylesheet" href="/assets/styles/dd.min.css"/>
 			<link rel="stylesheet" href="/assets/styles/jquery-ui.min.css"/>
 			<script src="/assets/javascript/script.out.js"></script>
@@ -19,7 +18,7 @@ templ TasksPage(taskType string, allApps []utils.AppIconCategoryAndCmdLine) {
 			<script src="/assets/libraries/jquery-ui.js"></script>
 			<title>ScreenTime</title>
 		</head>
-		<body>
+		<body class="m-0 p-0 h-full font-serif overflow-hidden">
 			<div class="flex w-full">
 				@sideBarMenu()
 				@reminderAndLimitPage(allApps)
@@ -97,11 +96,11 @@ templ reminderAndLimitDialog(allApps []utils.AppIconCategoryAndCmdLine) {
 }
 
 templ reminderAndLimitHeaderSection() {
-	<div class="h-12 sticky top-0 z-10 bg-black text-white mb-1 rounded-md flex gap-8">
+	<div class="h-12 sticky top-0 z-10 bg-zinc-500 text-white mb-1 rounded-md flex gap-8">
 		<div class="inline-flex justify-start items-center w-1/2 cursor-pointer">
 			<h2 class="m-0 p-0 w-full text-center hover:scale-90 font-bold text-lg" hx-get="/reminders" hx-swap="none" hx-select-oob="#task-holder:outerHTML">Reminder</h2>
 			<button
-				class="reminder-dialog__btn w-12 h-12 rounded-md cursor-alias bg-white "
+				class="reminder-dialog__btn w-11 h-11 rounded-md cursor-alias bg-white rounded-r"
 				title="add new reminder task"
 			>
 				<img
@@ -113,7 +112,7 @@ templ reminderAndLimitHeaderSection() {
 		<div class="inline-flex justify-start items-center w-1/2 cursor-pointer">
 			<h2 class="m-0 p-0 w-full text-center hover:scale-90 font-bold text-lg" hx-get="/limits" hx-swap="none" hx-select-oob="#task-holder:outerHTML">App Limit</h2>
 			<button
-				class="w-12 h-12 rounded-md cursor-alias bg-white items-center"
+				class="w-11 h-11 rounded-md cursor-alias bg-white items-center"
 				id="limit-dialog__btn"
 				title="add new app limit"
 			>
@@ -127,38 +126,41 @@ templ reminderAndLimitHeaderSection() {
 }
 
 templ reminderDialog() {
-	<dialog class="reminder-dialog">
-		<form class="new-reminder" method="post" action="/newReminder">
-			<div class="titles">
-				<div class="form-pair">
-					<label for="add-title">Title:</label>
+	<dialog class="reminder-dialog bg-zinc-400 text-white backdrop:bg-gradient-to-r from-sky-500 to-indigo-500">
+		<form class="new-reminder w-99% px-3" method="post" action="/newReminder">
+			<div class="titles w-full inline-flex justify-between">
+				<div class="form-pair flex flex-col">
+					<label for="add-title" class="mb-1.5 italic text-lg">Title:</label>
 					<input
 						type="text"
 						name="title"
 						minlength="4"
 						maxlength="35"
 						placeholder="minimun of 4 words"
+						class="p-1.5 text-sm mb-2.5"
 						required
 					/>
 				</div>
-				<div class="form-pair">
-					<label for="add-subtitle">Subtitle:</label>
+				<div class="form-pair flex flex-col">
+					<label for="add-subtitle" class="mb-1.5 italic text-lg">Subtitle:</label>
 					<input
 						type="text"
 						name="subtitle"
 						maxlength="50"
+						class="p-1.5 text-sm mb-2.5"
 						placeholder="optional"
 					/>
 				</div>
 			</div>
-			<div class="reminder-time">
-				<div class="combine">
-					<div class="form-pair">
-						<label for="set-reminder">Set your reminder:</label>
+			<div class="reminder-time w-full inline-flex justify-between flex-wrap">
+				<div class="combine flex justify-between items-center">
+					<div class="form-pair flex flex-col">
+						<label for="set-reminder" class="mb-1.5 italic text-lg">Set your reminder:</label>
 						<input
 							type="datetime-local"
 							name="reminder"
 							max={ FormatTimeTOHMTLDatetimeLocal(nextTwoWeeks()) }
+							class="p-1.5 text-sm mb-2.5"
 						/>
 					</div>
 					<div class="alert">
@@ -168,17 +170,18 @@ templ reminderDialog() {
 							value="true"
 							checked
 						/>
-						<label for="sound-notification-reminder">
+						<label for="sound-notification-reminder" class="mb-1.5 italic text-lg">
 							<img
 								src="assets/svg/bell.svg"
 								alt="Notification Icon"
+								class="w-4"
 							/>
 						</label>
 					</div>
 				</div>
-				<div class="combine">
-					<div class="form-pair ">
-						<label for="add-notification__first">
+				<div class="combine flex justify-between items-center">
+					<div class="form-pair flex flex-col">
+						<label for="add-notification__first" class="mb-1.5 italic text-lg">
 							First
 							notification
 							(Mins):
@@ -189,6 +192,7 @@ templ reminderDialog() {
 							min="0"
 							max="10"
 							value="10"
+							class="p-1.5 text-sm mb-2.5"
 						/>
 					</div>
 					<div class="alert">
@@ -198,17 +202,18 @@ templ reminderDialog() {
 							value="true"
 							checked
 						/>
-						<label for="sound-notification-first">
+						<label for="sound-notification-first" class="mb-1.5 italic text-lg">
 							<img
 								src="assets/svg/bell.svg"
 								alt="Notification Icon"
+								class="w-4"
 							/>
 						</label>
 					</div>
 				</div>
-				<div class="combine">
-					<div class="form-pair">
-						<label for="add-notification__second">
+				<div class="combine flex justify-between items-center">
+					<div class="form-pair flex flex-col">
+						<label for="add-notification__second" class="mb-1.5 italic text-lg">
 							Second
 							notification
 							(Mins):
@@ -219,6 +224,7 @@ templ reminderDialog() {
 							min="0"
 							max="10"
 							value="5"
+							class="p-1.5 text-sm mb-2.5"
 						/>
 					</div>
 					<div class="alert">
@@ -228,17 +234,18 @@ templ reminderDialog() {
 							value="true"
 							checked
 						/>
-						<label for="sound-notification-second">
+						<label for="sound-notification-second" class="mb-1.5 italic text-lg">
 							<img
 								src="assets/svg/bell.svg"
 								alt="Notification Icon"
+								class="w-4"
 							/>
 						</label>
 					</div>
 				</div>
 				<div class="out">
-					<div class="form-pair">
-						<label for="site-search">
+					<div class="form-pair flx flex-col">
+						<label for="site-search" class="mb-1.5 italic text-lg">
 							App to be
 							launched:
 						</label>
@@ -247,6 +254,7 @@ templ reminderDialog() {
 							name="app"
 							list="app-list"
 							value="no-app"
+							class="p-1.5 text-sm mb-2.5"
 						/>
 						<datalist id="app-list">
 							<option value="Pizza"></option>
@@ -258,18 +266,19 @@ templ reminderDialog() {
 					</div>
 				</div>
 			</div>
-			<div class="form-pair">
-				<label for="add-note">Include Note:</label>
+			<div class="form-pair flex flex-col">
+				<label for="add-note" class="mb-1.5 italic text-lg">Include Note:</label>
 				<textarea
 					name="note"
 					rows="3"
 					cols="1"
 					placeholder="optional"
+					class="p-1.5 text-sm mb-2.5"
 				></textarea>
 			</div>
-			<div class="button-container">
-				<button type="submit">Create Reminder</button>
-				<button class="close-modal" formmethod="dialog" formnovalidate>Close</button>
+			<div class="button-container flex justify-between">
+				<button class="p-2.5 text-lg bg-teal-800 text-white border-none rounded-md cursor-pointer" type="submit">Create Reminder</button>
+				<button class="close-modal p-2.5 text-lg bg-teal-800 text-white border-none rounded-md cursor-pointer" formmethod="dialog" formnovalidate>Close</button>
 			</div>
 		</form>
 		<script>
@@ -293,7 +302,7 @@ templ reminderDialog() {
 }
 
 templ limitDialog(allApp []utils.AppIconCategoryAndCmdLine) {
-	<dialog class="limit-dialog">
+	<dialog class="limit-dialog h-30vh bg-slate-400 items-center p-4 w-30vh backdrop:bg-gradient-to-r from-sky-500 to-indigo-500">
 		<div id="appLimit-dialog">
 			<form formmethod="dialog">
 				<select
@@ -310,23 +319,25 @@ templ limitDialog(allApp []utils.AppIconCategoryAndCmdLine) {
 						<option value={ app.AppName } data-image={ getImageFilePath(app.AppName, app.Icon) } data-description={ app.Category.String() }>{ app.AppName }</option>
 					}
 				</select>
-				<div class="inline">
+				<div class="mb-4 flex justify-between">
 					<input
 						type="number"
 						name="hrs"
 						min="0"
 						max="23"
-						placeholder="limit in Hrs; 0 - 23"
+						placeholder="in Hrs; 0 - 23"
+						class="mt-4 w-32 h-8"
 					/>
 					<input
 						type="number"
 						name="min"
 						min="0"
 						max="59"
-						placeholder="limit in Minutes; 0 - 59"
+						placeholder="in Mins; 0 - 59"
+						class="mt-4 w-32 h-8"
 					/>
 				</div>
-				<div class="inline">
+				<div class="mb-4 flex justify-between">
 					<div>
 						<input
 							type="checkbox"
@@ -344,16 +355,16 @@ templ limitDialog(allApp []utils.AppIconCategoryAndCmdLine) {
 							name="exitApp"
 							value="true"
 						/>
-						<label for="sound-notification-first">
+						<label for="sound-notification-first" class="italic">
 							Exit
 							app
 						</label>
 					</div>
 				</div>
-				<div class="button-container">
-					<button class="submit" type="submit">Create Limit</button>
+				<div class="button-container flex justify-between">
+					<button class="submit p-2.5 text-lg bg-teal-800 text-white border-none rounded-md cursor-pointer" type="submit">Create Limit</button>
 					<button
-						class="close-modal"
+						class="close-modal p-2.5 text-lg bg-teal-800 text-white border-none rounded-md cursor-pointer"
 						formmethod="dialog"
 						formnovalidate
 					>Close</button>
