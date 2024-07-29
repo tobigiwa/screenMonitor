@@ -5,7 +5,7 @@ import (
 
 	"time"
 
-	db "LiScreMon/daemon/internal/database"
+	db "smDaemon/daemon/internal/database"
 
 	"utils"
 

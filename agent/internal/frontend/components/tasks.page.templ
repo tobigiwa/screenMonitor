@@ -42,7 +42,7 @@ templ reminderAndLimitPage(allApps []utils.AppIconCategoryAndCmdLine) {
 	<div class="w-full bg-zinc-800">
 		@header()
 		@reminderAndLimitHeaderSection()
-		<div class="max-h-max min-h-task-page bg-zinc-400">
+		<div class="max-h-max min-h-task-page bg-slate-800">
 			@RenderTasks(true, templ.NopComponent)
 		</div>
 		@reminderAndLimitDialog(allApps)
@@ -51,7 +51,7 @@ templ reminderAndLimitPage(allApps []utils.AppIconCategoryAndCmdLine) {
 
 templ RenderTasks(isEmpty bool, taskType templ.Component) {
 	if isEmpty {
-		<div id="task-holder" hx-swap-oob="true" class="flex justify-center items-center text-white" style="min-height: calc(100vh - 8rem);">No Task</div>
+		<div id="task-holder" hx-swap-oob="true" class="flex justify-center items-center text-white min-h-task-page">No Task</div>
 	} else {
 		<div id="task-holder" hx-swap-oob="true">
 			<ul>
@@ -126,7 +126,7 @@ templ reminderAndLimitHeaderSection() {
 }
 
 templ reminderDialog() {
-	<dialog class="reminder-dialog bg-zinc-400 text-white backdrop:bg-gradient-to-r from-sky-500 to-indigo-500">
+	<dialog class="reminder-dialog bg-zinc-400 text-white backdrop:backdrop-opacity-10">
 		<form class="new-reminder w-99% px-3" method="post" action="/newReminder">
 			<div class="titles w-full inline-flex justify-between">
 				<div class="form-pair flex flex-col">
@@ -302,7 +302,7 @@ templ reminderDialog() {
 }
 
 templ limitDialog(allApp []utils.AppIconCategoryAndCmdLine) {
-	<dialog class="limit-dialog h-30vh bg-slate-400 items-center p-4 w-30vh backdrop:bg-gradient-to-r from-sky-500 to-indigo-500">
+	<dialog class="limit-dialog h-30vh bg-slate-400 items-center p-4 w-30vh backdrop:backdrop-opacity-10">
 		<div id="appLimit-dialog">
 			<form formmethod="dialog">
 				<select

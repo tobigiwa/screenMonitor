@@ -38,7 +38,7 @@ func (a *App) WeekStatHandler(w http.ResponseWriter, r *http.Request) {
 	case "lastweek":
 		msg = utils.Message{
 			Endpoint:        endpoint,
-			WeekStatRequest: utils.ReturnLastWeekSaturday(time.Now()),
+			WeekStatRequest: utils.ToDateType(utils.PreviousWeekSaturday(time.Now())),
 		}
 
 	case "month":
@@ -67,14 +67,14 @@ func (a *App) WeekStatHandler(w http.ResponseWriter, r *http.Request) {
 		if query == "backward" {
 			msg = utils.Message{
 				Endpoint:        endpoint,
-				WeekStatRequest: utils.ReturnLastWeekSaturday(t),
+				WeekStatRequest: utils.ToDateType(utils.PreviousWeekSaturday(t)),
 			}
 		}
 
 		if query == "forward" {
 			msg = utils.Message{
 				Endpoint:        endpoint,
-				WeekStatRequest: utils.ReturnNexWeektSaturday(t),
+				WeekStatRequest: utils.ToDateType(utils.NexWeektSaturday(t)),
 			}
 
 			if utils.IsFutureDate(t) {

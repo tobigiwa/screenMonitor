@@ -4,14 +4,14 @@
 package service
 
 import (
-	db "LiScreMon/daemon/internal/database"
-	"LiScreMon/daemon/internal/tasks"
 	"errors"
 	"fmt"
 	"io"
 	"net"
 	"os"
 	"path/filepath"
+	db "smDaemon/daemon/internal/database"
+	"smDaemon/daemon/internal/tasks"
 
 	"syscall"
 	utils "utils"

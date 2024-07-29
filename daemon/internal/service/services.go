@@ -1,9 +1,9 @@
 package service
 
 import (
-	db "LiScreMon/daemon/internal/database"
-	monitoring "LiScreMon/daemon/internal/screen/linux"
-	"LiScreMon/daemon/internal/tasks"
+	db "smDaemon/daemon/internal/database"
+	monitoring "smDaemon/daemon/internal/screen/linux"
+	"smDaemon/daemon/internal/tasks"
 
 	"cmp"
 	"fmt"
@@ -128,7 +128,7 @@ func (s *Service) getDayStat(msg utils.Date) (utils.DayStatMessage, error) {
 	if err != nil {
 		return utils.NoMessage.DayStatResponse, err
 	}
-	d, _ := utils.ParseKey(msg)
+	d := utils.ToTimeType(msg)
 	date := fmt.Sprintf("%s. %s %s, %d", strings.TrimSuffix(d.Weekday().String(), "day"), utils.AddOrdinalSuffix(d.Day()), d.Month().String(), d.Year())
 
 	return utils.DayStatMessage{EachApp: dayStat.EachApp, DayTotal: dayStat.DayTotal, Date: date}, nil

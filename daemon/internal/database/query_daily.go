@@ -13,7 +13,7 @@ import (
 
 func (bs *BadgerDBStore) GetDay(date utils.Date) (DailyStat, error) {
 
-	if day, _ := utils.ParseKey(date); day.After(utils.FormattedToDay()) {
+	if day := utils.ToTimeType(date); day.After(utils.FormattedToDay()) {
 		return ZeroValueDailyStat, ErrFutureDay
 	}
 

@@ -5,9 +5,9 @@
 package tasks
 
 import (
-	monitoring "LiScreMon/daemon/internal/screen/linux"
 	"fmt"
 	"os/exec"
+	monitoring "smDaemon/daemon/internal/screen/linux"
 
 	"reflect"
 	"time"
@@ -24,6 +24,7 @@ type TaskManagerDbRequirement interface {
 	RemoveTask(id uuid.UUID) error
 	AddTask(task utils.Task) error
 	GetAppTodayActiveStatSoFar(appName string) (float64, error)
+	ReportWeeklyUsage(anyDayInTheWeek time.Time) (string, error)
 }
 
 type TaskManager struct {
@@ -97,6 +98,29 @@ func StartTaskManger(dbHandle TaskManagerDbRequirement) (*TaskManager, error) {
 		}
 
 		tm.channel <- task
+	}
+
+	if _, err := tm.gocron.NewJob(
+		gocron.WeeklyJob(
+			1,
+			gocron.NewWeekdays(time.Sunday),
+			gocron.NewAtTimes(
+				gocron.NewAtTime(9, 0, 0),
+			),
+		),
+		gocron.NewTask(
+			func() {
+				s, err := tm.dbHandle.ReportWeeklyUsage(time.Now())
+				if err != nil {
+					fmt.Println("reportlyweek", err)
+					return
+				}
+
+				utils.NotifyWithBeep("Weekly Screentime", s)
+			},
+		),
+	); err != nil {
+		fmt.Println("error creating weekly job", err)
 	}
 
 	return tm, nil

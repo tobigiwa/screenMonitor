@@ -120,9 +120,9 @@ templ chartHighlight(appDetails []utils.ApplicationDetail, totalWeekUsage float6
 						}
 					</div>
 					if percentageUse := utils.PercentagesString(app.Usage, totalWeekUsage); percentageUse == "NaN" {
-						<div class="appStat ml-auto italic">0% of weeks usage</div>
+						<div class="appStat ml-auto italic">0% of week usage</div>
 					} else {
-						<div class="appStat ml-auto italic">{ percentageUse } of weeks usage: { utils.UsageTimeInHrsMin(app.Usage) }</div>
+						<div class="appStat ml-auto italic">{ percentageUse } of week usage: { utils.UsageTimeInHrsMin(app.Usage) }</div>
 					}
 				</li>
 			}

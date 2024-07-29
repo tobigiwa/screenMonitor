@@ -61,7 +61,7 @@ func onReady() {
 		kill := about.AddSubMenuItem("Quit daemon service", fmt.Sprintf("Quit %s daemon service", title))
 		remove := about.AddSubMenuItem("Remove this tray-icon", "Remove this Icon")
 
-		binaries := [3]string{"LiScreMon", "desktop", "browser"}
+		binaries := [3]string{"smDaemon", "smDesktop", "smBrowser"}
 		for _, binary := range binaries {
 			path := filepath.Join(getGOPATH(), "bin", binary)
 			if _, err := os.Stat(path); err != nil {
@@ -237,7 +237,7 @@ func killDaemonService() error {
 	var cmd *exec.Cmd
 
 	if runtime.GOOS == "linux" {
-		gopathBin := filepath.Join(gopath, "bin", "LiScreMon", "stop")
+		gopathBin := filepath.Join(gopath, "bin", "smDaemon", "stop")
 		cmd = exec.Command(gopathBin)
 	}
 

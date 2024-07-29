@@ -11,8 +11,9 @@ module.exports = {
         '99%': '99%',
         '30vh': '30vh',
         'chart-highlight': 'calc(100vh - 37rem)',
-        'task-page': 'calc(100vh - 7rem)',
+        'task-page': 'calc(100vh - 8rem)',
         'white-line': 'calc(100% - 30px)',
+        // 'renderTask': 'calc(100vh - 8em)',
       }
     },
   },

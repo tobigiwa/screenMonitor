@@ -1,4 +1,4 @@
-module desktop
+module smDesktop
 
 go 1.22.1
 

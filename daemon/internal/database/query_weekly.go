@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"errors"
 	"fmt"
+	"time"
 
 	"slices"
 	utils "utils"
@@ -11,11 +12,10 @@ import (
 	badger "github.com/dgraph-io/badger/v4"
 )
 
-func (bs *BadgerDBStore) GetWeek(day utils.Date) (WeeklyStat, error) {
+func (bs *BadgerDBStore) GetWeek(anyDayInTheWeek utils.Date) (WeeklyStat, error) {
 
-	anyDayInTheWeek := utils.Date(day)
-	date, _ := utils.ParseKey(anyDayInTheWeek)
-	if IsFutureWeek(date) {
+	date := utils.ToTimeType(anyDayInTheWeek)
+	if utils.IsFutureWeek(date) {
 		return ZeroValueWeeklyStat, ErrFutureWeek
 	}
 
@@ -47,8 +47,8 @@ func (bs *BadgerDBStore) getWeeklyAppStat(anyDayInTheWeek utils.Date) (WeeklySta
 		tmpStorage = make(map[string]utils.Stats, 20)
 	)
 
-	date, _ := utils.ParseKey(anyDayInTheWeek)
-	allConcernedDays := daysInThatWeek(date)
+	date := utils.ToTimeType(anyDayInTheWeek)
+	allConcernedDays := utils.DaysInThatWeek(date)
 
 	err := bs.db.View(func(txn *badger.Txn) error {
 
@@ -105,7 +105,7 @@ func (bs *BadgerDBStore) getWeeklyAppStat(anyDayInTheWeek utils.Date) (WeeklySta
 	result.WeekTotal = weekTotal
 	result.EachApp = eachAppSlice
 
-	if IsPastWeek(date) {
+	if utils.IsPastWeek(date) {
 		byteData, _ := utils.EncodeJSON(result)
 		saturdayOfThatWeek := allConcernedDays[6]
 		err := bs.setOrUpdateKeyValue(dbWeekKey(saturdayOfThatWeek), byteData)
@@ -117,4 +117,52 @@ func (bs *BadgerDBStore) getWeeklyAppStat(anyDayInTheWeek utils.Date) (WeeklySta
 	}
 
 	return result, nil
+}
+
+func (bs *BadgerDBStore) ReportWeeklyUsage(anyDayInTheWeek time.Time) (string, error) {
+
+	PreviousWeekSaturday := utils.PreviousWeekSaturday(anyDayInTheWeek)
+
+	var (
+		theWeekStat, previousWeekStat WeeklyStat
+		err                           error
+	)
+
+	if theWeekStat, err = bs.GetWeek(utils.ToDateType(anyDayInTheWeek)); err != nil {
+		return "", err
+	}
+	if previousWeekStat, err = bs.GetWeek(utils.ToDateType(PreviousWeekSaturday)); err != nil {
+		return "", err
+	}
+
+	theWeekDays, previousWeekDays := make([]float64, 7), make([]float64, 7)
+	for i := 0; i < 7; i++ {
+		theWeekDays = append(theWeekDays, theWeekStat.DayByDayTotal[i].Value.Active)
+		previousWeekDays = append(previousWeekDays, previousWeekStat.DayByDayTotal[i].Value.Active)
+	}
+
+	theWeekDailyAverage := calculateAverage(theWeekDays)
+	previousWeekDailyAverage := calculateAverage(previousWeekDays)
+
+	if theWeekDailyAverage > previousWeekDailyAverage {
+		return fmt.Sprintf("Daily Average: %s  ⬆️%.2f%% from previous week", utils.UsageTimeInHrsMin(theWeekDailyAverage), (theWeekDailyAverage-previousWeekDailyAverage)*100), nil
+	}
+
+	if theWeekDailyAverage < previousWeekDailyAverage {
+		return fmt.Sprintf("Daily Average: %s  ⬇️%.2f%% from previous week", utils.UsageTimeInHrsMin(theWeekDailyAverage), (previousWeekDailyAverage-theWeekDailyAverage)*100), nil
+	}
+
+	return fmt.Sprintf("Daily Average: %s  same with previous week", utils.UsageTimeInHrsMin(theWeekDailyAverage)), nil
+}
+
+func calculateAverage(data []float64) float64 {
+	var (
+		nominator   float64
+		denominator = len(data)
+	)
+
+	for i := 0; i < len(data); i++ {
+		nominator += data[i]
+	}
+	return nominator / float64(denominator)
 }

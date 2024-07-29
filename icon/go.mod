@@ -1,4 +1,4 @@
-module trayIcon
+module smTrayIcon
 
 go 1.22.1
 

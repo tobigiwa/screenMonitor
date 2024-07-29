@@ -1,10 +1,11 @@
 package service
 
 import (
-	db "LiScreMon/daemon/internal/database"
+	db "smDaemon/daemon/internal/database"
+
+	"utils"
 
 	"github.com/google/uuid"
-	"utils"
 )
 
 type DatabaseInterface interface {

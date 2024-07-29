@@ -1,10 +1,10 @@
 package daemon
 
 import (
-	db "LiScreMon/daemon/internal/database"
-	monitoring "LiScreMon/daemon/internal/screen/linux"
-	"LiScreMon/daemon/internal/service"
 	"path/filepath"
+	db "smDaemon/daemon/internal/database"
+	monitoring "smDaemon/daemon/internal/screen/linux"
+	"smDaemon/daemon/internal/service"
 
 	"context"
 	"log"

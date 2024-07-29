@@ -4,10 +4,10 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cli
 
 import (
-	"LiScreMon/daemon"
 	"fmt"
 	"log"
 	"log/slog"
+	"smDaemon/daemon"
 	"time"
 	utils "utils"
 
@@ -40,7 +40,7 @@ to quickly create a Cobra application.`,
 			fmt.Println("could not sucessfully shutdown running LiScreMon", err)
 			return
 		}
-		fmt.Println("LiScreMon would be restarting now...")
+		fmt.Println("smDaemon would be restarting now...")
 		time.Sleep(2 * time.Second) // allow for all resources to be released
 
 		// logging

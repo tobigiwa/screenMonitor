@@ -26,7 +26,7 @@ When this command is invoked, it prints "stop called" to the standard output and
 		if err := stopLiscrenMon(); err != nil {
 			fmt.Println(err)
 		}
-		fmt.Println("LiScreMon stopped successfully")
+		fmt.Println("smDaemon stopped successfully")
 
 	},
 }
@@ -37,7 +37,7 @@ func init() {
 
 func stopLiscrenMon() (Error error) {
 
-	result, err := exec.Command("pidof", "LiScreMon").CombinedOutput()
+	result, err := exec.Command("pidof", "smDaemon").CombinedOutput()
 	if err != nil {
 		Error = fmt.Errorf("%w:%w", Error, err)
 		return
@@ -46,7 +46,7 @@ func stopLiscrenMon() (Error error) {
 	arrayOfpidByte := bytes.Split(result, []byte(" "))
 
 	if len(arrayOfpidByte) == 1 { // the running program
-		fmt.Println("LiScreMon was not running")
+		fmt.Println("smDaemon was not running")
 		return
 	}
 

@@ -1,4 +1,4 @@
-module browser
+module smBrowser
 
 go 1.22.1
 
