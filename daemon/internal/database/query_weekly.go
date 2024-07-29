@@ -119,50 +119,34 @@ func (bs *BadgerDBStore) getWeeklyAppStat(anyDayInTheWeek utils.Date) (WeeklySta
 	return result, nil
 }
 
-func (bs *BadgerDBStore) ReportWeeklyUsage(anyDayInTheWeek time.Time) (string, error) {
+func (bs *BadgerDBStore) ReportWeeklyUsage(lastWeek time.Time) (string, error) {
 
-	PreviousWeekSaturday := utils.PreviousWeekSaturday(anyDayInTheWeek)
+	upperLastWeekSaturday := utils.PreviousWeekSaturday(lastWeek)
 
 	var (
-		theWeekStat, previousWeekStat WeeklyStat
-		err                           error
+		lastWeekStat, upperLastWeekStat WeeklyStat
+		err                             error
 	)
 
-	if theWeekStat, err = bs.GetWeek(utils.ToDateType(anyDayInTheWeek)); err != nil {
+	if lastWeekStat, err = bs.GetWeek(utils.ToDateType(lastWeek)); err != nil {
 		return "", err
 	}
-	if previousWeekStat, err = bs.GetWeek(utils.ToDateType(PreviousWeekSaturday)); err != nil {
+	if upperLastWeekStat, err = bs.GetWeek(utils.ToDateType(upperLastWeekSaturday)); err != nil {
 		return "", err
 	}
 
-	theWeekDays, previousWeekDays := make([]float64, 7), make([]float64, 7)
-	for i := 0; i < 7; i++ {
-		theWeekDays = append(theWeekDays, theWeekStat.DayByDayTotal[i].Value.Active)
-		previousWeekDays = append(previousWeekDays, previousWeekStat.DayByDayTotal[i].Value.Active)
+	denominator := float64(len(lastWeekStat.DayByDayTotal))
+	lastWeekDailyAverage := lastWeekStat.WeekTotal.Active / denominator
+	upperLastWeekDailyAverage := upperLastWeekStat.WeekTotal.Active / denominator
+	// fmt.Println(lastWeekStat.WeekTotal.Active, upperLastWeekStat.WeekTotal.Active, lastWeekDailyAverage, upperLastWeekDailyAverage)
+
+	if lastWeekDailyAverage > upperLastWeekDailyAverage {
+		return fmt.Sprintf("Last week daily Avg.: %s  ⬆️%.2f%% from previous week", utils.UsageTimeInHrsMin(lastWeekDailyAverage), ((lastWeekDailyAverage-upperLastWeekDailyAverage)/upperLastWeekDailyAverage)*100), nil
 	}
 
-	theWeekDailyAverage := calculateAverage(theWeekDays)
-	previousWeekDailyAverage := calculateAverage(previousWeekDays)
-
-	if theWeekDailyAverage > previousWeekDailyAverage {
-		return fmt.Sprintf("Daily Average: %s  ⬆️%.2f%% from previous week", utils.UsageTimeInHrsMin(theWeekDailyAverage), (theWeekDailyAverage-previousWeekDailyAverage)*100), nil
+	if lastWeekDailyAverage < upperLastWeekDailyAverage {
+		return fmt.Sprintf("Last week daily Avg.: %s  ⬇️%.2f%% from previous week", utils.UsageTimeInHrsMin(lastWeekDailyAverage), ((upperLastWeekDailyAverage-lastWeekDailyAverage)/upperLastWeekDailyAverage)*100), nil
 	}
 
-	if theWeekDailyAverage < previousWeekDailyAverage {
-		return fmt.Sprintf("Daily Average: %s  ⬇️%.2f%% from previous week", utils.UsageTimeInHrsMin(theWeekDailyAverage), (previousWeekDailyAverage-theWeekDailyAverage)*100), nil
-	}
-
-	return fmt.Sprintf("Daily Average: %s  same with previous week", utils.UsageTimeInHrsMin(theWeekDailyAverage)), nil
-}
-
-func calculateAverage(data []float64) float64 {
-	var (
-		nominator   float64
-		denominator = len(data)
-	)
-
-	for i := 0; i < len(data); i++ {
-		nominator += data[i]
-	}
-	return nominator / float64(denominator)
+	return fmt.Sprintf("Last week daily Avg.: %s  same with previous week", utils.UsageTimeInHrsMin(lastWeekDailyAverage)), nil
 }

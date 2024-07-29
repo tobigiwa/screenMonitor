@@ -110,7 +110,7 @@ func StartTaskManger(dbHandle TaskManagerDbRequirement) (*TaskManager, error) {
 		),
 		gocron.NewTask(
 			func() {
-				s, err := tm.dbHandle.ReportWeeklyUsage(time.Now())
+				s, err := tm.dbHandle.ReportWeeklyUsage(utils.PreviousWeekSaturday(time.Now()))
 				if err != nil {
 					fmt.Println("reportlyweek", err)
 					return

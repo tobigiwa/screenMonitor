@@ -12,7 +12,7 @@ func init() {
 		log.Fatalln("error at init fn:", err) // exit
 	}
 
-	configDir := filepath.Join(homeDir, "smDaemon")
+	configDir := filepath.Join(homeDir, "liScreMon")
 	logDir := filepath.Join(configDir, "logs")
 
 	for _, dir := range [2]string{configDir, logDir} {
@@ -27,7 +27,7 @@ func init() {
 		log.Fatalln("error at init fn:", err) // exit
 	}
 
-	byteData, err := EncodeJSON(ConfigFile{Name: "smDaemon", Description: "Linux Screen Monitoring", Version: "1.0.0"})
+	byteData, err := EncodeJSON(ConfigFile{Name: "LiScreMon", Description: "Linux Screen Monitoring", Version: "1.0.0"})
 	if err != nil {
 		log.Fatalln("error at init fn:", err) // exit
 	}
