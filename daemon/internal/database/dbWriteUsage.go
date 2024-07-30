@@ -7,7 +7,6 @@ import (
 	"image"
 	"image/color"
 	"image/png"
-	"log"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -42,7 +41,7 @@ func (bs *BadgerDBStore) WriteUsage(data utils.ScreenTime) error {
 			app.ScreenStat = make(dailyAppScreenTime)
 
 			addAppInfoForNewApp(data.WindowID, &app)
-			log.Printf("New appName:%v, time so far is: %v:%v\n\n", app.AppName, app.IsCategorySet, app.IsIconSet)
+			// log.Printf("New appName:%v, time so far is: %v:%v", app.AppName, app.IsCategorySet, app.IsIconSet)
 			return updateAppStats(data, &app, txn)
 		}
 
@@ -55,7 +54,7 @@ func (bs *BadgerDBStore) WriteUsage(data utils.ScreenTime) error {
 		}
 
 		updateAppInfoForOldApp(data.WindowID, &app)
-		log.Printf("Existing appName:%v, time so far is: %v:%v, brought in %f\n\n", data.AppName, app.ScreenStat[utils.Today()].Active, app.ScreenStat[utils.Today()].Open, data.Duration)
+		// log.Printf("Existing appName:%v, time so far is: %v:%v, brought in %f", data.AppName, app.ScreenStat[utils.Today()].Active, app.ScreenStat[utils.Today()].Open, data.Duration)
 		return updateAppStats(data, &app, txn)
 	})
 }
@@ -129,7 +128,7 @@ func addAppInfoForNewApp(windowId xproto.Window, app *AppInfo) {
 		}
 		app.CmdLine = r.cmdLine
 		app.IsCmdLineSet = true
-		log.Println("fetched info for new app", app.AppName, app.CmdLine, app.DesktopCategories)
+		// log.Println("fetched info for new app", app.AppName, app.CmdLine, app.DesktopCategories)
 	}
 }
 
@@ -151,7 +150,6 @@ func updateAppInfoForOldApp(windowId xproto.Window, app *AppInfo) {
 			if len(r.desktopCategories) != 0 {
 				app.DesktopCategories = r.desktopCategories
 				for _, c := range r.desktopCategories {
-					log.Printf("currently in category selection for app %s with c '%s'\n", app.AppName, strings.ToLower(c))
 					if category, ok := utils.CategoryMap[strings.ToLower(c)]; ok {
 						app.Category = category
 						app.IsCategorySet = true
@@ -159,7 +157,6 @@ func updateAppInfoForOldApp(windowId xproto.Window, app *AppInfo) {
 					}
 				}
 			}
-			log.Println("fetched info for old app", app.AppName, app.CmdLine, app.DesktopCategories, app.Category)
 		}
 	}
 }

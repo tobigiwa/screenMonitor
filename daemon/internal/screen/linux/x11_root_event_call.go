@@ -39,7 +39,7 @@ func propertyNotifyEventFuncRoot(x11Conn *xgbutil.XUtil, ev xevent.PropertyNotif
 }
 
 func mapNotifyEventFuncRoot(x11Conn *xgbutil.XUtil, ev xevent.MapNotifyEvent) {
-	log.Printf("\nrootMapNotifyHandler ev.window:%v ======++++++====> ev.event:%v\n", ev.Window, ev.Event)
+	log.Printf("\nrootMapNotifyHandler ev.window:%v ======++++++====> ev.event:%v", ev.Window, ev.Event)
 	if ev.OverrideRedirect { // window is a popup
 		return
 	}

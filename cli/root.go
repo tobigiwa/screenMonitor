@@ -38,7 +38,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().BoolP("mode", "dev", false, "specify if to build in production or development mode")
+	rootCmd.PersistentFlags().BoolP("mode", "d", false, "specify if to build in production or development mode")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.

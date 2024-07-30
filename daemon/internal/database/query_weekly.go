@@ -4,7 +4,6 @@ import (
 	"cmp"
 	"errors"
 	"fmt"
-	"log"
 	"time"
 
 	"slices"
@@ -109,12 +108,11 @@ func (bs *BadgerDBStore) getWeeklyAppStat(anyDayInTheWeek utils.Date) (WeeklySta
 	if utils.IsPastWeek(date) {
 		byteData, _ := utils.EncodeJSON(result)
 		saturdayOfThatWeek := allConcernedDays[6]
-		err := bs.setOrUpdateKeyValue(dbWeekKey(saturdayOfThatWeek), byteData)
-		if err != nil {
-			log.Println("ERROR WRITING NEW WEEK ENTRY", saturdayOfThatWeek, "ERROR IS:", err)
-		} else {
-			log.Println("WRITING NEW WEEK ENTRY", saturdayOfThatWeek)
+		if err := bs.setOrUpdateKeyValue(dbWeekKey(saturdayOfThatWeek), byteData); err != nil {
+			fmt.Println("ERROR WRITING NEW WEEK ENTRY", saturdayOfThatWeek, "ERROR IS:", err)
 		}
+		fmt.Println("WRITING NEW WEEK ENTRY", saturdayOfThatWeek)
+
 	}
 
 	return result, nil

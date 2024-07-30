@@ -46,7 +46,7 @@ to quickly create a Cobra application.`,
 		// Logging
 		mode, err := cmd.Flags().GetBool("mode")
 		if err != nil {
-			log.Fatalln("err getting build mode in flag command:", err) //exit
+			log.Fatalln("err getting build mode in flag command:", err) // exit
 		}
 
 		logger, logFile, err := utils.Logger("daemon.log", mode)

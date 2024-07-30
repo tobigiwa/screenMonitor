@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"io"
+	"log"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -16,15 +16,16 @@ func Logger(logFileName string, mode bool) (*slog.Logger, *os.File, error) {
 		return nil, nil, err
 	}
 
-	opts := slog.HandlerOptions{
+	opts := &slog.HandlerOptions{
 		AddSource: true,
 	}
 
 	if mode {
-		jsonLogger := slog.NewTextHandler(io.MultiWriter(logFile, os.Stdout), &opts)
+		log.Default()
+		jsonLogger := slog.NewTextHandler(os.Stdout, opts)
 		return slog.New(jsonLogger), logFile, nil
 	}
 
-	jsonLogger := slog.NewTextHandler(logFile, &opts)
+	jsonLogger := slog.NewJSONHandler(logFile, opts)
 	return slog.New(jsonLogger), logFile, nil
 }

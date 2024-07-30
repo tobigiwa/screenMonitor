@@ -1,6 +1,7 @@
 package monitoring
 
 import (
+	"fmt"
 	"log"
 
 	"time"
@@ -40,7 +41,7 @@ func (x11 *X11Monitor) windowChanged(x11Conn *xgbutil.XUtil, currActiveWindow xp
 		Interval: utils.TimeInterval{Start: formerActiveWindow.TimeStamp, End: time.Now()},
 	}
 
-	log.Printf("New active window ID =====> %v:%v\ntime elapsed for last window %v:%v was %vsecs\n",
+	fmt.Printf("New active window ID =====> %v:%v\ntime elapsed for last window %v:%v was %vsecs",
 		currActiveWindow, curSessionNamedWindow[currActiveWindow], formerActiveWindow.WindowID, curSessionNamedWindow[formerActiveWindow.WindowID], time.Since(netActiveWindow.TimeStamp).Seconds())
 
 	// SETTING THE NEW _NET_ACTIVE_WINDOW
@@ -50,7 +51,7 @@ func (x11 *X11Monitor) windowChanged(x11Conn *xgbutil.XUtil, currActiveWindow xp
 
 	if s.AppName != "" { // AS mentioned earlier, if we don't have a name, lost metric
 		if err := x11.Db.WriteUsage(s); err != nil {
-			log.Fatalln("write to db error:", err)
+			log.Fatalln("write to db error:", err) // exit
 		}
 	}
 }

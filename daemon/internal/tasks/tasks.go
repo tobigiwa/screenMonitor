@@ -140,7 +140,7 @@ func (tm *TaskManager) disperseTask() {
 			break
 		}
 
-		log.Printf("task received   %+v\n\n", task)
+		log.Printf("task received   %+v", task)
 
 		switch task.Job {
 		case utils.ReminderWithNoAppLaunch:

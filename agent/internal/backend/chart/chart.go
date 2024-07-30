@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"html/template"
 	"io"
-	"log"
 
 	"github.com/go-echarts/go-echarts/v2/render"
 )
@@ -16,12 +15,7 @@ type Renderer interface {
 
 func renderToHtml(c render.Renderer) template.HTML {
 	var buf bytes.Buffer
-	err := c.Render(&buf)
-	if err != nil {
-		log.Printf("Failed to render chart: %s", err)
-		return ""
-	}
-
+	_ = c.Render(&buf)
 	return template.HTML(buf.String())
 }
 

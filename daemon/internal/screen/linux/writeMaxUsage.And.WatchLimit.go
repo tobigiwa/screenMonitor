@@ -67,8 +67,6 @@ func (x11 *X11Monitor) watchLimit(windowID xproto.Window, duration float64) {
 			}
 
 			LimitApp[windowName] = limitApp
-			log.Printf("\nthis so far %f for app %s...limit at %f\n\n", limitApp.timeSofar, windowName, limitApp.limit) // remove
-
 		}
 	}
 }
@@ -87,7 +85,7 @@ func (x11 *X11Monitor) sendFiftyEightSecsUsage() {
 		Duration: oneMinuteUsage,
 		Interval: utils.TimeInterval{Start: oneMinuteTimeStamp, End: time.Now()},
 	}); err != nil {
-		log.Fatalln("write to db error:", err)
+		log.Fatalln("write to db error:", err) // exit
 	}
 }
 
@@ -101,8 +99,6 @@ func AddNewLimit(t utils.Task, timesofar float64) {
 			limit:      t.AppLimit.Limit,
 			timeSofar:  timesofar,
 		}
-	} else { // remove
-		log.Printf("appLimit on %s for %f is over by %f\n", t.AppName, t.AppLimit.Limit, timesofar-t.AppLimit.Limit)
 	}
 }
 

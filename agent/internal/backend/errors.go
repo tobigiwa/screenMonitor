@@ -2,7 +2,6 @@ package backend
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 )
 
@@ -13,10 +12,10 @@ var (
 
 func (a App) clientError(w http.ResponseWriter, errStatus int, err error) {
 	http.Error(w, err.Error(), errStatus)
-	log.Println("clientError", err)
+	a.logger.Error("clientError" + err.Error())
 }
 
 func (a App) serverError(w http.ResponseWriter, err error) {
 	http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-	log.Println("serverError", err)
+	a.logger.Error("serverError" + err.Error())
 }

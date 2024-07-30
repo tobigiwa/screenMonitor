@@ -60,7 +60,6 @@ func getWindowClassName(X *xgbutil.XUtil, win xproto.Window) (string, error) {
 
 	name, err2 := checkQueryTreeForParent(X, win)
 	if err2 == nil && (name != "") {
-		log.Println("WE GOT THIS NAME AND WIN", name, win)
 		addWindowTocurSessionNamedWindowMap(win, name) // we got a name, so we add it
 		return name, nil
 	}

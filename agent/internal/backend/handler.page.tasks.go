@@ -3,7 +3,6 @@ package backend
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 
 	"strconv"
@@ -169,7 +168,6 @@ func (a *App) newReminderHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) newDaillyAppLimitHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("it got here")
 	err := r.ParseForm()
 	if err != nil {
 		a.clientError(w, http.StatusBadRequest, err)

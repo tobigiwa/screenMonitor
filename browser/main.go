@@ -40,7 +40,7 @@ func main() {
 		count++
 		if port, err = findFreePort(*mode); err != nil {
 			if count >= 5 {
-				log.Fatalf("error getting a free port for browser connection: err %v\n", err)
+				log.Fatalf("error getting a free port for browser connection: err %v", err) // exit
 			}
 			time.Sleep(time.Second)
 			continue
@@ -55,7 +55,7 @@ func main() {
 
 	_, err = BrowserAgent.CheckDaemonService()
 	if err != nil {
-		log.Fatalln("error connecting to daemon service:", err)
+		log.Fatalln("error connecting to daemon service:", err) // exit
 	}
 
 	server := &http.Server{
@@ -72,9 +72,9 @@ func main() {
 	_ = writeURLtoJSONConfigFile(url)
 
 	go func() {
-		log.Printf("Server is running on %s\n", url)
+		logger.Info("Server is running on " + url)
 		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Println("Server error:", err)
+			logger.Error("Server error: " + err.Error())
 		}
 	}()
 
@@ -86,18 +86,18 @@ func main() {
 	close(done)
 
 	if err := cmd.Wait(); err != nil {
-		log.Println("err with browser launch command:", err)
+		logger.Error("err with browser launch command:" + err.Error())
 	}
 
 	if err := BrowserAgent.CloseDaemonConnection(); err != nil {
-		log.Println("error closing socket connection with daemon, error:", err)
+		logger.Error("error closing socket connection with daemon, error:" + err.Error())
 	}
 
 	if err := server.Shutdown(context.TODO()); err != nil {
-		log.Printf("Graceful server shutdown Failed:%+v\n", err)
+		logger.Error("Graceful server shutdown Failed: " + err.Error())
 	}
 
-	log.Println("SERVER STOPPED GRACEFULLY")
+	logger.Info("SERVER STOPPED GRACEFULLY")
 }
 
 func findFreePort(devMode bool) (int, error) {

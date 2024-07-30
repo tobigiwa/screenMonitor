@@ -3,7 +3,6 @@ package database
 import (
 	"bytes"
 	"fmt"
-	"log"
 
 	utils "utils"
 
@@ -96,10 +95,8 @@ func (bs *BadgerDBStore) DeleteBucket(dbPrefix string) error {
 			key := item.Key()
 			if bytes.HasPrefix(key, prefix) {
 				if err := bs.DeleteKey(key); err != nil {
-					log.Println("error deleting key", string(key))
 					continue
 				}
-				log.Println("successfully deleted key:", string(key))
 			}
 		}
 
@@ -190,7 +187,7 @@ func ExampleOf_opsFunc(v []byte) ([]byte, error) {
 
 	if app.AppName == "Google-chrome" {
 		app.ScreenStat[utils.Today()] = utils.Stats{}
-		log.Println(app.AppName, app.ScreenStat[utils.Today()].Active)
+		// log.Println(app.AppName, app.ScreenStat[utils.Today()].Active)
 	}
 
 	// a := app.AppName
