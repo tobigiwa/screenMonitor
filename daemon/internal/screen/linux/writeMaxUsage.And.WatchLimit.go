@@ -49,7 +49,7 @@ func (x11 *X11Monitor) watchLimit(windowID xproto.Window, duration float64) {
 			if limitApp.timeSofar >= limitApp.limit { // limit reached
 				delete(LimitApp, windowName)
 				if err := x11.appLimitReached(limitApp.taskUUID); err != nil {
-					fmt.Println("error from appLimitReached", err)
+					log.Println("error from appLimitReached", err)
 				}
 
 				return
@@ -67,7 +67,7 @@ func (x11 *X11Monitor) watchLimit(windowID xproto.Window, duration float64) {
 			}
 
 			LimitApp[windowName] = limitApp
-			fmt.Printf("\nthis so far %f for app %s...limit at %f\n\n", limitApp.timeSofar, windowName, limitApp.limit) // remove
+			log.Printf("\nthis so far %f for app %s...limit at %f\n\n", limitApp.timeSofar, windowName, limitApp.limit) // remove
 
 		}
 	}
@@ -102,7 +102,7 @@ func AddNewLimit(t utils.Task, timesofar float64) {
 			timeSofar:  timesofar,
 		}
 	} else { // remove
-		fmt.Printf("appLimit on %s for %f is over by %f\n", t.AppName, t.AppLimit.Limit, timesofar-t.AppLimit.Limit)
+		log.Printf("appLimit on %s for %f is over by %f\n", t.AppName, t.AppLimit.Limit, timesofar-t.AppLimit.Limit)
 	}
 }
 

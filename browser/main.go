@@ -3,6 +3,7 @@ package main
 import (
 	webserver "agent"
 	"flag"
+	"fmt"
 	"net"
 
 	"runtime"
@@ -11,7 +12,6 @@ import (
 
 	"context"
 	"errors"
-	"fmt"
 	"log"
 	"log/slog"
 	"net/http"
@@ -23,8 +23,11 @@ import (
 
 func main() {
 
+	mode := flag.Bool("dev", false, "specify if to build in production or development mode")
+	flag.Parse()
+
 	// logging
-	logger, logFile, err := utils.Logger("webserver.log")
+	logger, logFile, err := utils.Logger("webserver.log", *mode)
 	if err != nil {
 		log.Fatalln(err) // exit
 	}
@@ -32,12 +35,10 @@ func main() {
 
 	slog.SetDefault(logger)
 
-	devMode := flag.Bool("dev", false, "specify to run in devMode")
-	flag.Parse()
 	var count, port int
 	for {
 		count++
-		if port, err = findFreePort(*devMode); err != nil {
+		if port, err = findFreePort(*mode); err != nil {
 			if count >= 5 {
 				log.Fatalf("error getting a free port for browser connection: err %v\n", err)
 			}
@@ -71,7 +72,7 @@ func main() {
 	_ = writeURLtoJSONConfigFile(url)
 
 	go func() {
-		fmt.Printf("Server is running on %s\n", url)
+		log.Printf("Server is running on %s\n", url)
 		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Println("Server error:", err)
 		}
@@ -85,18 +86,18 @@ func main() {
 	close(done)
 
 	if err := cmd.Wait(); err != nil {
-		fmt.Println("err with browser launch command:", err)
+		log.Println("err with browser launch command:", err)
 	}
 
 	if err := BrowserAgent.CloseDaemonConnection(); err != nil {
-		fmt.Println("error closing socket connection with daemon, error:", err)
+		log.Println("error closing socket connection with daemon, error:", err)
 	}
 
 	if err := server.Shutdown(context.TODO()); err != nil {
-		fmt.Printf("Graceful server shutdown Failed:%+v\n", err)
+		log.Printf("Graceful server shutdown Failed:%+v\n", err)
 	}
 
-	fmt.Println("SERVER STOPPED GRACEFULLY")
+	log.Println("SERVER STOPPED GRACEFULLY")
 }
 
 func findFreePort(devMode bool) (int, error) {

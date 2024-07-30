@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"slices"
@@ -110,9 +111,9 @@ func (bs *BadgerDBStore) getWeeklyAppStat(anyDayInTheWeek utils.Date) (WeeklySta
 		saturdayOfThatWeek := allConcernedDays[6]
 		err := bs.setOrUpdateKeyValue(dbWeekKey(saturdayOfThatWeek), byteData)
 		if err != nil {
-			fmt.Println("ERROR WRITING NEW WEEK ENTRY", saturdayOfThatWeek, "ERROR IS:", err)
+			log.Println("ERROR WRITING NEW WEEK ENTRY", saturdayOfThatWeek, "ERROR IS:", err)
 		} else {
-			fmt.Println("WRITING NEW WEEK ENTRY", saturdayOfThatWeek)
+			log.Println("WRITING NEW WEEK ENTRY", saturdayOfThatWeek)
 		}
 	}
 
@@ -138,7 +139,6 @@ func (bs *BadgerDBStore) ReportWeeklyUsage(lastWeek time.Time) (string, error) {
 	denominator := float64(len(lastWeekStat.DayByDayTotal))
 	lastWeekDailyAverage := lastWeekStat.WeekTotal.Active / denominator
 	upperLastWeekDailyAverage := upperLastWeekStat.WeekTotal.Active / denominator
-	// fmt.Println(lastWeekStat.WeekTotal.Active, upperLastWeekStat.WeekTotal.Active, lastWeekDailyAverage, upperLastWeekDailyAverage)
 
 	if lastWeekDailyAverage > upperLastWeekDailyAverage {
 		return fmt.Sprintf("Last week daily Avg.: %s  ⬆️%.2f%% from previous week", utils.UsageTimeInHrsMin(lastWeekDailyAverage), ((lastWeekDailyAverage-upperLastWeekDailyAverage)/upperLastWeekDailyAverage)*100), nil

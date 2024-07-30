@@ -38,7 +38,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.LiScreMon.yaml)")
+	rootCmd.PersistentFlags().BoolP("mode", "dev", false, "specify if to build in production or development mode")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.

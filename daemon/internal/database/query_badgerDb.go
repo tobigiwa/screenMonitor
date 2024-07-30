@@ -3,6 +3,7 @@ package database
 import (
 	"bytes"
 	"fmt"
+	"log"
 
 	utils "utils"
 
@@ -95,10 +96,10 @@ func (bs *BadgerDBStore) DeleteBucket(dbPrefix string) error {
 			key := item.Key()
 			if bytes.HasPrefix(key, prefix) {
 				if err := bs.DeleteKey(key); err != nil {
-					fmt.Println("error deleting key", string(key))
+					log.Println("error deleting key", string(key))
 					continue
 				}
-				fmt.Println("successfully deleted key:", string(key))
+				log.Println("successfully deleted key:", string(key))
 			}
 		}
 
@@ -189,13 +190,13 @@ func ExampleOf_opsFunc(v []byte) ([]byte, error) {
 
 	if app.AppName == "Google-chrome" {
 		app.ScreenStat[utils.Today()] = utils.Stats{}
-		fmt.Println(app.AppName, app.ScreenStat[utils.Today()].Active)
+		log.Println(app.AppName, app.ScreenStat[utils.Today()].Active)
 	}
 
 	// a := app.AppName
 	// app.AppIconCategoryAndCmdLine = utils.NoAppIconCategoryAndCmdLine
 	// app.AppName = a
-	// fmt.Println(app.AppName, app.IsCategorySet, app.DesktopCategories, "category-", app.Category, app.IsCmdLineSet, app.CmdLine, app.IsIconSet)
+	// log.Println(app.AppName, app.IsCategorySet, app.DesktopCategories, "category-", app.Category, app.IsCmdLineSet, app.CmdLine, app.IsIconSet)
 
 	return utils.EncodeJSON(app)
 }

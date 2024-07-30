@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 )
 
-func Logger(logFileName string) (*slog.Logger, *os.File, error) {
+func Logger(logFileName string, mode bool) (*slog.Logger, *os.File, error) {
 
 	configDir := APP_CONFIG_DIR
 
@@ -20,6 +20,11 @@ func Logger(logFileName string) (*slog.Logger, *os.File, error) {
 		AddSource: true,
 	}
 
-	jsonLogger := slog.NewTextHandler(io.MultiWriter(logFile, os.Stdout), &opts)
+	if mode {
+		jsonLogger := slog.NewTextHandler(io.MultiWriter(logFile, os.Stdout), &opts)
+		return slog.New(jsonLogger), logFile, nil
+	}
+
+	jsonLogger := slog.NewTextHandler(logFile, &opts)
 	return slog.New(jsonLogger), logFile, nil
 }

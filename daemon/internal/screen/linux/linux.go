@@ -2,7 +2,6 @@ package monitoring
 
 import (
 	"fmt"
-
 	"time"
 
 	db "smDaemon/daemon/internal/database"

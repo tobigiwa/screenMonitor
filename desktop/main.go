@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"embed"
+	"flag"
 	"log"
 	"log/slog"
 
@@ -20,9 +21,11 @@ import (
 var assetDir embed.FS
 
 func main() {
+	mode := flag.Bool("dev", false, "specify if to build in production or development mode")
+	flag.Parse()
 
-	// logging
-	logger, logFile, err := utils.Logger("desktop.log")
+	// Logging
+	logger, logFile, err := utils.Logger("desktop.log", *mode)
 	if err != nil {
 		log.Fatalln(err) // exit
 	}

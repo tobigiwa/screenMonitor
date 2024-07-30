@@ -2,7 +2,7 @@ package database
 
 import (
 	"errors"
-	"fmt"
+	"log"
 
 	utils "utils"
 
@@ -44,7 +44,7 @@ func (bs *BadgerDBStore) GetTaskByAppName(appName string) ([]utils.Task, error) 
 
 	taskArry, err := bs.getAllTasks()
 	if err != nil {
-		fmt.Println("error came from here:", err)
+		log.Println("error came from here:", err)
 		return nil, err
 	}
 
@@ -65,7 +65,7 @@ func (bs *BadgerDBStore) GetTaskByUUID(taskID uuid.UUID) (utils.Task, error) {
 
 	taskArry, err := bs.getAllTasks()
 	if err != nil {
-		fmt.Println("error came from here:", err)
+		log.Println("error came from here:", err)
 		return utils.Task{}, err
 	}
 
@@ -85,7 +85,7 @@ func (bs *BadgerDBStore) AddTask(task utils.Task) error {
 	}
 
 	if bs.checkIfLimitAppExist(task, taskArry) {
-		fmt.Println("this happened")
+		log.Println("this happened")
 		return utils.ErrLimitAppExist
 	}
 

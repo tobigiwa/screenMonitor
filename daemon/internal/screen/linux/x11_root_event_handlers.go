@@ -1,7 +1,6 @@
 package monitoring
 
 import (
-	"fmt"
 	"log"
 
 	"time"
@@ -41,7 +40,7 @@ func (x11 *X11Monitor) windowChanged(x11Conn *xgbutil.XUtil, currActiveWindow xp
 		Interval: utils.TimeInterval{Start: formerActiveWindow.TimeStamp, End: time.Now()},
 	}
 
-	fmt.Printf("New active window ID =====> %v:%v\ntime elapsed for last window %v:%v was %vsecs\n",
+	log.Printf("New active window ID =====> %v:%v\ntime elapsed for last window %v:%v was %vsecs\n",
 		currActiveWindow, curSessionNamedWindow[currActiveWindow], formerActiveWindow.WindowID, curSessionNamedWindow[formerActiveWindow.WindowID], time.Since(netActiveWindow.TimeStamp).Seconds())
 
 	// SETTING THE NEW _NET_ACTIVE_WINDOW

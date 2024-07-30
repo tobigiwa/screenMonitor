@@ -1,12 +1,12 @@
 package service
 
 import (
+	"fmt"
 	db "smDaemon/daemon/internal/database"
 	monitoring "smDaemon/daemon/internal/screen/linux"
 	"smDaemon/daemon/internal/tasks"
 
 	"cmp"
-	"fmt"
 
 	"slices"
 	"strings"

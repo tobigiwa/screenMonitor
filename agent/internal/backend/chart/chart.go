@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"log"
 
 	"github.com/go-echarts/go-echarts/v2/render"
 )
@@ -17,7 +18,7 @@ func renderToHtml(c render.Renderer) template.HTML {
 	var buf bytes.Buffer
 	err := c.Render(&buf)
 	if err != nil {
-		fmt.Printf("Failed to render chart: %s", err)
+		log.Printf("Failed to render chart: %s", err)
 		return ""
 	}
 

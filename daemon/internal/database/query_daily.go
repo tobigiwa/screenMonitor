@@ -3,7 +3,7 @@ package database
 import (
 	"cmp"
 	"errors"
-	"fmt"
+	"log"
 
 	"slices"
 	utils "utils"
@@ -103,9 +103,9 @@ func (bs *BadgerDBStore) getDailyAppStat(day utils.Date) (DailyStat, error) {
 		byteData, _ := utils.EncodeJSON(result)
 		err := bs.setOrUpdateKeyValue(dbDayKey(day), byteData)
 		if err != nil {
-			fmt.Println("ERROR WRITING NEW DAY ENTRY", day, "ERROR IS:", err)
+			log.Println("ERROR WRITING NEW DAY ENTRY", day, "ERROR IS:", err)
 		} else {
-			fmt.Println("WRITING NEW DAY ENTRY", day)
+			log.Println("WRITING NEW DAY ENTRY", day)
 		}
 	}
 

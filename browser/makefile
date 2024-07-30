@@ -4,3 +4,6 @@ dev:
 run:
 	@go generate && go run .
 
+install:
+	@go install
+

@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net"
 	"os"
 	"path/filepath"
@@ -79,15 +80,15 @@ func (s *Service) handleConnection(listener *net.UnixListener) {
 		c, err := listener.Accept()
 		if err != nil {
 			if errors.Is(err, net.ErrClosed) {
-				fmt.Println("connection closed, daemonService says 🖐")
+				log.Println("connection closed, daemonService says 🖐")
 				return
 			} else {
-				fmt.Println("error accepting connection...buh we muuve:", err)
+				log.Println("error accepting connection...buh we muuve:", err)
 				continue
 			}
 		}
 
-		fmt.Println("Connection accepted")
+		log.Println("Connection accepted")
 		go s.treatMessage(c)
 	}
 }
@@ -102,9 +103,9 @@ func (s *Service) treatMessage(c net.Conn) {
 
 		buf := make([]byte, 10_000) //10kb
 		if n, err = c.Read(buf); err != nil {
-			fmt.Println("error reading message:", err)
+			log.Println("error reading message:", err)
 			if errors.Is(err, io.EOF) {
-				fmt.Println("client connection closed")
+				log.Println("client connection closed")
 				c.Close()
 				return
 			}
@@ -112,7 +113,7 @@ func (s *Service) treatMessage(c net.Conn) {
 		}
 
 		if msg, err = utils.DecodeJSON[utils.Message](buf[:n]); err != nil {
-			fmt.Println("error decoding socket message", err)
+			log.Println("error decoding socket message", err)
 			c.Close()
 			return
 		}
@@ -168,16 +169,16 @@ func (s *Service) treatMessage(c net.Conn) {
 
 		_, err = c.Write(bytes)
 		if err != nil {
-			fmt.Println("error writing response:", err)
+			log.Println("error writing response:", err)
 			continue
 		}
 	}
 }
 
 func closeConnection(c net.Conn) {
-	fmt.Println("we got a close connection message")
+	log.Println("we got a close connection message")
 	err := c.Close()
 	if err != nil {
-		fmt.Println("ERROR CLOSING CONNECTION")
+		log.Println("ERROR CLOSING CONNECTION")
 	}
 }

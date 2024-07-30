@@ -68,7 +68,7 @@ func DaemonServiceLinux(logger *slog.Logger) {
 
 	// err = monitor.Db.UpdateAppInfoManually([]byte("app:Google-chrome"), db.ExampleOf_opsFunc)
 	// if err != nil {
-	// 	fmt.Println("opt failed", err)
+	// 	log.Println("opt failed", err)
 	// }
 
 	xevent.Quit(monitor.X11Connection) // this should always comes first

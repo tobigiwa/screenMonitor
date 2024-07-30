@@ -2,6 +2,7 @@ package monitoring
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/BurntSushi/xgb/xproto"
 	"github.com/BurntSushi/xgbutil"
@@ -28,7 +29,7 @@ func registerWindowForEvents(windowID xproto.Window) {
 		[]uint32{
 			xproto.EventMaskStructureNotify}).Check()
 	if err != nil {
-		fmt.Printf("Failed to select notify events for window:%v, error: %v", windowID, err)
+		log.Printf("Failed to select notify events for window:%v, error: %v", windowID, err)
 	}
 
 	registerWindow(windowID)
@@ -59,7 +60,7 @@ func getWindowClassName(X *xgbutil.XUtil, win xproto.Window) (string, error) {
 
 	name, err2 := checkQueryTreeForParent(X, win)
 	if err2 == nil && (name != "") {
-		fmt.Println("WE GOT THIS NAME AND WIN", name, win)
+		log.Println("WE GOT THIS NAME AND WIN", name, win)
 		addWindowTocurSessionNamedWindowMap(win, name) // we got a name, so we add it
 		return name, nil
 	}

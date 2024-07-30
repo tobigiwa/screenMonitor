@@ -1,7 +1,7 @@
 package monitoring
 
 import (
-	"fmt"
+	"log"
 	"time"
 
 	"github.com/BurntSushi/xgbutil"
@@ -39,13 +39,13 @@ func propertyNotifyEventFuncRoot(x11Conn *xgbutil.XUtil, ev xevent.PropertyNotif
 }
 
 func mapNotifyEventFuncRoot(x11Conn *xgbutil.XUtil, ev xevent.MapNotifyEvent) {
-	fmt.Printf("\nrootMapNotifyHandler ev.window:%v ======++++++====> ev.event:%v\n", ev.Window, ev.Event)
+	log.Printf("\nrootMapNotifyHandler ev.window:%v ======++++++====> ev.event:%v\n", ev.Window, ev.Event)
 	if ev.OverrideRedirect { // window is a popup
 		return
 	}
 
 	if transientFor, err := xprop.PropValWindow(xprop.GetProperty(x11Conn, ev.Window, "WM_TRANSIENT_FOR")); err == nil && transientFor != 0 {
-		fmt.Println("This window is transient for window", transientFor)
+		log.Println("This window is transient for window", transientFor)
 		return // window can be treated as a popup
 	}
 

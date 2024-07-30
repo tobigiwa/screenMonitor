@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"go/build"
 	"log"
@@ -28,8 +29,10 @@ func main() {
 }
 
 func onReady() {
+	mode := flag.Bool("dev", false, "specify if to build in production or development mode")
+	flag.Parse()
 
-	logger, logFile, err := utils.Logger("trayIcon.log")
+	logger, logFile, err := utils.Logger("trayIcon.log", *mode)
 	if err != nil {
 		log.Println(err)
 		systray.Quit()

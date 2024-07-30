@@ -37,7 +37,14 @@ var startCmd = &cobra.Command{
 		// 	panic(err)
 		// }
 		// defer pprof.StopCPUProfile()
-		logger, logFile, err := utils.Logger("daemon.log")
+
+		// Logging
+		mode, err := cmd.Flags().GetBool("mode")
+		if err != nil {
+			log.Fatalln("err getting build mode in flag command:", err) // exit
+		}
+
+		logger, logFile, err := utils.Logger("daemon.log", mode)
 		if err != nil {
 			log.Fatalln(err) // exit
 		}

@@ -6,6 +6,7 @@ package tasks
 
 import (
 	"fmt"
+	"log"
 	"os/exec"
 	monitoring "smDaemon/daemon/internal/screen/linux"
 
@@ -43,7 +44,7 @@ func newTaskManger(dbHandle TaskManagerDbRequirement) *TaskManager {
 
 func (tm *TaskManager) CloseChan() error {
 	if err := tm.gocron.Shutdown(); err != nil {
-		fmt.Println("error shutting down gocron Scheduler:", err)
+		log.Println("error shutting down gocron Scheduler:", err)
 		return err
 	}
 	tm.channel <- utils.Task{}
@@ -112,7 +113,7 @@ func StartTaskManger(dbHandle TaskManagerDbRequirement) (*TaskManager, error) {
 			func() {
 				s, err := tm.dbHandle.ReportWeeklyUsage(utils.PreviousWeekSaturday(time.Now()))
 				if err != nil {
-					fmt.Println("reportlyweek", err)
+					log.Println("reportlyweek", err)
 					return
 				}
 
@@ -120,7 +121,7 @@ func StartTaskManger(dbHandle TaskManagerDbRequirement) (*TaskManager, error) {
 			},
 		),
 	); err != nil {
-		fmt.Println("error creating weekly job", err)
+		log.Println("error creating weekly job", err)
 	}
 
 	return tm, nil
@@ -135,11 +136,11 @@ func (tm *TaskManager) disperseTask() {
 
 		if reflect.ValueOf(task).IsZero() {
 			close(tm.channel)
-			fmt.Println("closing and cleaning TaskManager")
+			log.Println("closing and cleaning TaskManager")
 			break
 		}
 
-		fmt.Printf("task received   %+v\n\n", task)
+		log.Printf("task received   %+v\n\n", task)
 
 		switch task.Job {
 		case utils.ReminderWithNoAppLaunch:
@@ -172,7 +173,7 @@ func (tm *TaskManager) reminderWithNoAppLaunch(task utils.Task) {
 			}),
 		),
 	); err != nil {
-		fmt.Println("error creating job", err)
+		log.Println("error creating job", err)
 	}
 
 }
@@ -190,12 +191,12 @@ func (tm *TaskManager) reminderWithAppLaunch(task utils.Task) {
 					cmd := exec.Command("bash", "-c", task.CmdLine)
 					err := cmd.Start()
 					if err != nil {
-						fmt.Println(err)
+						log.Println(err)
 					}
 
 					err = cmd.Wait()
 					if err != nil {
-						fmt.Printf("Command finished with error: %v", err)
+						log.Printf("Command finished with error: %v", err)
 					}
 				}),
 			gocron.AfterJobRuns(func(jobID uuid.UUID, jobName string) {
@@ -219,7 +220,7 @@ func (tm *TaskManager) preNotify(task utils.Task) {
 			gocron.OneTimeJob(gocron.OneTimeJobStartDateTime(t)),
 			gocron.NewTask(preNotifyAlert, task.UI.Title, notifyBeForeReminder, withSound),
 			gocron.WithTags(task.UUID.String())); err != nil {
-			fmt.Println("gocron failed to add notififcation", err)
+			log.Println("gocron failed to add notififcation", err)
 		}
 	}
 }
