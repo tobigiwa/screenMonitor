@@ -72,7 +72,7 @@ func main() {
 	_ = writeURLtoJSONConfigFile(url)
 
 	go func() {
-		logger.Info("Server is running on " + url)
+		fmt.Println("Server is running on " + url)
 		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			logger.Error("Server error: " + err.Error())
 		}

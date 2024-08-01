@@ -4,10 +4,11 @@ import (
 	"sync"
 	"time"
 
+	"utils"
+
 	"github.com/BurntSushi/xgb/xproto"
 	"github.com/BurntSushi/xgbutil"
 	"github.com/google/uuid"
-	"utils"
 )
 
 type netActiveWindowInfo struct {
@@ -20,12 +21,11 @@ type DoNotCopy [0]sync.Mutex
 
 type x11DBInterface interface {
 	WriteUsage(utils.ScreenTime) error
-	UpdateOpertionOnBuCKET(dbPrefix string, opsFunc func([]byte) ([]byte, error)) error
-	UpdateAppInfoManually(key []byte, opsFunc func([]byte) ([]byte, error)) error
+	UpdateOpertionOnPrefix(dbPrefix string, opsFunc func([]byte) ([]byte, error)) error
+	UpdateOperationOnKey(key []byte, opsFunc func([]byte) ([]byte, error)) error
 	GetTaskByUUID(taskID uuid.UUID) (utils.Task, error)
 	UpdateAppLimitStatus(taskID uuid.UUID) error
 	RemoveTask(id uuid.UUID) error
-	DeleteKey([]byte) error
 }
 
 type X11Monitor struct {

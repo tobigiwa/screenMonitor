@@ -41,7 +41,7 @@ func DaemonServiceLinux(logger *slog.Logger) {
 
 	go func() {
 		if err := service.StartService(filepath.Join(configDir, "socket"), badgerDB); err != nil {
-			log.Println("error starting service", err)
+			logger.Error("error starting service:" + err.Error())
 			sig <- syscall.SIGTERM // if service.StartService fails, send a signal to close the program
 		}
 	}()
@@ -60,13 +60,13 @@ func DaemonServiceLinux(logger *slog.Logger) {
 
 	go func() {
 		xevent.Main(monitor.X11Connection) // Start the x11 event loop.
-		log.Println("error starting x11 event loop", err)
+		logger.Error("error starting x11 event loop:" + err.Error())
 		sig <- syscall.SIGTERM // if the event loop cannot be started, send a signal to close the program
 	}()
 
 	<-sig // awaiting only the first signal
 
-	// err = monitor.Db.UpdateAppInfoManually([]byte("app:Google-chrome"), db.ExampleOf_opsFunc)
+	// err = monitor.Db.UpdateOpertionOnPrefix("app", db.ExampleOf_opsFunc)
 	// if err != nil {
 	// 	log.Println("opt failed", err)
 	// }

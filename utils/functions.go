@@ -220,7 +220,6 @@ func IsInCurrentWeekTime(t time.Time) bool {
 }
 
 func IsInCurrentWeekDate(d Date) bool {
-	// t, _ := d.ToTime()
 	return SaturdayOfTheWeek(time.Now()) == d
 }
 

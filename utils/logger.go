@@ -26,6 +26,7 @@ func Logger(logFileName string, mode bool) (*slog.Logger, *os.File, error) {
 		return slog.New(jsonLogger), logFile, nil
 	}
 
+	os.Stdout = nil
 	jsonLogger := slog.NewJSONHandler(logFile, opts)
 	return slog.New(jsonLogger), logFile, nil
 }

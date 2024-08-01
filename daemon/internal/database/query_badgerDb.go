@@ -108,7 +108,7 @@ func (bs *BadgerDBStore) DeleteBucket(dbPrefix string) error {
 	return nil
 }
 
-func (bs *BadgerDBStore) UpdateOpertionOnBuCKET(dbPrefix string, opsFunc func([]byte) ([]byte, error)) error {
+func (bs *BadgerDBStore) UpdateOpertionOnPrefix(dbPrefix string, opsFunc func([]byte) ([]byte, error)) error {
 
 	var prefix []byte
 	switch dbPrefix {
@@ -137,9 +137,9 @@ func (bs *BadgerDBStore) UpdateOpertionOnBuCKET(dbPrefix string, opsFunc func([]
 					return err
 				}
 
-				if bytes.Equal(updatedByteArr, val) {
-					return nil
-				}
+				// if bytes.Equal(updatedByteArr, val) {
+				// 	return nil
+				// }
 
 				return txn.Set(it.Item().Key(), updatedByteArr)
 			})
@@ -157,7 +157,7 @@ func (bs *BadgerDBStore) UpdateOpertionOnBuCKET(dbPrefix string, opsFunc func([]
 	return nil
 }
 
-func (bs *BadgerDBStore) UpdateAppInfoManually(key []byte, opsFunc func([]byte) ([]byte, error)) error {
+func (bs *BadgerDBStore) UpdateOperationOnKey(key []byte, opsFunc func([]byte) ([]byte, error)) error {
 
 	byteData, err := bs.Get(key)
 	if err != nil {
@@ -168,9 +168,9 @@ func (bs *BadgerDBStore) UpdateAppInfoManually(key []byte, opsFunc func([]byte) 
 		return err
 	}
 
-	if bytes.Equal(updatedByteArr, byteData) {
-		return nil
-	}
+	// if bytes.Equal(updatedByteArr, byteData) {
+	// 	return nil
+	// }
 
 	return bs.setOrUpdateKeyValue(key, updatedByteArr)
 }
@@ -184,16 +184,14 @@ func ExampleOf_opsFunc(v []byte) ([]byte, error) {
 	if app, err = utils.DecodeJSON[AppInfo](v); err != nil {
 		return nil, err
 	}
+	fmt.Println(app.AppName, app.IsCategorySet, app.DesktopCategories, "category-", app.Category, app.IsCmdLineSet, app.CmdLine, app.IsIconSet)
 
-	if app.AppName == "Google-chrome" {
-		app.ScreenStat[utils.Today()] = utils.Stats{}
-		// log.Println(app.AppName, app.ScreenStat[utils.Today()].Active)
-	}
+	app.AppIconCategoryAndCmdLine.Category = ""
+	app.AppIconCategoryAndCmdLine.IsCategorySet = false
+	app.AppIconCategoryAndCmdLine.DesktopCategories = nil
 
-	// a := app.AppName
-	// app.AppIconCategoryAndCmdLine = utils.NoAppIconCategoryAndCmdLine
-	// app.AppName = a
-	// log.Println(app.AppName, app.IsCategorySet, app.DesktopCategories, "category-", app.Category, app.IsCmdLineSet, app.CmdLine, app.IsIconSet)
-
+	fmt.Println(app.AppName, app.IsCategorySet, app.DesktopCategories, "category-", app.Category, app.IsCmdLineSet, app.CmdLine, app.IsIconSet)
+	fmt.Println()
+	fmt.Println()
 	return utils.EncodeJSON(app)
 }

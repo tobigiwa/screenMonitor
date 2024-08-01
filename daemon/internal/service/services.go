@@ -25,10 +25,9 @@ func (s *Service) StopTaskManger() error {
 
 func (s *Service) getWeekStat(msg utils.Date) (utils.WeekStatMessage, error) {
 	var (
-		weekStat    db.WeeklyStat
-		appsInfo    []utils.AppIconCategoryAndCmdLine
-		allCategory []utils.Category
-		err         error
+		weekStat db.WeeklyStat
+		appsInfo []utils.AppIconCategoryAndCmdLine
+		err      error
 	)
 
 	if weekStat, err = s.db.GetWeek(msg); err != nil {
@@ -64,16 +63,11 @@ func (s *Service) getWeekStat(msg utils.Date) (utils.WeekStatMessage, error) {
 		appCard = append(appCard, utils.ApplicationDetail{AppInfo: appsInfo[i], Usage: weekStat.EachApp[i].Usage.Active})
 	}
 
-	if allCategory, err = s.db.GetAllACategories(); err != nil {
-		return utils.NoMessage.WeekStatResponse, fmt.Errorf("err with GetAllCategories:%w", err)
-	}
-
 	return utils.WeekStatMessage{
 			Keys:            keys,
 			FormattedDay:    formattedDay,
 			Values:          values,
 			TotalWeekUptime: weekStat.WeekTotal.Active,
-			AllCategory:     allCategory,
 			Month:           month,
 			Year:            fmt.Sprint(year),
 			AppDetail:       appCard,
@@ -138,6 +132,12 @@ func (s *Service) setAppCategory(msg utils.SetCategoryRequest) (utils.SetCategor
 	if err := s.db.SetAppCategory(msg.AppName, msg.Category); err != nil {
 		return utils.NoMessage.SetCategoryResponse, err
 	}
+
+	// r, err := s.db.GetWeek(utils.ToDateType(time.Now()))
+	// if err != nil {
+	// 	return utils.NoMessage.SetCategoryResponse, err
+	// }
+
 	return utils.SetCategoryResponse{IsCategorySet: true}, nil
 }
 
@@ -253,4 +253,8 @@ func (s *Service) removeTask(msg utils.Task) (utils.ReminderMessage, error) {
 	}
 
 	return utils.ReminderMessage{TaskOptSuccessful: true}, nil
+}
+
+func (s *Service) getCategory() ([]utils.Category, error) {
+	return s.db.GetAllACategories()
 }

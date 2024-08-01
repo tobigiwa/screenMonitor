@@ -13,8 +13,6 @@ type Message struct {
 	StatusCheck              string              `json:"statusCheck"`
 	IsError                  bool                `json:"isError"`
 	Error                    string              `json:"error"`
-	SetCategoryRequest       SetCategoryRequest  `json:"setCategoryRequest"`
-	SetCategoryResponse      SetCategoryResponse `json:"setCategoryResponse"`
 	DayStatRequest           Date                `json:"dayStatRequest"`
 	DayStatResponse          DayStatMessage      `json:"dayStatResponse"`
 	WeekStatRequest          Date                `json:"weekStatRequest"`
@@ -23,6 +21,9 @@ type Message struct {
 	AppStatResponse          AppStatMessage      `json:"appStatResponse"`
 	ReminderAndLimitRequest  Task                `json:"reminderAndLimitRequest"`
 	ReminderAndLimitResponse ReminderMessage     `json:"reminderAndLimitResponse"`
+	SetCategoryRequest       SetCategoryRequest  `json:"setCategoryRequest"`
+	SetCategoryResponse      SetCategoryResponse `json:"setCategoryResponse"`
+	GetCategoryResponse      []Category          `json:"getCategoryResponse"`
 }
 
 type SetCategoryRequest struct {
@@ -49,7 +50,6 @@ type WeekStatMessage struct {
 	Month           string              `json:"month"`
 	Year            string              `json:"year"`
 	AppDetail       []ApplicationDetail `json:"appDetail"`
-	AllCategory     []Category          `json:"allCategory"`
 }
 
 type DayStatMessage struct {

@@ -20,6 +20,7 @@ func (a *App) Routes() *http.ServeMux {
 	mux.HandleFunc("GET /weekStat", a.WeekStatHandler)
 	mux.HandleFunc("GET /appStat", a.AppStatHandler)
 	mux.HandleFunc("GET /dayStat", a.DayStatHandler)
+	mux.HandleFunc("GET /getCategory", a.getCategory)
 	mux.HandleFunc("POST /setCategory", a.SetCategory)
 
 	// ReminderAndLimitPage

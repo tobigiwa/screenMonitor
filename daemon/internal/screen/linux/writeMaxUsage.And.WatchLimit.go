@@ -49,7 +49,7 @@ func (x11 *X11Monitor) watchLimit(windowID xproto.Window, duration float64) {
 			if limitApp.timeSofar >= limitApp.limit { // limit reached
 				delete(LimitApp, windowName)
 				if err := x11.appLimitReached(limitApp.taskUUID); err != nil {
-					log.Println("error from appLimitReached", err)
+					fmt.Println("error from appLimitReached", err)
 				}
 
 				return

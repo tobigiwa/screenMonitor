@@ -139,6 +139,9 @@ func (s *Service) treatMessage(c net.Conn) {
 		case "setCategory":
 			msg.SetCategoryResponse, err = s.setAppCategory(msg.SetCategoryRequest)
 
+		case "getCategory":
+			msg.GetCategoryResponse, err = s.getCategory()
+
 		case "tasks":
 			msg.ReminderAndLimitResponse, err = s.tasks()
 
@@ -176,7 +179,7 @@ func (s *Service) treatMessage(c net.Conn) {
 }
 
 func closeConnection(c net.Conn) {
-	log.Println("we got a close connection message")
+	fmt.Println("we got a close connection message")
 	err := c.Close()
 	if err != nil {
 		log.Println("ERROR CLOSING CONNECTION")
