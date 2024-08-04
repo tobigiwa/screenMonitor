@@ -143,22 +143,22 @@ func (s *Service) treatMessage(c net.Conn) {
 			msg.GetCategoryResponse, err = s.getCategory()
 
 		case "tasks":
-			msg.ReminderAndLimitResponse, err = s.tasks()
+			msg.TaskResponse, err = s.tasks()
 
 		case "reminders":
-			msg.ReminderAndLimitResponse, err = s.allReminderTask()
+			msg.TaskResponse, err = s.allReminderTask()
 
 		case "limits":
-			msg.ReminderAndLimitResponse, err = s.allDailyAppLimitTask()
+			msg.TaskResponse, err = s.allDailyAppLimitTask()
 
 		case "newReminder":
-			msg.ReminderAndLimitResponse, err = s.addNewReminder(msg.ReminderAndLimitRequest)
+			msg.TaskResponse, err = s.addNewReminder(msg.TaskRequest)
 
 		case "newLimit":
-			msg.ReminderAndLimitResponse, err = s.addNewLimitApp(msg.ReminderAndLimitRequest)
+			msg.TaskResponse, err = s.addNewLimitApp(msg.TaskRequest)
 
 		case "removeTask":
-			msg.ReminderAndLimitResponse, err = s.removeTask(msg.ReminderAndLimitRequest)
+			msg.TaskResponse, err = s.removeTask(msg.TaskRequest)
 		}
 
 		if err != nil {

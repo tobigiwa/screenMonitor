@@ -21,8 +21,8 @@ type DoNotCopy [0]sync.Mutex
 
 type x11DBInterface interface {
 	WriteUsage(utils.ScreenTime) error
-	UpdateOpertionOnPrefix(dbPrefix string, opsFunc func([]byte) ([]byte, error)) error
-	UpdateOperationOnKey(key []byte, opsFunc func([]byte) ([]byte, error)) error
+	UpdateOpertionOnPrefix(dbPrefix string, opsFunc func([]byte) ([]byte, error)) error // these two are here only because I find it useful
+	UpdateOperationOnKey(key []byte, opsFunc func([]byte) ([]byte, error)) error        // to manipulate my db, usage in daemon_[os].go (later end of the script).
 	GetTaskByUUID(taskID uuid.UUID) (utils.Task, error)
 	UpdateAppLimitStatus(taskID uuid.UUID) error
 	RemoveTask(id uuid.UUID) error

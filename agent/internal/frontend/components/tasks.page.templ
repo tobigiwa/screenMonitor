@@ -2,7 +2,7 @@ package frontend
 
 import "utils"
 
-templ TasksPage(taskType string, allApps []utils.AppIconCategoryAndCmdLine) {
+templ TasksPage(allApps []utils.AppIconCategoryAndCmdLine) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
@@ -10,55 +10,36 @@ templ TasksPage(taskType string, allApps []utils.AppIconCategoryAndCmdLine) {
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			<link rel="stylesheet" href="/assets/styles/output.css"/>
 			<link rel="stylesheet" href="/assets/styles/dd.min.css"/>
-			<link rel="stylesheet" href="/assets/styles/jquery-ui.min.css"/>
 			<script src="/assets/javascript/script.out.js"></script>
 			<script src="/assets/libraries/htmx.min.js"></script>
+			<script src="assets/libraries/hyperscript.min.js"></script>
 			<script src="/assets/libraries/dd.min.js"></script>
-			<script src="/assets/libraries/jquery-3.7.1.js"></script>
-			<script src="/assets/libraries/jquery-ui.js"></script>
 			<title>ScreenTime</title>
 		</head>
 		<body class="m-0 p-0 h-full font-serif overflow-hidden">
 			<div class="flex w-full">
 				@sideBarMenu()
-				@reminderAndLimitPage(allApps)
-				@templ.JSONScript("id", taskType)
+				@reminderAndLimitPage()
 			</div>
-			<script>
-				document.addEventListener( 'DOMContentLoaded', function () {
-					const data = JSON.parse(document.getElementById('id').textContent);
-					if (data === "AppLimit") {
-						document.querySelector( '.applimitRequest' ).click();
-					} else {
-						document.querySelector( '.reminderRequest' ).click();
-					}
-				});
-		</script>
 		</body>
+		@reminderAndLimitDialog(allApps)
 	</html>
 }
 
-templ reminderAndLimitPage(allApps []utils.AppIconCategoryAndCmdLine) {
+templ reminderAndLimitPage() {
 	<div class="w-full bg-zinc-800">
 		@header()
 		@reminderAndLimitHeaderSection()
 		<div class="max-h-max min-h-task-page bg-slate-800">
-			@RenderTasks(true, templ.NopComponent)
+			@RenderTasks(templ.NopComponent)
 		</div>
-		@reminderAndLimitDialog(allApps)
 	</div>
 }
 
-templ RenderTasks(isEmpty bool, taskType templ.Component) {
-	if isEmpty {
-		<div id="task-holder" hx-swap-oob="true" class="flex justify-center items-center text-white min-h-task-page">No Task</div>
-	} else {
-		<div id="task-holder" hx-swap-oob="true">
-			<ul>
-				@taskType
-			</ul>
-		</div>
-	}
+templ RenderTasks(taskType templ.Component) {
+	<div id="task-holder">
+		@taskType
+	</div>
 }
 
 templ reminderAndLimitDialog(allApps []utils.AppIconCategoryAndCmdLine) {
@@ -69,10 +50,11 @@ templ reminderAndLimitDialog(allApps []utils.AppIconCategoryAndCmdLine) {
 templ reminderAndLimitHeaderSection() {
 	<div class="h-12 sticky top-0 z-10 bg-zinc-500 text-white mb-1 rounded-md flex gap-8">
 		<div class="inline-flex justify-start items-center w-1/2 cursor-pointer">
-			<h2 class="m-0 p-0 w-full text-center hover:scale-90 font-bold text-lg" hx-get="/reminders" hx-swap="none" hx-select-oob="#task-holder:outerHTML">Reminder</h2>
+			<h2 class="m-0 p-0 w-full text-center hover:scale-90 font-bold text-lg" hx-get="/reminders" hx-swap="none" hx-select-oob="#task-holder:outerHTML " _="on load trigger click on me">Reminder</h2>
 			<button
-				class="reminder-dialog__btn w-11 h-11 rounded-md cursor-alias bg-white rounded-r"
+				class=" w-11 h-11 rounded-md cursor-alias bg-white rounded-r"
 				title="add new reminder task"
+				_="on click call showReminderDialog()"
 			>
 				<img
 					src="assets/svg/add2.svg"
@@ -84,8 +66,8 @@ templ reminderAndLimitHeaderSection() {
 			<h2 class="m-0 p-0 w-full text-center hover:scale-90 font-bold text-lg" hx-get="/limits" hx-swap="none" hx-select-oob="#task-holder:outerHTML">App Limit</h2>
 			<button
 				class="w-11 h-11 rounded-md cursor-alias bg-white items-center"
-				id="limit-dialog__btn"
 				title="add new app limit"
+				_="on click js document.querySelector('.limit-dialog').showModal() end"
 			>
 				<img
 					class="h-8 w-10"
@@ -96,9 +78,94 @@ templ reminderAndLimitHeaderSection() {
 	</div>
 }
 
+templ limitDialog(allApp []utils.AppIconCategoryAndCmdLine) {
+	<dialog class="limit-dialog h-30vh bg-slate-400 items-center p-4 w-30vh rounded-md backdrop-blur-sm">
+		<form id="limit-form">
+			<select
+				name="app"
+				is="ms-dropdown"
+				data-enable-auto-filter="false"
+				required
+			>
+				<option
+					value=""
+					data-description="select app to limit"
+				>Apps</option>
+				for _, app := range allApp {
+					<option value={ app.AppName } data-image={ getImageFilePath(app.AppName, app.Icon) } data-description={ app.Category.String() }>{ app.AppName }</option>
+				}
+			</select>
+			<div class="mb-4 flex justify-between">
+				<input
+					type="number"
+					name="hrs"
+					min="0"
+					max="23"
+					placeholder="in Hrs; 0 - 23"
+					class="mt-4 w-32 h-8"
+					focus
+				/>
+				<input
+					type="number"
+					name="min"
+					min="0"
+					max="59"
+					placeholder="in Mins; 0 - 59"
+					class="mt-4 w-32 h-8"
+				/>
+			</div>
+			<div class="mb-4 flex justify-between">
+				<div>
+					<input
+						type="checkbox"
+						name="recurring"
+						value="true"
+						checked
+					/>
+					<label
+						for="sound-notification-first"
+					>Everyday</label>
+				</div>
+				<div>
+					<input
+						type="checkbox"
+						name="exitApp"
+						value="true"
+					/>
+					<label for="sound-notification-first" class="italic">
+						Exit
+						app
+					</label>
+				</div>
+			</div>
+			<div class="button-container flex justify-between">
+				<button
+					type="submit"
+					hx-post="/newLimit"
+					hx-trigger="submit"
+					hx-swap="none"
+					hx-select-oob="#task-holder:outerHTML"
+					_="on submit js document.querySelector('.limit-dialog').close() end"
+					formmethod="dialog"
+					class="p-2.5 text-lg bg-teal-800 text-white border-none rounded-md cursor-pointer"
+				>Create Limit</button>
+				<button _="on click get the first .limit-dialog then call it.close()" class="p-2.5 text-lg bg-teal-800 text-white border-none rounded-md cursor-pointer">Close</button>
+			</div>
+		</form>
+	</dialog>
+}
+
 templ reminderDialog() {
-	<dialog class="reminder-dialog bg-zinc-400 text-white backdrop:backdrop-opacity-10">
-		<form class="new-reminder w-99% px-3" method="post" action="/newReminder">
+	<dialog class="reminder-dialog w-3/4 bg-zinc-400 text-black rounded-md backdrop-blur-sm">
+		<form
+			formmethod="dialog"
+			class="px-3"
+			hx-post="/newReminder"
+			hx-trigger="submit"
+			hx-swap="none"
+			hx-select-oob="#task-holder:outerHTML"
+			_="on submit js document.querySelector('.reminder-dialog').close() end"
+		>
 			<div class="titles w-full inline-flex justify-between">
 				<div class="form-pair flex flex-col">
 					<label for="add-title" class="mb-1.5 italic text-lg">Title:</label>
@@ -247,12 +314,12 @@ templ reminderDialog() {
 					class="p-1.5 text-sm mb-2.5"
 				></textarea>
 			</div>
-			<div class="button-container flex justify-between">
+			<div class="button-container flex justify-between py-4">
 				<button class="p-2.5 text-lg bg-teal-800 text-white border-none rounded-md cursor-pointer" type="submit">Create Reminder</button>
 				<button class="close-modal p-2.5 text-lg bg-teal-800 text-white border-none rounded-md cursor-pointer" formmethod="dialog" formnovalidate>Close</button>
 			</div>
 		</form>
-		<script>
+		<script type="text/javascript">
 			function getLocalDateTime() {
 				const now = new Date();
 				const timeZoneOffset = now.getTimezoneOffset() * 60000;
@@ -260,93 +327,13 @@ templ reminderDialog() {
 				return localDateTime.toISOString().slice(0, 16);
 			}
 
-			const reminderDialog = document.querySelector('.reminder-dialog');
-			
-			document.querySelector('.reminder-dialog__btn').addEventListener('click', () => {
+			function showReminderDialog() {
 				const dateTimeInput = document.querySelector('input[type="datetime-local"]');
 				dateTimeInput.value = getLocalDateTime();
 				dateTimeInput.min = getLocalDateTime();
-				reminderDialog.showModal();
-			});
-		</script>
-	</dialog>
-}
 
-templ limitDialog(allApp []utils.AppIconCategoryAndCmdLine) {
-	<dialog class="limit-dialog h-30vh bg-slate-400 items-center p-4 w-30vh backdrop:backdrop-opacity-10">
-		<div id="appLimit-dialog">
-			<form formmethod="dialog">
-				<select
-					name="app"
-					is="ms-dropdown"
-					data-enable-auto-filter="false"
-					required
-				>
-					<option
-						value=""
-						data-description="select app to limit"
-					>Apps</option>
-					for _, app := range allApp {
-						<option value={ app.AppName } data-image={ getImageFilePath(app.AppName, app.Icon) } data-description={ app.Category.String() }>{ app.AppName }</option>
-					}
-				</select>
-				<div class="mb-4 flex justify-between">
-					<input
-						type="number"
-						name="hrs"
-						min="0"
-						max="23"
-						placeholder="in Hrs; 0 - 23"
-						class="mt-4 w-32 h-8"
-					/>
-					<input
-						type="number"
-						name="min"
-						min="0"
-						max="59"
-						placeholder="in Mins; 0 - 59"
-						class="mt-4 w-32 h-8"
-					/>
-				</div>
-				<div class="mb-4 flex justify-between">
-					<div>
-						<input
-							type="checkbox"
-							name="recurring"
-							value="true"
-							checked
-						/>
-						<label
-							for="sound-notification-first"
-						>Everyday</label>
-					</div>
-					<div>
-						<input
-							type="checkbox"
-							name="exitApp"
-							value="true"
-						/>
-						<label for="sound-notification-first" class="italic">
-							Exit
-							app
-						</label>
-					</div>
-				</div>
-				<div class="button-container flex justify-between">
-					<button class="submit p-2.5 text-lg bg-teal-800 text-white border-none rounded-md cursor-pointer" type="submit">Create Limit</button>
-					<button
-						class="close-modal p-2.5 text-lg bg-teal-800 text-white border-none rounded-md cursor-pointer"
-						formmethod="dialog"
-						formnovalidate
-					>Close</button>
-				</div>
-			</form>
-			<script type="text/javascript">
-					const limitDialog = document.querySelector('.limit-dialog');
-					document.querySelector('#limit-dialog__btn').addEventListener('click', () => {
-						limitDialog.showModal();
-					});
-			</script>
-		</div>
+				document.querySelector('.reminder-dialog').showModal();
+			}
+		</script>
 	</dialog>
 }

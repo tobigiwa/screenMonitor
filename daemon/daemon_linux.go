@@ -70,6 +70,10 @@ func DaemonServiceLinux(logger *slog.Logger) {
 	// if err != nil {
 	// 	log.Println("opt failed", err)
 	// }
+	err = monitor.Db.UpdateOperationOnKey([]byte("Microsoft-edge"), db.ExampleOf_opsFunc)
+	if err != nil {
+		log.Println("opt failed", err)
+	}
 
 	xevent.Quit(monitor.X11Connection) // this should always comes first
 	ctxCancel()                        // a different goroutine for managing backing up app usage every minute, fired from monitor

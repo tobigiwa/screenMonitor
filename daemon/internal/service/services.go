@@ -132,29 +132,23 @@ func (s *Service) setAppCategory(msg utils.SetCategoryRequest) (utils.SetCategor
 	if err := s.db.SetAppCategory(msg.AppName, msg.Category); err != nil {
 		return utils.NoMessage.SetCategoryResponse, err
 	}
-
-	// r, err := s.db.GetWeek(utils.ToDateType(time.Now()))
-	// if err != nil {
-	// 	return utils.NoMessage.SetCategoryResponse, err
-	// }
-
 	return utils.SetCategoryResponse{IsCategorySet: true}, nil
 }
 
-func (s *Service) tasks() (utils.ReminderMessage, error) {
+func (s *Service) tasks() (utils.TaskMessage, error) {
 
 	allApps, err := s.db.GetAllApp()
 	if err != nil {
-		return utils.NoMessage.ReminderAndLimitResponse, err
+		return utils.NoMessage.TaskResponse, err
 	}
-	return utils.ReminderMessage{AllApps: allApps}, nil
+	return utils.TaskMessage{AllApps: allApps}, nil
 }
 
-func (s *Service) allReminderTask() (utils.ReminderMessage, error) {
+func (s *Service) allReminderTask() (utils.TaskMessage, error) {
 
 	tasks, err := s.db.GetAllTask()
 	if err != nil {
-		return utils.NoMessage.ReminderAndLimitResponse, err
+		return utils.NoMessage.TaskResponse, err
 	}
 
 	validTask := make([]utils.Task, 0, len(tasks))
@@ -168,7 +162,7 @@ func (s *Service) allReminderTask() (utils.ReminderMessage, error) {
 
 		if taskStartTime.Before(now) {
 			if err := s.db.RemoveTask(task.UUID); err != nil {
-				return utils.NoMessage.ReminderAndLimitResponse, err
+				return utils.NoMessage.TaskResponse, err
 			}
 		}
 		validTask = append(validTask, task)
@@ -178,13 +172,13 @@ func (s *Service) allReminderTask() (utils.ReminderMessage, error) {
 		return a.Reminder.StartTime.Compare(b.Reminder.StartTime)
 	})
 
-	return utils.ReminderMessage{AllTask: slices.Clip(validTask)}, nil
+	return utils.TaskMessage{AllTask: slices.Clip(validTask)}, nil
 }
 
-func (s *Service) allDailyAppLimitTask() (utils.ReminderMessage, error) {
+func (s *Service) allDailyAppLimitTask() (utils.TaskMessage, error) {
 	tasks, err := s.db.GetAllTask()
 	if err != nil {
-		return utils.NoMessage.ReminderAndLimitResponse, err
+		return utils.NoMessage.TaskResponse, err
 	}
 
 	limitTask := make([]utils.Task, 0, len(tasks))
@@ -199,44 +193,50 @@ func (s *Service) allDailyAppLimitTask() (utils.ReminderMessage, error) {
 		return cmp.Compare(a.AppLimit.Limit, b.AppLimit.Limit)
 	})
 
-	return utils.ReminderMessage{AllTask: slices.Clip(limitTask)}, nil
+	return utils.TaskMessage{AllTask: slices.Clip(limitTask)}, nil
 }
 
-func (s *Service) addNewReminder(task utils.Task) (utils.ReminderMessage, error) {
+func (s *Service) addNewReminder(task utils.Task) (utils.TaskMessage, error) {
 
 	if task.Job == utils.ReminderWithAppLaunch {
 		appInfo, err := s.db.GetAppIconCategoryAndCmdLine([]string{task.AppName})
 		if err != nil {
-			return utils.NoMessage.ReminderAndLimitResponse, err
+			return utils.NoMessage.TaskResponse, err
 		}
 		task.AppIconCategoryAndCmdLine = appInfo[0]
 	}
 
 	err := s.taskManager.SendTaskToTaskManager(task)
 	if err != nil {
-		return utils.NoMessage.ReminderAndLimitResponse, err
+		return utils.NoMessage.TaskResponse, err
 	}
 
-	return utils.ReminderMessage{TaskOptSuccessful: true}, nil
-}
-
-func (s *Service) addNewLimitApp(msg utils.Task) (utils.ReminderMessage, error) {
-
-	err := s.taskManager.SendTaskToTaskManager(msg)
+	t, err := s.allReminderTask()
 	if err != nil {
-		return utils.NoMessage.ReminderAndLimitResponse, err
-	}
-
-	t, err := s.allDailyAppLimitTask()
-	if err != nil {
-		return utils.ReminderMessage{TaskOptSuccessful: true}, err
+		return utils.TaskMessage{TaskOptSuccessful: true}, err
 	}
 
 	t.TaskOptSuccessful = true
 	return t, nil
 }
 
-func (s *Service) removeTask(msg utils.Task) (utils.ReminderMessage, error) {
+func (s *Service) addNewLimitApp(msg utils.Task) (utils.TaskMessage, error) {
+
+	err := s.taskManager.SendTaskToTaskManager(msg)
+	if err != nil {
+		return utils.NoMessage.TaskResponse, err
+	}
+
+	t, err := s.allDailyAppLimitTask()
+	if err != nil {
+		return utils.TaskMessage{TaskOptSuccessful: true}, err
+	}
+
+	t.TaskOptSuccessful = true
+	return t, nil
+}
+
+func (s *Service) removeTask(msg utils.Task) (utils.TaskMessage, error) {
 
 	if t, err := s.db.GetTaskByUUID(msg.UUID); err == nil {
 
@@ -249,10 +249,10 @@ func (s *Service) removeTask(msg utils.Task) (utils.ReminderMessage, error) {
 
 	err := s.db.RemoveTask(msg.UUID)
 	if err != nil {
-		return utils.NoMessage.ReminderAndLimitResponse, err
+		return utils.NoMessage.TaskResponse, err
 	}
 
-	return utils.ReminderMessage{TaskOptSuccessful: true}, nil
+	return utils.TaskMessage{TaskOptSuccessful: true}, nil
 }
 
 func (s *Service) getCategory() ([]utils.Category, error) {

@@ -64,7 +64,7 @@ templ chartControls() {
 				hx-vals="js:{nonce: Math.random()}"
 				hx-swap="none"
 				hx-select-oob="#echart:innerHTML,#highlight:outerHTML"
-				class="h-full bg-zinc-800 text-white rounded-none outline-none py-0 px-4 shadow-zinc-800"
+				class="h-full bg-zinc-800 text-white rounded-none outline-none py-0 px-4 shadow-zinc-800 hover:text-sm"
 			>
 				<option value="" id="placeholder" disabled selected>Last 3 Month</option>
 				for _, v := range monthDropDownSelectArray(3) {
@@ -74,8 +74,8 @@ templ chartControls() {
 			<button class="rounded-l bg-zinc-800 text-white font-bold hover:rounded-l hover:bg-zinc-400 " hx-get="/weekStat?week=backward" hx-vals="js:{nonce: Math.random()}" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">
 				<img class="w-12" src="assets/svg/angle-left-svgrepo-com.svg" alt=""/>
 			</button>
-			<button class="rounded-l bg-zinc-800 text-white font-bold hover:rounded-l hover:bg-zinc-400 hover:text-black max550:text-sm" hx-get="/weekStat?week=lastweek" hx-vals="js:{nonce: Math.random()}" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">Last Week</button>
-			<button class="rounded-l bg-zinc-800 text-white font-bold hover:rounded-l hover:bg-zinc-400 hover:text-black max550:text-sm" hx-get="/weekStat?week=thisweek" hx-vals="js:{nonce: Math.random()}" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML" _="on load trigger click on me">This Week</button>
+			<button class="rounded-l bg-zinc-800 text-white font-bold hover:rounded-l hover:bg-zinc-400 hover:text-black max550:text-sm hover:text-sm" hx-get="/weekStat?week=lastweek" hx-vals="js:{nonce: Math.random()}" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">Last Week</button>
+			<button class="rounded-l bg-zinc-800 text-white font-bold hover:rounded-l hover:bg-zinc-400 hover:text-black max550:text-sm hover:text-sm" hx-get="/weekStat?week=thisweek" hx-vals="js:{nonce: Math.random()}" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML" _="on load trigger click on me">This Week</button>
 			<button class="rounded-l bg-zinc-800 text-white font-bold hover:rounded-l  hover:bg-zinc-400" hx-get="/weekStat?week=forward" hx-vals="js:{nonce: Math.random()}" hx-swap="none" hx-select-oob="#echart:innerHTML,#highlight:outerHTML">
 				<img class="w-12" src="assets/svg/angle-right-svgrepo-com.svg" alt=""/>
 			</button>
@@ -104,7 +104,7 @@ templ chartHighlight(appDetails []utils.ApplicationDetail, totalWeekUsage float6
 						if app.AppInfo.IsCategorySet && app.AppInfo.Category.String() != "" {
 							<button disabled class="min-w-full rounded-sm bg-zinc-800 text-white text-left">{ app.AppInfo.Category.String() }</button>
 						} else if utils.IsInCurrentWeekDate(utils.Date(anyDay)) {
-							<button id={ app.AppInfo.AppName } class="bg-cyan-800" hx-get={ "/getCategory?name=" + app.AppInfo.AppName } hx-target="body" hx-swap="beforeend" onclick="event.stopPropagation()">Select app catergory</button>
+							<button id={ app.AppInfo.AppName } class="bg-zinc-500 hover:scale-105" hx-get={ "/getCategory?name=" + app.AppInfo.AppName } hx-target="body" hx-swap="beforeend" onclick="event.stopPropagation()">Select app catergory</button>
 						}
 					</div>
 					if percentageUse := utils.PercentagesString(app.Usage, totalWeekUsage); percentageUse == "NaN" {
@@ -148,8 +148,11 @@ templ CategoryModal(allCategory []utils.Category, appInfo utils.AppIconCategoryA
 						name="category"
 						value={ category.String() }
 						class="m-3"
+						required
 					/>
-					<label for={ category.String() }>{ category.String() } </label>
+					<label for={ category.String() }>
+						{ category.String() }
+					</label>
 					<br/>
 				}
 			</fieldset>
