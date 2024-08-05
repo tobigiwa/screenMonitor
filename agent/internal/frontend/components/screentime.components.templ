@@ -8,7 +8,7 @@ import (
 templ WeekStatTempl(chart template.HTML, totalWeekUsage float64, appDetails []utils.ApplicationDetail, anyDay string) {
 	@chartWrapper(chart, utils.NoAppIconCategoryAndCmdLine)
 	if len(appDetails) == 0 {
-		<div class="min-h-chart-highlight flex justify-center items-center" id="highlight" hx-swap-obb="true">
+		<div id="highlight" hx-swap-obb="true" class="min-h-chart-highlight flex justify-center items-center">
 			<div class="text-white">There seems to be no usage this week 😢</div>
 		</div>
 	} else {
@@ -25,5 +25,5 @@ templ DayStatTempl(chart template.HTML, data []utils.AppStat) {
 }
 
 templ SetCategory(category, appName string) {
-	<button disabled id={ appName } class="min-w-full rounded-sm bg-zinc-800 text-white text-left" hx-swap-obb="true">{ category }</button>
+	<button disabled id={ appName } hx-swap-obb="true" class="min-w-full rounded-sm bg-zinc-800 text-white text-left">{ category }</button>
 }

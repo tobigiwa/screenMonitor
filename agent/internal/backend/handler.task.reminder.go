@@ -114,7 +114,7 @@ func (a *App) newReminderHandler(w http.ResponseWriter, r *http.Request) {
 		TaskRequest: task,
 	}
 
-	if _, err = a.commWithDaemonService(msg); err != nil {
+	if msg, err = a.commWithDaemonService(msg); err != nil {
 		a.serverError(w, err)
 		return
 	}

@@ -16,7 +16,7 @@ templ animation() {
 			<p class="text-white">'If You Can't Measure It, You Can't Manage It'</p>
 		</div>
 		<script src="assets/libraries/lottie.min.js"></script>
-		<script>
+		<script type="text/javascript">
 		document.addEventListener( 'DOMContentLoaded', function ()
 		{
 			lottie.loadAnimation( {
@@ -35,138 +35,70 @@ templ menuItems() {
 	<div class="flex flex-col grow shrink">
 		<nav>
 			<ul class="p-0 flex flex-col gap-5 list-none">
-				<li class="max550:hidden">
-					<a
-						href="/screentime"
-						class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800"
-						tabindex="0"
-					>
-						<img
-							src="assets/svg/no_1.svg"
-							class="w-12 h-9 mr-2"
-						/>Screentime
+				<li class="links max550:hidden">
+					<a href="/screentime" tabindex="0" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800">
+						<img src="assets/svg/no_1.svg" class="w-12 h-9 mr-2"/>
+						Screentime
 					</a>
 				</li>
-				<li class="max550:flex hidden" title="Screentime">
-					<a
-						href="#"
-						class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800"
-						tabindex="0"
-					>
-						<img
-							src="assets/svg/no_1.svg"
-							class="w-12 h-9 mr-2"
-						/>
+				<li title="Screentime" class="links max550:flex hidden">
+					<a href="#" tabindex="0" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800">
+						<img src="assets/svg/no_1.svg" class="w-12 h-9 mr-2"/>
 					</a>
 				</li>
-				<li class="max550:hidden">
-					<a href="#" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800 max550:hidden" tabindex="0">
-						<img
-							src="assets/svg/no_3.svg"
-							class="w-12 h-9 mr-2"
-						/>Analytics
+				<li class="links max550:hidden">
+					<a href="#" tabindex="0" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800 max550:hidden">
+						<img src="assets/svg/no_3.svg" class="w-12 h-9 mr-2"/>
+						Analytics
 					</a>
 				</li>
-				<li class="max550:flex hidden" title="Analytics">
-					<a
-						href="#"
-						class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800"
-						tabindex="0"
-					>
-						<img
-							src="assets/svg/no_3.svg"
-							class="w-12 h-9 mr-2"
-						/>
+				<li class="links max550:flex hidden" title="Analytics">
+					<a href="#" tabindex="0" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800">
+						<img src="assets/svg/no_3.svg" class="w-12 h-9 mr-2"/>
 					</a>
 				</li>
-				<li class="max550:hidden">
-					<a href="/tasks" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800 max550:hidden" tabindex="0">
-						<img
-							src="assets/svg/no_4.svg"
-							class="w-12 h-9 mr-2"
-							style="vertical-align: top;"
-						/>
+				<li class="links max550:hidden">
+					<a href="/tasks" tabindex="0" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800 max550:hidden">
+						<img src="assets/svg/no_4.svg" class="w-12 h-9 mr-2 align-top"/>
 						Tasks
 					</a>
 				</li>
-				<li class="max550:flex hidden" title="Tasks">
-					<a
-						href="#"
-						class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800"
-						tabindex="0"
-					>
-						<img
-							src="assets/svg/no_4.svg"
-							class="w-12 h-9 mr-2"
-						/>
+				<li class="links max550:flex hidden" title="Tasks">
+					<a href="#" tabindex="0" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800">
+						<img src="assets/svg/no_4.svg" class="w-12 h-9 mr-2"/>
 					</a>
 				</li>
-				<li class="max550:hidden ">
-					<a href="#" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800 max550:hidden" tabindex="0">
-						<img
-							src="assets/svg/no_2.svg"
-							class="w-12 h-9 mr-2"
-						/>ToDo
+				<li class="links max550:hidden">
+					<a href="#" tabindex="0" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800 max550:hidden">
+						<img src="assets/svg/no_2.svg" class="w-12 h-9 mr-2"/>
+						ToDo
 					</a>
 				</li>
-				<li class="max550:flex hidden" title="ToDo">
-					<a
-						href="#"
-						class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800"
-						tabindex="0"
-					>
-						<img
-							src="assets/svg/no_2.svg"
-							class="w-12 h-9 mr-2"
-						/>
+				<li class="links max550:flex hidden" title="ToDo">
+					<a href="#" tabindex="0" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800">
+						<img src="assets/svg/no_2.svg" class="w-12 h-9 mr-2"/>
 					</a>
 				</li>
-				<li class="hidden max650:flex max550:hidden ">
-					<a
-						href="#"
-						class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800"
-						tabindex="0"
-					>
-						<img
-							src="assets/svg/no_5_settings.svg"
-							class="w-12 h-9 mr-2"
-						/>Settings
+				<li class="links hidden max650:flex max550:hidden ">
+					<a href="#" tabindex="0" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800">
+						<img src="assets/svg/no_5_settings.svg" class="w-12 h-9 mr-2"/>
+						Settings
 					</a>
 				</li>
-				<li class="hidden max550:flex" title="Settings">
-					<a
-						href="#"
-						class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800"
-						tabindex="0"
-					>
-						<img
-							src="assets/svg/no_5_settings.svg"
-							class="w-12 h-9 mr-2"
-						/>
+				<li class="links hidden max550:flex" title="Settings">
+					<a href="#" tabindex="0" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800">
+						<img src="assets/svg/no_5_settings.svg" class="w-12 h-9 mr-2"/>
 					</a>
 				</li>
-				<li class="hidden max650:flex max550:hidden ">
-					<a
-						href="#"
-						class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800"
-						tabindex="0"
-					>
-						<img
-							src="assets/svg/no_6_logout.svg"
-							class="w-12 h-9 mr-2"
-						/>Logout
+				<li class="links hidden max650:flex max550:hidden ">
+					<a href="#" tabindex="0" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800">
+						<img src="assets/svg/no_6_logout.svg" class="w-12 h-9 mr-2"/>
+						Logout
 					</a>
 				</li>
-				<li class="hidden max550:flex" title="Logout">
-					<a
-						href="#"
-						class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800"
-						tabindex="0"
-					>
-						<img
-							src="assets/svg/no_6_logout.svg"
-							class="w-12 h-9 mr-2"
-						/>
+				<li class="links hidden max550:flex" title="Logout">
+					<a href="#" tabindex="0" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800">
+						<img src="assets/svg/no_6_logout.svg" class="w-12 h-9 mr-2"/>
 					</a>
 				</li>
 			</ul>
