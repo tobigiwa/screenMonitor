@@ -10,6 +10,7 @@ templ TasksPage(allApps []utils.AppIconCategoryAndCmdLine) {
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			<link rel="stylesheet" href="/assets/styles/output.css"/>
 			<link rel="stylesheet" href="/assets/styles/dd.min.css"/>
+			<script src="assets/javascript/script.out.js"></script>
 			<script src="/assets/libraries/htmx.min.js"></script>
 			<script src="assets/libraries/hyperscript.min.js"></script>
 			<script src="/assets/libraries/dd.min.js"></script>
@@ -60,6 +61,22 @@ templ reminderAndLimitHeaderSection() {
 				<img class="h-8 w-10" src="assets/svg/add2.svg"/>
 			</button>
 		</div>
+		<script type="text/javascript">
+			function getLocalDateTime() {
+				const now = new Date();
+				const timeZoneOffset = now.getTimezoneOffset() * 60000;
+				const localDateTime = new Date(now.getTime() - timeZoneOffset);
+				return localDateTime.toISOString().slice(0, 16);
+			}
+
+			function showReminderDialog() {
+				const dateTimeInput = document.querySelector('input[type="datetime-local"]');
+				dateTimeInput.value = getLocalDateTime();
+				dateTimeInput.min = getLocalDateTime();
+
+				document.querySelector('.reminder-dialog').showModal();
+			}
+		</script>
 	</div>
 }
 
@@ -132,13 +149,8 @@ templ reminderDialog() {
 							class="p-1.5 text-sm mb-2.5"
 						/>
 					</div>
-					<div class="alert">
-						<input
-							type="checkbox"
-							name="soundFirstNotification"
-							value="true"
-							checked
-						/>
+					<div>
+						<input type="checkbox" name="soundFirstNotification" value="true" checked/>
 						<label for="sound-notification-first" class="mb-1.5 italic text-lg">
 							<img
 								src="assets/svg/bell.svg"
@@ -198,21 +210,5 @@ templ reminderDialog() {
 				<button formnovalidate _="on click get the first .reminder-dialog then call it.close() then halt the event" class="p-2.5 text-lg bg-teal-800 text-white border-none rounded-md cursor-pointer">Close</button>
 			</div>
 		</form>
-		<script type="text/javascript">
-			function getLocalDateTime() {
-				const now = new Date();
-				const timeZoneOffset = now.getTimezoneOffset() * 60000;
-				const localDateTime = new Date(now.getTime() - timeZoneOffset);
-				return localDateTime.toISOString().slice(0, 16);
-			}
-
-			function showReminderDialog() {
-				const dateTimeInput = document.querySelector('input[type="datetime-local"]');
-				dateTimeInput.value = getLocalDateTime();
-				dateTimeInput.min = getLocalDateTime();
-
-				document.querySelector('.reminder-dialog').showModal();
-			}
-		</script>
 	</dialog>
 }

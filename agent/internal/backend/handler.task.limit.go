@@ -33,7 +33,6 @@ func (a *App) limitTasksHandler(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) newDaillyAppLimitHandler(w http.ResponseWriter, r *http.Request) {
 
-	fmt.Println("got here")
 	if err := r.ParseForm(); err != nil {
 		a.clientError(w, http.StatusBadRequest, err)
 		return
@@ -46,6 +45,9 @@ func (a *App) newDaillyAppLimitHandler(w http.ResponseWriter, r *http.Request) {
 		err      error
 	)
 
+	task.Job = utils.DailyAppLimit
+	task.AppLimit.OneTime = true
+
 	for key, value := range r.Form {
 		switch key {
 		case "app":
@@ -54,45 +56,38 @@ func (a *App) newDaillyAppLimitHandler(w http.ResponseWriter, r *http.Request) {
 		case "hrs":
 			if value[0] == "" {
 				hrs = 0
-			} else {
-				hrs, err = strconv.Atoi(value[0])
-				if err != nil {
-					a.clientError(w, http.StatusBadRequest, fmt.Errorf("error parsing formData:%w", err))
-					return
-				}
+				continue
+			}
+
+			if hrs, err = strconv.Atoi(value[0]); err != nil {
+				a.clientError(w, http.StatusBadRequest, fmt.Errorf("error parsing formData:%w", err))
+				return
 			}
 
 		case "min":
 			if value[0] == "" {
 				min = 0
-			} else {
-				min, err = strconv.Atoi(value[0])
-				if err != nil {
-					a.clientError(w, http.StatusBadRequest, fmt.Errorf("error parsing formData:%w", err))
-					return
-				}
+				continue
+			}
+
+			if min, err = strconv.Atoi(value[0]); err != nil {
+				a.clientError(w, http.StatusBadRequest, fmt.Errorf("error parsing formData:%w", err))
+				return
 			}
 
 		case "recurring":
-			isEveryDay, err := strconv.ParseBool(value[0])
-			if err != nil {
+			if _, err := strconv.ParseBool(value[0]); err != nil {
 				a.clientError(w, http.StatusBadRequest, fmt.Errorf("error parsing formData:%w", err))
 				return
 			}
-			if isEveryDay {
-				task.AppLimit.OneTime = false
-				task.Job = utils.DailyAppLimit
-			}
+			task.AppLimit.OneTime = false
 
 		case "exitApp":
-			exitApp, err := strconv.ParseBool(value[0])
-			if err != nil {
+			if _, err := strconv.ParseBool(value[0]); err != nil {
 				a.clientError(w, http.StatusBadRequest, fmt.Errorf("error parsing formData:%w", err))
 				return
 			}
-			if exitApp {
-				task.AppLimit.ExitApp = true
-			}
+			task.AppLimit.ExitApp = true
 
 		}
 	}
@@ -112,9 +107,11 @@ func (a *App) newDaillyAppLimitHandler(w http.ResponseWriter, r *http.Request) {
 		TaskRequest: task,
 	}
 
+	fmt.Printf("%+v", task)
+
 	if msg, err = a.commWithDaemonService(msg); err != nil {
 		if strings.Contains(err.Error(), utils.ErrLimitAppExist.Error()) {
-			// return
+			w.Header().Set("HX-Trigger", `{"hhhh":"aaaaa}`)
 		}
 		a.serverError(w, err)
 		return

@@ -128,7 +128,7 @@ func (s *Service) treatMessage(c net.Conn) {
 			return
 
 		case "weekStat":
-			msg.WeekStatResponse, err = s.getWeekStat(msg.WeekStatRequest)
+			msg.WeekStatResponse, err = s.getWeekStat(msg.WeekStatRequest, false)
 
 		case "appStat":
 			msg.AppStatResponse, err = s.getAppStat(msg.AppStatRequest)
@@ -159,6 +159,10 @@ func (s *Service) treatMessage(c net.Conn) {
 
 		case "removeTask":
 			msg.TaskResponse, err = s.removeTask(msg.TaskRequest)
+
+		case "back":
+			msg.WeekStatResponse, err = s.getWeekStat(msg.WeekStatRequest, true)
+
 		}
 
 		if err != nil {

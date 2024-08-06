@@ -93,7 +93,7 @@ func StartTaskManger(dbHandle TaskManagerDbRequirement) (*TaskManager, error) {
 			}
 
 			if task.AppLimit.IsLimitReached && task.AppLimit.Today == utils.Today() {
-				// limit has been reached...and limit was reached that very day
+				// limit has been reached...and limit was reached that today
 				continue
 			}
 		}

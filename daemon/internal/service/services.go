@@ -23,7 +23,7 @@ func (s *Service) StopTaskManger() error {
 	return s.taskManager.CloseChan()
 }
 
-func (s *Service) getWeekStat(msg utils.Date) (utils.WeekStatMessage, error) {
+func (s *Service) getWeekStat(msg utils.Date, chartOnly bool) (utils.WeekStatMessage, error) {
 	var (
 		weekStat db.WeeklyStat
 		appsInfo []utils.AppIconCategoryAndCmdLine
@@ -55,6 +55,19 @@ func (s *Service) getWeekStat(msg utils.Date) (utils.WeekStatMessage, error) {
 		appNameInTheWeek = append(appNameInTheWeek, weekStat.EachApp[i].AppName)
 	}
 
+	res := utils.WeekStatMessage{
+		Keys:            keys,
+		FormattedDay:    formattedDay,
+		Values:          values,
+		TotalWeekUptime: weekStat.WeekTotal.Active,
+		Month:           month,
+		Year:            fmt.Sprint(year),
+	}
+
+	if chartOnly {
+		return res, nil
+	}
+
 	if appsInfo, err = s.db.GetAppIconCategoryAndCmdLine(appNameInTheWeek); err != nil {
 		return utils.NoMessage.WeekStatResponse, fmt.Errorf("err with GetAppIconAndCategory:%w", err)
 	}
@@ -63,16 +76,8 @@ func (s *Service) getWeekStat(msg utils.Date) (utils.WeekStatMessage, error) {
 		appCard = append(appCard, utils.ApplicationDetail{AppInfo: appsInfo[i], Usage: weekStat.EachApp[i].Usage.Active})
 	}
 
-	return utils.WeekStatMessage{
-			Keys:            keys,
-			FormattedDay:    formattedDay,
-			Values:          values,
-			TotalWeekUptime: weekStat.WeekTotal.Active,
-			Month:           month,
-			Year:            fmt.Sprint(year),
-			AppDetail:       appCard,
-		},
-		nil
+	res.AppDetail = appCard
+	return res, nil
 }
 
 func (s *Service) getAppStat(msg utils.AppStatRequest) (utils.AppStatMessage, error) {
@@ -185,6 +190,7 @@ func (s *Service) allDailyAppLimitTask() (utils.TaskMessage, error) {
 
 	for _, task := range tasks {
 		if task.Job == utils.DailyAppLimit {
+			fmt.Printf("-------%+v------\n\n", task)
 			limitTask = append(limitTask, task)
 		}
 	}
@@ -227,10 +233,14 @@ func (s *Service) addNewLimitApp(msg utils.Task) (utils.TaskMessage, error) {
 		return utils.NoMessage.TaskResponse, err
 	}
 
+	fmt.Println("task sent")
+
 	t, err := s.allDailyAppLimitTask()
 	if err != nil {
 		return utils.TaskMessage{TaskOptSuccessful: true}, err
 	}
+
+	fmt.Println("task added")
 
 	t.TaskOptSuccessful = true
 	return t, nil
@@ -247,8 +257,7 @@ func (s *Service) removeTask(msg utils.Task) (utils.TaskMessage, error) {
 		s.taskManager.RemoveTask(msg.UUID)
 	}
 
-	err := s.db.RemoveTask(msg.UUID)
-	if err != nil {
+	if err := s.db.RemoveTask(msg.UUID); err != nil {
 		return utils.NoMessage.TaskResponse, err
 	}
 

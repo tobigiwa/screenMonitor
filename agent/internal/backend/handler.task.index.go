@@ -40,7 +40,6 @@ func (a *App) removeTask(w http.ResponseWriter, r *http.Request) {
 	}
 
 	endpoint, pathParam := path[1], r.PathValue("uuid")
-	fmt.Println(endpoint, "-----", pathParam)
 	msg := utils.Message{
 		Endpoint: endpoint,
 	}

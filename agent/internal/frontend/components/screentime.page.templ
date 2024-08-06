@@ -33,22 +33,27 @@ templ IndexPage() {
 templ screentimeTimePage() {
 	<div class="w-full bg-zinc-800">
 		@header()
-		@chartWrapper("", utils.NoAppIconCategoryAndCmdLine)
+		@chartWrapper("", utils.NoAppIconCategoryAndCmdLine, false)
 		@chartControls()
 		@chartHighlight(nil, 0, "")
 	</div>
 }
 
-templ chartWrapper(chart template.HTML, info utils.AppIconCategoryAndCmdLine) {
+templ chartWrapper(chart template.HTML, info utils.AppIconCategoryAndCmdLine, pieChart bool) {
 	<div class="relative">
 		<div id="echart" hx-swap-oob="true" class="bg-white rounded w-99%">
 			@templ.Raw(chart)
 			if !reflect.ValueOf(info).IsZero() {
+				// for appStat  
 				if info.IsIconSet {
 					<img src={ getImageFilePath(info.AppName, info.Icon) } alt={ info.AppName } class="absolute w-5 h-5 top-1.5 left-1.5"/>
 				} else {
 					<img src="/assets/image/noAppImage.jpg" alt="noImage" class="absolute w-5 h-5 top-1.5 left-1.5"/>
 				}
+				<img src="/assets/svg/back.svg" title="back to weekly chart" hx-get="/back" hx-vals="js:{nonce: Math.random()}" hx-swap="none" hx-select-oob="#echart:innerHTML" class="absolute w-6 h-6 bottom-4 left-4 hover:scale-110"/>
+			}
+			if pieChart {
+				<img src="/assets/svg/back.svg" title="back to weekly chart" hx-get="/back" hx-vals="js:{nonce: Math.random()}" hx-swap="none" hx-select-oob="#echart:innerHTML" class="absolute w-6 h-6 bottom-4 left-4 hover:scale-110"/>
 			}
 		</div>
 	</div>

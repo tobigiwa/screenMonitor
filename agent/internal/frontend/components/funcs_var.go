@@ -23,9 +23,14 @@ var (
 +-+-+-+-+-+-+-+-+-+
 |L|i|S|c|r|e|M|o|n|
 +-+-+-+-+-+-+-+-+-+`
+
+	art4 string = `
+
+	LISCREMON
+`
 )
 
-var arrayOfArt = []string{art1, art2, art3}
+var arrayOfArt = []string{art1, art2, art3, art4}
 
 func getRandomArt() string {
 	randonIndex := rand.Intn(len(arrayOfArt))
