@@ -99,7 +99,7 @@ func (a *App) newDaillyAppLimitHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	task.AppLimit.Today = utils.Today()
+	task.AppLimit.Day = utils.Today()
 	task.UUID = uuid.New()
 
 	msg = utils.Message{
@@ -107,11 +107,8 @@ func (a *App) newDaillyAppLimitHandler(w http.ResponseWriter, r *http.Request) {
 		TaskRequest: task,
 	}
 
-	fmt.Printf("%+v", task)
-
 	if msg, err = a.commWithDaemonService(msg); err != nil {
 		if strings.Contains(err.Error(), utils.ErrLimitAppExist.Error()) {
-			w.Header().Set("HX-Trigger", `{"hhhh":"aaaaa}`)
 		}
 		a.serverError(w, err)
 		return

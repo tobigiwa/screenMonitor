@@ -57,7 +57,9 @@ to quickly create a Cobra application.`,
 
 		slog.SetDefault(logger)
 
-		daemon.DaemonServiceLinux(logger)
+		if err := daemon.DaemonServiceLinux(logger); err != nil {
+			logger.Error(err.Error())
+		}
 	},
 }
 

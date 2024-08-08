@@ -190,7 +190,13 @@ func (s *Service) allDailyAppLimitTask() (utils.TaskMessage, error) {
 
 	for _, task := range tasks {
 		if task.Job == utils.DailyAppLimit {
-			fmt.Printf("-------%+v------\n\n", task)
+
+			if timesofar, err := s.db.GetAppTodayActiveStatSoFar(task.AppName); err == nil {
+				if timesofar > task.AppLimit.Limit {
+					task.AppLimit.IsLimitReached = true
+				}
+			}
+
 			limitTask = append(limitTask, task)
 		}
 	}

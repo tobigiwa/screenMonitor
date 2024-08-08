@@ -107,7 +107,7 @@ templ chartHighlight(appDetails []utils.ApplicationDetail, totalWeekUsage float6
 					<div class="flex flex-col ml-4">
 						<div class="font-bold text-lg appName">{ app.AppInfo.AppName }</div>
 						if app.AppInfo.IsCategorySet && app.AppInfo.Category.String() != "" {
-							<button disabled class="min-w-full rounded-sm bg-zinc-800 text-white text-left">{ app.AppInfo.Category.String() }</button>
+							<button disabled class="min-w-full rounded-lg bg-zinc-800 text-white text-left">{ app.AppInfo.Category.String() }</button>
 						} else if utils.IsInCurrentWeekDate(utils.Date(anyDay)) {
 							<button id={ app.AppInfo.AppName } hx-get={ "/getCategory?name=" + app.AppInfo.AppName } hx-target="body" hx-swap="beforeend" onclick="event.stopPropagation()" class="bg-zinc-500 hover:scale-105">Select app catergory</button>
 						}

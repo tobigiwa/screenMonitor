@@ -4,8 +4,6 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cli
 
 import (
-	"log"
-
 	"github.com/spf13/cobra"
 )
 
@@ -28,10 +26,6 @@ Examples:
   // Launch the analytics application on port 8080, viewable on the browser
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		log.Println("web was called")
-		detach, _ := cmd.Flags().GetBool("detach")
-		log.Println(detach)
-
 	},
 }
 

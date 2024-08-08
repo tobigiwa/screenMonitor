@@ -2,6 +2,7 @@ package monitoring
 
 import (
 	"fmt"
+	"log/slog"
 	"time"
 
 	db "smDaemon/daemon/internal/database"
@@ -25,17 +26,14 @@ var (
 	// netClientStackingAtom xproto.Atom
 	x11Conn         *xgbutil.XUtil
 	netActiveWindow = &netActiveWindowInfo{}
-	fixtyEightSecs  = time.Duration(58) * time.Second
+	fixtyEight  = time.Duration(58) * time.Second
 )
 
-func InitMonitoring(db *db.BadgerDBStore) (X11Monitor, error) {
+func InitMonitoring(db *db.BadgerDBStore, logger *slog.Logger) (X11Monitor, error) {
 
-	var (
-		err error
-	)
+	var err error
 
 	count := 0
-
 	// X server connection
 	for {
 		if x11Conn, err = xgbutil.NewConn(); err != nil { // we wait till we connect to X server
@@ -55,6 +53,7 @@ func InitMonitoring(db *db.BadgerDBStore) (X11Monitor, error) {
 		X11Connection:  x11Conn,
 		Db:             db,
 		windowChangeCh: make(chan utils.GenericKeyValue[xproto.Window, float64], 1),
+		logger:         logger,
 	}
 
 	if err = setRootEventMask(x11Conn); err != nil {

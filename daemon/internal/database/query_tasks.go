@@ -121,26 +121,3 @@ func (bs *BadgerDBStore) RemoveTask(id uuid.UUID) error {
 	}
 	return bs.setOrUpdateKeyValue(dbTaskKey, byteData)
 }
-
-func (bs *BadgerDBStore) UpdateAppLimitStatus(taskID uuid.UUID) error {
-	taskArry, err := bs.getAllTasks()
-	if err != nil {
-		return err
-	}
-
-	for i := 0; i < len(taskArry); i++ {
-		if task := taskArry[i]; task.UUID == taskID {
-			task.AppLimit.Today = utils.Today()
-			task.AppLimit.IsLimitReached = true
-			taskArry[i] = task
-			break
-		}
-	}
-
-	byteData, err := utils.EncodeJSON(taskArry)
-	if err != nil {
-		return err
-	}
-
-	return bs.setOrUpdateKeyValue(dbTaskKey, byteData)
-}

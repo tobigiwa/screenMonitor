@@ -16,8 +16,7 @@ func currentlyOpenedWindows(X *xgbutil.XUtil) ([]xproto.Window, error) {
 }
 
 func setRootEventMask(X *xgbutil.XUtil) error {
-	err := xproto.ChangeWindowAttributesChecked(X.Conn(), X.RootWin(), xproto.CwEventMask,
-		[]uint32{xproto.EventMaskPropertyChange | xproto.EventMaskSubstructureNotify}).Check()
+	err := xproto.ChangeWindowAttributesChecked(X.Conn(), X.RootWin(), xproto.CwEventMask, []uint32{xproto.EventMaskPropertyChange | xproto.EventMaskSubstructureNotify}).Check()
 	if err != nil {
 		return fmt.Errorf("failed to set eventMask on root widow:%w", err)
 	}
@@ -25,9 +24,7 @@ func setRootEventMask(X *xgbutil.XUtil) error {
 }
 
 func registerWindowForEvents(windowID xproto.Window) {
-	err := xproto.ChangeWindowAttributesChecked(x11Conn.Conn(), windowID, xproto.CwEventMask,
-		[]uint32{
-			xproto.EventMaskStructureNotify}).Check()
+	err := xproto.ChangeWindowAttributesChecked(x11Conn.Conn(), windowID, xproto.CwEventMask, []uint32{xproto.EventMaskStructureNotify}).Check()
 	if err != nil {
 		log.Printf("Failed to select notify events for window:%v, error: %v", windowID, err)
 	}

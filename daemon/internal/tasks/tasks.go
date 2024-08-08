@@ -20,7 +20,6 @@ import (
 )
 
 type TaskManagerDbRequirement interface {
-	GetTaskByAppName(appName string) ([]utils.Task, error)
 	GetAllTask() ([]utils.Task, error)
 	RemoveTask(id uuid.UUID) error
 	AddTask(task utils.Task) error
@@ -85,16 +84,11 @@ func StartTaskManger(dbHandle TaskManagerDbRequirement) (*TaskManager, error) {
 				}
 			}
 
-		case task.Job == utils.DailyAppLimit: // this is a double-check, the oneTime app limit should have been removed when done
-			if task.AppLimit.OneTime && task.AppLimit.Today != utils.Today() { // whether it reached limit or not,for a new day, the limit does not matter again, hence why it is a dailyLimit.
-				if err := tm.dbHandle.RemoveTask(task.UUID); err != nil {
+		case task.Job == utils.DailyAppLimit:
+			if task.AppLimit.OneTime && task.AppLimit.Day != utils.Today() { // this is a double-check, the oneTime app limit should have been removed when done;
+				if err := tm.dbHandle.RemoveTask(task.UUID); err != nil { // whether it reached the limit or not,for a new day, the limit does not matter again, hence why it is a dailyLimit.
 					return nil, fmt.Errorf("%s: %+v :%w", utils.ErrDeletingTask.Error(), task, err)
 				}
-			}
-
-			if task.AppLimit.IsLimitReached && task.AppLimit.Today == utils.Today() {
-				// limit has been reached...and limit was reached that today
-				continue
 			}
 		}
 
@@ -153,9 +147,7 @@ func (tm *TaskManager) disperseTask() {
 			timeSofar, _ := tm.dbHandle.GetAppTodayActiveStatSoFar(task.AppName)
 			monitoring.AddNewLimit(task, timeSofar)
 		}
-
 	}
-
 }
 
 func (tm *TaskManager) reminderWithNoAppLaunch(task utils.Task) {
