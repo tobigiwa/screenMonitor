@@ -20,26 +20,30 @@ import (
 var (
 	broswerCmd *exec.Cmd
 	desktopCmd *exec.Cmd
+	logger     *slog.Logger
 )
 
 func main() {
-	onExit := func() { broswerCmd, desktopCmd = nil, nil }
+	var (
+		logFile *os.File
+		err     error
+	)
 
+	mode := flag.Bool("dev", false, "specify if to build in production or development mode")
+	flag.Parse()
+
+	if logger, logFile, err = utils.Logger("trayIcon.log", *mode); err != nil {
+		log.Fatalln(err)
+	}
+	defer logFile.Close()
+
+	onExit := func() { broswerCmd, desktopCmd, logger = nil, nil, nil }
 	systray.Run(onReady, onExit)
 }
 
 func onReady() {
-	mode := flag.Bool("dev", false, "specify if to build in production or development mode")
-	flag.Parse()
 
-	logger, logFile, err := utils.Logger("trayIcon.log", *mode)
-	if err != nil {
-		log.Println(err)
-		systray.Quit()
-	}
-	defer logFile.Close()
-
-	slog.SetDefault(logger)
+	logger.Info("TrayIcon is alive!!!")
 
 	systray.SetTemplateIcon(icon, icon)
 	systray.SetTitle(title)
@@ -61,7 +65,7 @@ func onReady() {
 		systray.AddSeparator()
 		logFolder := systray.AddMenuItem("Open log folder", "Open log folder")
 		about := systray.AddMenuItem("More Information", "More Information")
-		kill := about.AddSubMenuItem("Quit daemon service", fmt.Sprintf("Quit %s daemon service", title))
+		killDaemon := about.AddSubMenuItem("Quit daemon service", fmt.Sprintf("Quit %s daemon service", title))
 		remove := about.AddSubMenuItem("Remove this tray-icon", "Remove this Icon")
 
 		binaries := [3]string{"smDaemon", "smDesktop", "smBrowser"}
@@ -98,7 +102,6 @@ func onReady() {
 				if err := launchBrowserView(); err != nil { // starts the browser server
 					utils.NotifyWithBeep("Operation failed", fmt.Sprintf("Could not launch %s browser view.", title))
 					logger.Error(err.Error())
-
 					continue
 				}
 
@@ -135,13 +138,14 @@ func onReady() {
 					logger.Error(err.Error())
 				}
 
-			case <-kill.ClickedCh:
+			case <-killDaemon.ClickedCh:
 				if err := killDaemonService(); err != nil { // starts the browser server
 					utils.NotifyWithBeep("Operation failed", "Could not kill daemon service.")
 					logger.Error(err.Error())
 					continue
 				}
-				utils.NotifyWithBeep("Operation failed", "Could not kill daemon service.")
+
+				utils.NotifyWithBeep("Daemon sevice ended", "would need to restart user session to awake daemon.")
 
 			case <-remove.ClickedCh:
 				utils.NotifyWithBeep(
@@ -159,7 +163,7 @@ func launchBrowserView() error {
 	gopath := getGOPATH()
 
 	if runtime.GOOS == "linux" {
-		gopathBin := filepath.Join(gopath, "bin", "browser")
+		gopathBin := filepath.Join(gopath, "bin", "smBrowser")
 		broswerCmd = exec.Command(gopathBin)
 	}
 
@@ -174,7 +178,7 @@ func launcDesktopView() error {
 	gopath := getGOPATH()
 
 	if runtime.GOOS == "linux" {
-		gopathBin := filepath.Join(gopath, "bin", "desktop")
+		gopathBin := filepath.Join(gopath, "bin", "smDesktop")
 		desktopCmd = exec.Command(gopathBin)
 	}
 
@@ -240,8 +244,8 @@ func killDaemonService() error {
 	var cmd *exec.Cmd
 
 	if runtime.GOOS == "linux" {
-		gopathBin := filepath.Join(gopath, "bin", "smDaemon", "stop")
-		cmd = exec.Command(gopathBin)
+		gopathBin := filepath.Join(gopath, "bin", "smDaemon")
+		cmd = exec.Command(gopathBin, "stop")
 	}
 
 	if runtime.GOOS == "windows" {
@@ -273,5 +277,4 @@ func openLogFolder() error {
 	}
 
 	return cmd.Wait()
-
 }

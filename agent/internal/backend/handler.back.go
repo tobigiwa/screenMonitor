@@ -15,7 +15,6 @@ func (a *App) backHandler(w http.ResponseWriter, r *http.Request) {
 		msg utils.Message
 		err error
 	)
-	fmt.Println("backHandler", lastRequestSaturday)
 	msg = utils.Message{
 		Endpoint:        strings.TrimPrefix(r.URL.Path, "/"),
 		WeekStatRequest: utils.Date(lastRequestSaturday),

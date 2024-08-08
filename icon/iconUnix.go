@@ -5,7 +5,7 @@
 package main
 
 const (
-	title   string = "smDaemon"
+	title   string = "LiScreMon"
 	toolTip string = "Linux Screen Monitor"
 )
 

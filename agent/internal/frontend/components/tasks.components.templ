@@ -58,26 +58,24 @@ templ AppLimitTasks(tasks []utils.Task) {
 	} else {
 		<ul id="taskHolder" hx-swap-oob="true" class="">
 			for _, t := range  tasks {
-				if !t.TaskTime.AppLimit.IsLimitReached {
-					<li>
-						<div class="inline-flex w-full px-4 justify-between items-center bg-zinc-800 text-white">
-							<div class="inline-flex justify-start items-center g-1 w-1/2 px-1 leading-10">
-								<img src={ getImageFilePath(t.AppName, t.Icon) } alt={ t.AppName } class="h-8 w-8 align-middle hover:scale-95"/>
-								<p>{ t.AppName }</p>
-							</div>
-							<div class="inline-flex justify-end items-center w-1/2 gap-8">
-								if t.TaskTime.AppLimit.IsLimitReached {
-									<p class="bg-black text-white">Daily limit exceeded</p>
-								}
-								<p class="bg-teal-500 font-bold italic h-8 w-40 text-center pt-2 cursor-default">{ utils.UsageTimeInHrsMin(t.TaskTime.AppLimit.Limit) }</p>
-								<div class="flex gap-4">
-									<img src="/assets/svg/delete.svg" alt="delete" hx-post={ "/removeTask/" + t.UUID.String() + "?taskType=AppLimit" } hx-swap="none" hx-select-oob="#taskHolder:outerHTML" class="hover:scale-95 h-6 w-6 cursor-pointer" title="delete app limit"/>
-									<img title="edit app limit" src="/assets/svg/edit-white.svg" alt="edit" class="hover:scale-95 h-6 w-6 cursor-pointer"/>
-								</div>
+				<li>
+					<div class="inline-flex w-full px-4 justify-between items-center bg-zinc-800 text-white">
+						<div class="inline-flex justify-start items-center g-1 w-1/2 px-1 leading-10">
+							<img src={ getImageFilePath(t.AppName, t.Icon) } alt={ t.AppName } class="h-8 w-8 align-middle hover:scale-95"/>
+							<p>{ t.AppName }</p>
+						</div>
+						<div class="inline-flex justify-end items-center w-1/2 gap-8">
+							if t.TaskTime.AppLimit.IsLimitReached {
+								<p class="bg-black text-white">Daily limit exceeded</p>
+							}
+							<p class="bg-teal-500 font-bold italic h-8 w-40 text-center pt-2 cursor-default">{ utils.UsageTimeInHrsMin(t.TaskTime.AppLimit.Limit) }</p>
+							<div class="flex gap-4">
+								<img src="/assets/svg/delete.svg" alt="delete" hx-post={ "/removeTask/" + t.UUID.String() + "?taskType=AppLimit" } hx-swap="none" hx-select-oob="#taskHolder:outerHTML" class="hover:scale-95 h-6 w-6 cursor-pointer" title="delete app limit"/>
+								<img title="edit app limit" src="/assets/svg/edit-white.svg" alt="edit" class="hover:scale-95 h-6 w-6 cursor-pointer"/>
 							</div>
 						</div>
-					</li>
-				}
+					</div>
+				</li>
 			}
 		</ul>
 	}
