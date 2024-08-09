@@ -1,7 +1,7 @@
 package frontend
 
 templ sideBarMenu() {
-	<div class="flex flex-col gap-4 bg-zinc-800 min-h-full w-80 pt-14 max550:w-fit">
+	<div class="flex flex-col gap-4 min-h-full w-80 pt-14 max550:w-fit bg-zinc-800 ">
 		@animation()
 		@menuItems()
 	</div>
@@ -36,68 +36,68 @@ templ menuItems() {
 		<nav>
 			<ul class="p-0 flex flex-col gap-5 list-none">
 				<li class="links max550:hidden">
-					<a href="/screentime" tabindex="0" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800">
+					<a href="/screentime" tabindex="0" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-customCyan focus:text-black">
 						<img src="assets/svg/no_1.svg" class="w-12 h-9 mr-2"/>
 						Screentime
 					</a>
 				</li>
 				<li title="Screentime" class="links max550:flex hidden">
-					<a href="#" tabindex="0" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800">
+					<a href="#" tabindex="0" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-customCyan focus:text-black">
 						<img src="assets/svg/no_1.svg" class="w-12 h-9 mr-2"/>
 					</a>
 				</li>
 				<li class="links max550:hidden">
-					<a href="#" tabindex="0" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800 max550:hidden">
+					<a href="#" tabindex="0" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-customCyan focus:text-black max550:hidden">
 						<img src="assets/svg/no_3.svg" class="w-12 h-9 mr-2"/>
 						Analytics
 					</a>
 				</li>
 				<li class="links max550:flex hidden" title="Analytics">
-					<a href="#" tabindex="0" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800">
+					<a href="#" tabindex="0" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-customCyan focus:text-black">
 						<img src="assets/svg/no_3.svg" class="w-12 h-9 mr-2"/>
 					</a>
 				</li>
 				<li class="links max550:hidden">
-					<a href="/tasks" tabindex="0" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800 max550:hidden">
+					<a href="/tasks" tabindex="0" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-customCyan focus:text-black max550:hidden">
 						<img src="assets/svg/no_4.svg" class="w-12 h-9 mr-2 align-top"/>
 						Tasks
 					</a>
 				</li>
 				<li class="links max550:flex hidden" title="Tasks">
-					<a href="#" tabindex="0" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800">
+					<a href="#" tabindex="0" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-customCyan focus:text-black">
 						<img src="assets/svg/no_4.svg" class="w-12 h-9 mr-2"/>
 					</a>
 				</li>
 				<li class="links max550:hidden">
-					<a href="#" tabindex="0" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800 max550:hidden">
+					<a href="#" tabindex="0" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-customCyan focus:text-black max550:hidden">
 						<img src="assets/svg/no_2.svg" class="w-12 h-9 mr-2"/>
 						ToDo
 					</a>
 				</li>
 				<li class="links max550:flex hidden" title="ToDo">
-					<a href="#" tabindex="0" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800">
+					<a href="#" tabindex="0" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-customCyan focus:text-black">
 						<img src="assets/svg/no_2.svg" class="w-12 h-9 mr-2"/>
 					</a>
 				</li>
 				<li class="links hidden max650:flex max550:hidden ">
-					<a href="#" tabindex="0" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800">
+					<a href="#" tabindex="0" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-customCyan focus:text-black">
 						<img src="assets/svg/no_5_settings.svg" class="w-12 h-9 mr-2"/>
 						Settings
 					</a>
 				</li>
 				<li class="links hidden max550:flex" title="Settings">
-					<a href="#" tabindex="0" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800">
+					<a href="#" tabindex="0" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-customCyan focus:text-black">
 						<img src="assets/svg/no_5_settings.svg" class="w-12 h-9 mr-2"/>
 					</a>
 				</li>
 				<li class="links hidden max650:flex max550:hidden ">
-					<a href="#" tabindex="0" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800">
+					<a href="#" tabindex="0" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-customCyan focus:text-black">
 						<img src="assets/svg/no_6_logout.svg" class="w-12 h-9 mr-2"/>
 						Logout
 					</a>
 				</li>
 				<li class="links hidden max550:flex" title="Logout">
-					<a href="#" tabindex="0" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-teal-800">
+					<a href="#" tabindex="0" class="font-bold italic text-lg text-white p-3.5 outline-none rounded-md flex text-center items-center focus:bg-customCyan focus:text-black">
 						<img src="assets/svg/no_6_logout.svg" class="w-12 h-9 mr-2"/>
 					</a>
 				</li>

@@ -48,7 +48,7 @@ templ reminderAndLimitDialog(allApps []utils.AppIconCategoryAndCmdLine) {
 }
 
 templ reminderAndLimitHeaderSection() {
-	<div class="h-12 sticky top-0 z-10 bg-zinc-500 text-white mb-1 rounded-md flex gap-8">
+	<div class="h-12 sticky top-0 z-10 bg-customGray text-white mb-1 rounded-md flex gap-8">
 		<div class="inline-flex justify-start items-center w-1/2 cursor-pointer">
 			<h2 hx-get="/reminders" hx-swap="none" hx-select-oob="#taskHolder:outerHTML " _="on load trigger click on me" class="m-0 p-0 w-full text-center hover:scale-90 font-bold text-lg">Reminder</h2>
 			<button title="add new reminder task" _="on click call showReminderDialog() then get the first .reminder-form then call it.reset()" class=" w-11 h-11 rounded-md cursor-alias bg-white rounded-r">
@@ -104,15 +104,15 @@ templ limitDialog(allApp []utils.AppIconCategoryAndCmdLine) {
 				</div>
 			</div>
 			<div class="button-container flex justify-between">
-				<button type="submit" class="p-2.5 text-lg bg-teal-800 text-white border-none rounded-md cursor-pointer">Create Limit</button>
-				<button formnovalidate _="on click get the first .limit-dialog then call it.close() then halt the event" class="p-2.5 text-lg bg-teal-800 text-white border-none rounded-md cursor-pointer">Close</button>
+				<button type="submit" class="p-2.5 text-lg bg-customCyan text-black border-none rounded-md cursor-pointer">Create Limit</button>
+				<button formnovalidate _="on click get the first .limit-dialog then call it.close() then halt the event" class="p-2.5 text-lg bg-customCyan text-black border-none rounded-md cursor-pointer">Close</button>
 			</div>
 		</form>
 	</dialog>
 }
 
 templ reminderDialog() {
-	<dialog class="reminder-dialog w-3/4 bg-zinc-400 text-black rounded-md backdrop:backdrop-blur-sm">
+	<dialog class="reminder-dialog w-3/4 bg-slate-400 text-black rounded-md backdrop:backdrop-blur-sm">
 		<form hx-post="/newReminder" hx-trigger="submit" hx-swap="none" hx-select-oob="#taskHolder:outerHTML" _="on submit js document.querySelector('.reminder-dialog').close() end" class="reminder-form px-3">
 			<div class="titles w-full inline-flex justify-between">
 				<div class="form-pair flex flex-col">
@@ -206,8 +206,8 @@ templ reminderDialog() {
 				></textarea>
 			</div>
 			<div class="button-container flex justify-between py-4">
-				<button type="submit" class="p-2.5 text-lg bg-teal-800 text-white border-none rounded-md cursor-pointer" type="submit">Create Reminder</button>
-				<button formnovalidate _="on click get the first .reminder-dialog then call it.close() then halt the event" class="p-2.5 text-lg bg-teal-800 text-white border-none rounded-md cursor-pointer">Close</button>
+				<button type="submit" class="p-2.5 text-lg bg-customCyan text-black border-none rounded-md cursor-pointer" type="submit">Create Reminder</button>
+				<button formnovalidate _="on click get the first .reminder-dialog then call it.close() then halt the event" class="p-2.5 text-lg bg-customCyan text-black border-none rounded-md cursor-pointer">Close</button>
 			</div>
 		</form>
 	</dialog>

@@ -14,10 +14,10 @@ templ ReminderTasks(tasks []utils.Task) {
 				<li>
 					<div class="w-full bg-slate-700 inline-flex justify-between mb-1">
 						<div class="px-2 w-1/2">
-							<p class="font-extrabold text-lg p-2 m-1"><span class="text-sm"><i>title:</i></span> <span class="font-extrabold text-lg p-2">{ t.UI.Title }</span></p>
-							<p class="font-bold"><span class="text-sm"><i>subtitle:</i></span> <span class="font-extrabold text-lg p-2">{ t.UI.Subtitle }</span></p>
+							<p class="font-extrabold text-lg p-2 m-1"><span class="text-sm">title:</span><span class="font-extrabold text-lg p-2 ">{ t.UI.Title }</span></p>
+							<p class="font-bold"><span class="text-sm">subtitle:</span><span class="font-extrabold text-lg p-2">{ t.UI.Subtitle }</span></p>
 							<details>
-								<summary><span class="text-sm"><i>See attached note</i></span></summary>
+								<summary><span class="text-sm "><i>See attached note</i></span></summary>
 								<p>{ t.UI.Notes }</p>
 							</details>
 							if t.Job == utils.ReminderWithAppLaunch {
@@ -25,22 +25,22 @@ templ ReminderTasks(tasks []utils.Task) {
 							}
 						</div>
 						<div class="edit-and-alerts inline-flex w-full justify-end gap-4 align-baseline">
-							<div>
+							<div class="flex items-end ">
 								<img title="delete reminder" src="/assets/svg/delete.svg" alt="delete" hx-post={ "/removeTask/" + t.UUID.String() } hx-swap="none" hx-select-oob="#taskHolder:outerHTML" class="h-6 w-8 cursor-pointer hover:scale-125"/>
 								<img title="edit reminder" src="/assets/svg/edit.svg" alt="delete" class="h-6 w-8 cursor-pointer hover:scale-125"/>
 							</div>
 							<div>
-								<p class="font-bold text-lg"><span class="font-bold text-lg"><i>Starts at:</i></span> <span class="font-bold">{ formatTimeToHumanReadable(t.Reminder.StartTime) }</span></p>
-								if time.Now().Before(t.Reminder.StartTime.Add(intToDuration(-t.Reminder.AlertTimesInMinutes[0]))) {
-									<p>
-										<span class="font-bold text-lg"><i>reminder at:</i></span>
-										<span class="font-bold">{ formatTimeToHumanReadable(t.Reminder.StartTime.Add(intToDuration(-t.Reminder.AlertTimesInMinutes[0]))) }</span>
+								<p class="font-bold text-lg"><span class="font-bold text-lg"><i>Reminder:</i></span> <span class="font-bold">{ formatTimeToHumanReadable(t.Reminder.StartTime) }</span></p>
+								if time.Now().Before(t.Reminder.StartTime.Add(intToDuration(-t.Reminder.AlertTimesInMinutes[1]))) {
+									<p class="inline-flex w-full justify-end">
+										<span class="font-bold text-lg"><i>Notify at:</i></span>
+										<span class="font-bold text-lg">{ formatTimeToHumanReadableShort(t.Reminder.StartTime.Add(intToDuration(-t.Reminder.AlertTimesInMinutes[0]))) }</span>
 									</p>
 								}
-								if time.Now().Before(t.Reminder.StartTime.Add(intToDuration(-t.Reminder.AlertTimesInMinutes[1]))) {
-									<p>
-										<span class="font-bold text-lg"><i>reminder at:</i></span>
-										<span class="font-bold">{ formatTimeToHumanReadable(t.Reminder.StartTime.Add(intToDuration(-t.Reminder.AlertTimesInMinutes[1]))) }</span>
+								if time.Now().Before(t.Reminder.StartTime.Add(intToDuration(-t.Reminder.AlertTimesInMinutes[0]))) {
+									<p class="inline-flex w-full justify-end">
+										<span class="font-bold text-lg"><i>Notify at:</i></span>
+										<span class="font-bold text-lg">{ formatTimeToHumanReadableShort(t.Reminder.StartTime.Add(intToDuration(-t.Reminder.AlertTimesInMinutes[1]))) }</span>
 									</p>
 								}
 							</div>
@@ -59,16 +59,16 @@ templ AppLimitTasks(tasks []utils.Task) {
 		<ul id="taskHolder" hx-swap-oob="true" class="">
 			for _, t := range  tasks {
 				<li>
-					<div class="inline-flex w-full px-4 justify-between items-center bg-zinc-800 text-white">
+					<div class="inline-flex w-full px-4 justify-between items-center bg-slate-700 text-white">
 						<div class="inline-flex justify-start items-center g-1 w-1/2 px-1 leading-10">
 							<img src={ getImageFilePath(t.AppName, t.Icon) } alt={ t.AppName } class="h-8 w-8 align-middle hover:scale-95"/>
 							<p>{ t.AppName }</p>
+							if t.TaskTime.AppLimit.IsLimitReached {
+								<img title="daily limit reached" src="/assets/svg/check-colored.svg" alt="edit" class="hover:scale-95 h-3 w-3 ml-2 cursor-pointer"/>
+							}
 						</div>
 						<div class="inline-flex justify-end items-center w-1/2 gap-8">
-							if t.TaskTime.AppLimit.IsLimitReached {
-								<p class="bg-black text-white">Daily limit exceeded</p>
-							}
-							<p class="bg-teal-500 font-bold italic h-8 w-40 text-center pt-2 cursor-default">{ utils.UsageTimeInHrsMin(t.TaskTime.AppLimit.Limit) }</p>
+							<p class="bg-customCyan text-black font-bold italic h-8 w-40 text-center pt-2 cursor-default">{ utils.UsageTimeInHrsMin(t.TaskTime.AppLimit.Limit) }</p>
 							<div class="flex gap-4">
 								<img src="/assets/svg/delete.svg" alt="delete" hx-post={ "/removeTask/" + t.UUID.String() + "?taskType=AppLimit" } hx-swap="none" hx-select-oob="#taskHolder:outerHTML" class="hover:scale-95 h-6 w-6 cursor-pointer" title="delete app limit"/>
 								<img title="edit app limit" src="/assets/svg/edit-white.svg" alt="edit" class="hover:scale-95 h-6 w-6 cursor-pointer"/>

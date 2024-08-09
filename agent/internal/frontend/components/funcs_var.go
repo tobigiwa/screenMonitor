@@ -87,6 +87,9 @@ func getImageFilePath(filename string, imageData []byte) string {
 func formatTimeToHumanReadable(t time.Time) string {
 	return t.Format("Monday, 02 January 2006, 03:04 PM")
 }
+func formatTimeToHumanReadableShort(t time.Time) string {
+	return t.Format("03:04 PM")
+}
 
 func intToDuration(minutes int) time.Duration {
 	return time.Duration(minutes) * time.Minute

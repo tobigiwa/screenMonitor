@@ -14,6 +14,9 @@ module.exports = {
         'task-page': 'calc(100vh - 8rem)',
         'white-line': 'calc(100% - 30px)'
       },
+      colors: {
+        customCyan: '#94ebeb',
+      },
     },
     animation: {
       'modal-o': 'FadeIn 0.5s ease infinite',
