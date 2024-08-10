@@ -5,6 +5,7 @@ package main
 import (
 	"agent"
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -26,5 +27,5 @@ func main() {
 		log.Fatalln("your index.html file might not be up-to-date, could not render into index.html: ", err) // exit
 	}
 
-	log.Println("index.html file generated and placed in the frontend directory")
+	fmt.Println("index.html file generated and placed in the frontend directory")
 }
