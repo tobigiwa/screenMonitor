@@ -88,7 +88,7 @@ Comment=ME...
 
 var trayIconAutoStart = `[Desktop Entry]
 Type=Application
-Exec=%s/bin/trayIcon
+Exec=%s/bin/smTrayIcon
 Hidden=false
 NoDisplay=false
 X-GNOME-Autostart-enabled=true

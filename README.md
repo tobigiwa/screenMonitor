@@ -2,7 +2,7 @@
 
 ## Liscremon
 
-Liscremon, Linux Screen Monitor, is not the proposed name of this project yet, all intention is to make this available on [Windows](https://en.wikipedia.org/wiki/Microsoft_Windows) and [MacOS](https://en.wikipedia.org/wiki/MacOS), which are very doable.
+Liscremon, Linux Screen Monitor, is the linux specific distribution of this project, all intention is to make this available on [Windows](https://en.wikipedia.org/wiki/Microsoft_Windows) and [MacOS](https://en.wikipedia.org/wiki/MacOS), which are very doable.
 
 It's Linux for now, because it is the development environment I use. I own a banged-up HP Pavilion, so Windows support is definately coming(WinScreMon). I can't say much of MacOS(DaScreMon), shit is too expensive.
 
@@ -65,13 +65,70 @@ This part should be fun, ActivityWatch has something like that, it is called "Qu
 
 This one, not central at all, is the last thing we should handle if we agree it is "Okay" to have. The idea is to have a UI like the mobile app version of [Trello](https://trello.com/), where we have three columns; "ToDo", "Doing" and "Done"; with drag and drop. Ideally Todo items should be limited to two weeks. Seeing we have a Reminder system already, it would only be frontend heavy, so small work on the Go side of things.
 
-
 ## Project Architecture
-By the folder structure of the codebase;
-- cli: this is the main entrypoint to the **daemon service**. It has few commands to launch and stop the  it does the screen monitoring, task scheduling and database management. It is always running, so it has an autostart script. It is the **smDaemon binary**.
-Both the cli/ and daemon/ makes up this
 
-- 
+I cannot think of a better way to introduce the project codebase other than it folder structure, it actually a Go thing...it module and package management system, which is very good;
 
--agent: This is the backend that talks to the daemon service, and also contains the frontend that displays to the user.
-- TrayIcon: This is meant to be how the us
+- **cli/ & daemon/**: This is the **daemon service**, like every cobra-cli app, it has a main.go file (the entrypoint) and a cli/ folder which house the commands. The commands in the cli/ folder are just to start and stop the _daemon_. The deamon/ folder house the daemon functionalities; the screen monitoring, task scheduling and database management. It is always running, so it has an autostart script. Compiled at the root of the project directory, produces the **smDaemon binary**.
+
+- **agent/**: This is the backend that talks to the daemon service, and also contains the frontend that displays to the user. It houses the webserver app struct and the frontend codebase; the htmx, templ, tailwind and static files. It is just a package with two public function.
+
+- **browser/**: This renders the frontend via the browser, it contains the **webserver** and imports _agent/_.It is a module and produces the **smBrowser** binary.
+
+- **desktop/**: This renders the frontend via the **wails desktop app**, it contains the setup for the wails app and imports _agent/_. It is a module and produces the **smDesktop** binary.
+
+- **TrayIcon**: This is meant to be another way the user can interacts with the application, aside the desktop entry for the desktop app. See the image below. It is a module and produces the **smTrayIcon** binary.
+  <details>
+  <summary>
+  tray-Icon
+  </summary>
+  <img src="./images/trayIcon.png" alt="Weekly Report">
+  </details>
+
+- **utils/**: This standalone module cotains shared funtionalities (functions) and Types for other mdoules.
+
+## Installation
+
+Since this is a developer-release, you need to clone the project first. In the root directory, run;
+
+> `make all`
+
+This would run a dependencies-check first, if all is fufilled, it then compile all four binaries. It would also place the binaries in your `GOPATH/bin` directory and add to two .desktop file to your `~/.config/autostart` for the `daemon and the tray-Icon`.
+
+## Development
+
+If you want to contribute or run these programs yourself, here is a good guide;
+
+- get something like Tilix that can help you split your terminal, cos you'll need to open about 5 of it 😄😄😄
+
+- firstly, in the project root directory, run;
+
+  > `make dev`
+
+  to start the daemon service. This would actually try to kill other daemon process running, and also enable printing to the terminal
+
+- if you would be working on the `browser/`, `desktop/` or `trayIcon`, open a terminal for them and also run;
+
+  > `make dev`
+
+  this would likewise enable printing to the terminal.
+
+- if you are going to be making changes to the frontend, you'll need to open two terminal for live reload and updates. `cd` into `agent/internal/frontend`, run:
+
+  > `make tailwindcss`
+
+  this would enable live reload for the tailwindwind ouput file.
+
+  > `make dev`
+
+  this would enable templ hot reload.
+
+## Contribution guide
+
+### Note
+Thanks for doing this, before you proceed I'll recommend seeing the Project scope, the architecture and development. This project is birth in the spirit of Go as the backend language, it employs HMTX, a-h Templ, Hyperscript and Tailwindcss for it frontend. I believe with this stack we can complete this project, if need requires...maybe AlpineJS but not React or any other over-powerful JS framework.
+You can pick up any part of the projects and make your contribution(s).
+
+### Story
+This first developer release of this project has 
+
