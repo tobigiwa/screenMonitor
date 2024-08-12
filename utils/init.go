@@ -12,7 +12,7 @@ func init() {
 		log.Fatalln("error at init fn:", err) // exit
 	}
 
-	configDir := filepath.Join(homeDir, "liScreMon")
+	configDir := filepath.Join(homeDir, ".config", "liScreMon")
 	logDir := filepath.Join(configDir, "logs")
 
 	for _, dir := range [2]string{configDir, logDir} {

@@ -2,7 +2,7 @@
 
 ## Liscremon
 
-Liscremon, Linux Screen Monitor, is the linux specific distribution of this project, all intention is to make this available on [Windows](https://en.wikipedia.org/wiki/Microsoft_Windows) and [MacOS](https://en.wikipedia.org/wiki/MacOS). It's Linux for now, because it is the development environment I use. I own a banged-up HP Pavilion, so Windows support is definately coming(WinScreMon). I can't say much of MacOS(DaScreMon), shit is too expensive.
+Liscremon, Linux Screen Monitor, is the linux specific distribution of this project, all intention is to make this available on [Windows](https://en.wikipedia.org/wiki/Microsoft_Windows) and [MacOS](https://en.wikipedia.org/wiki/MacOS). It's Linux for now, because it is the development environment I use. I own a banged-up HP Pavilion, so Windows support is definately coming(WinScreMon). I can't say much of MacOS(DaScreMon), shit is too expensive. After the first developer release, support for windows is my next to-do.
 
 This README.md is meant to invite contributions to the project, I believe am working too slow on it, also because I just want more opinions on the features that would be useful (building in secret is not so much fun as I thought). So, if you want to touch grass with this codebase, THANK YOU 🙌🏿🙌🏿🙌🏿 and here are the things you should know.
 
@@ -128,11 +128,25 @@ If you want to contribute or run these programs yourself, here is a good guide;
 Thanks for doing this, before you proceed I'll recommend seeing the Project scope, the architecture and development. This project is birth in the spirit of Go as the backend language, it employs HMTX, a-h Templ, Hyperscript and Tailwindcss for it frontend. I believe with this stack we can complete this project, if need requires...maybe AlpineJS but not React or any other over-powerful JS framework.
 You can pick up any part of the projects and make your contribution(s).
 
-### Story
+### Other things I want to say
 
 - Why Go?
 
-Go **simplicity**, **superb performance** and **EXPLICIT-ness** makes it my love-language. It is the perfect balance between *low performance, extremely simple **Python*** to *high performance, pain-in-the-ass **Rust***. It is the better brother of [Java](https://www.java.com/en/download/help/whatis_java.html), the true prodigy of [C](<https://en.wikipedia.org/wiki/C_(programming_language)>), the final blessing of software development for [grug brain developers](https://grugbrain.dev/) and the [Q.E.D](Quite Easyily Done) of professional software development.
+  Go **simplicity**, **superb performance** and **EXPLICIT-ness** makes it my love-language. It is the perfect balance between *low performance, extremely simple **Python*** to *high performance, pain-in-the-ass **Rust***. It is the better brother of [Java](https://www.java.com/en/download/help/whatis_java.html), the true prodigy of [C](<https://en.wikipedia.org/wiki/C_(programming_language)>), the final blessing of software development for [grug brain developers](https://grugbrain.dev/) and the "Q.E.D" (Quite Easyily Done) of professional software development.
 
 - Why HTMX?
-  For me, argubaly the best software principle is ["Locality of Behaviour"](https://htmx.org/essays/locality-of-behaviour/) and HTMX does it better. Coupled with [Hyperscript](https://hyperscript.org/), 😘.
+
+  For me, argubaly the best software principle is ["Locality of Behaviour"](https://htmx.org/essays/locality-of-behaviour/) and HTMX does it better, coupled with [Hyperscript](https://hyperscript.org/) & [Tailwindcss](https://tailwindcss.com/), 😘😘😘. Also, [Vue.js](https://vuejs.org/), [Svelte](https://svelte.dev/) and other supposedly said simple altervenatives...seems hard, I'm a backend guy.
+
+## Other Code discussions:
+
+- **Protobuf** is included in the codebase, but we'll use it later in development once we're confident in our type definitions. Since frequent serialization/deserialization will occur at every user window switch, Protobuf offers better performance and storage efficiency. However, we're currently using JSON for ease of development.
+
+- **Active and passive screentime**, it you peruse the codebase regarding screen monitoring, you'll notice a distinction in the screentime recorded. The idea of a **active screentime** is the window with the active focus & **passive screentime** includes windows that aren't in focus but are still interacted with, like scrolling on a webpage while focused on another window _(two-hand scrolling)_, or those that remain visible in a split screen. These nuances are still under consideration. I tried working on the two-hand scrolling feature, but it proved too machine-dependent, requiring mouse-driver interfacing _(I forsee writing C code here)_. For window visibility, with the help of a C++ friend, we were able to capture that metric, though it brings its own set of debates, such as how large must a non-overlaped window be to be regarded as still in passive use; especially when you consider big screens.
+  It would be nice capturing this metrics as a screentime record but...it is too opinionated; I'll rather we discuss it before implementing and removing later.
+
+- **Browser watch history**, ActivityWatch includes this feature, so maybe we should consider adding it as well. What are your thoughts?
+
+- **Application Logo**, that was the best I could get from BingAI, I cannot even remember what the prompt was but if you think that logo is terrible; I agree and we should change it.
+
+I don't have anything else reasonable to say, so please I'll be expecting your feedback on my hands with Go, thanks. Very strong criticism are the most welcomed.

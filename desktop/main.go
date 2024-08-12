@@ -4,6 +4,7 @@ import (
 	"context"
 	"embed"
 	"flag"
+	"fmt"
 	"log"
 	"log/slog"
 
@@ -82,7 +83,8 @@ func NewApp(desktopApp AppInterface) *App {
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 	if _, err := a.desktopAgent.CheckDaemonService(); err != nil {
-		log.Fatalln("error connecting to daemon service:", err) // exit
+		fmt.Println("it seems the daemon is not running :error :", err.Error())
+		// log.Fatalln("error connecting to daemon service:", err) // exit
 	}
 }
 
