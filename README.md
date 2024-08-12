@@ -149,4 +149,20 @@ You can pick up any part of the projects and make your contribution(s).
 
 - **Application Logo**, that was the best I could get from BingAI, I cannot even remember what the prompt was but if you think that logo is terrible; I agree and we should change it.
 
-I don't have anything else reasonable to say, so please I'll be expecting your feedback on my hands with Go, thanks. Very strong criticism are the most welcomed.
+I don't have anything else meaningful to add, so I'll be looking forward to your feedback on my work with Go. Feel free to give strong critiques—those are the most appreciated. Thanks!
+
+A friend of mine added this to his open-source project and had no regrets. So, if you'd like to support me in building this—or just appreciate the effort—a burger 🍔 with extra toppings 🧀🥓would be much appreciated. God bless you.
+
+[Solana Network](https://solana.com/)
+
+BxfSXLfrj3DsFVk6Pnqnt2b7F5AwoaSPtsbDnRCXfwbe
+
+[Ethereum Network](https://ethereum.org/en/)
+
+0xa67FdbacbCBa11d28f7DF1780c8bAA180A346E76
+
+[Bitcoin Network](https://bitcoin.org/en/)
+
+bc1qt8lj3u4kk77v4glj8ls6lsyjjzy6l796sgmyyf
+
+
