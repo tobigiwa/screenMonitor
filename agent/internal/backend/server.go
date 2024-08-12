@@ -50,6 +50,9 @@ func listenToDaemonService() (net.Conn, error) {
 	if runtime.GOOS == "windows" {
 		notImplemented()
 	}
+	if runtime.GOOS == "darwin" {
+		notImplemented()
+	}
 
 	if unixAddr, err = net.ResolveUnixAddr(unix, socketDir); err != nil {
 		return nil, err

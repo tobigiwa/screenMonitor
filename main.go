@@ -1,9 +1,9 @@
 /*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
+Copyright © 2024 Friendly-Programmer <giwaoluwatobi@gmail.com>
 */
 package main
 
-import cli "LiScreMon/cli"
+import cli "smDaemon/cli"
 
 func main() {
 	cli.Execute()

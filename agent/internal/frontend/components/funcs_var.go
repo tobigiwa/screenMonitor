@@ -15,14 +15,14 @@ var (
 ┗┛┗┗┛┗┛ ┗ ┛ ┗┗┛┛┗`
 
 	art2 string = `
-╦ ┬ ╔═╗┌─┐┬─┐┌─┐╔╦╗┌─┐┌┐┌
-║ │ ╚═╗│  ├┬┘├┤ ║║║│ ││││
-╩═╝┴╚═╝└─┘┴└─└─┘╩ ╩└─┘┘└┘`
+╦ 	┬ ╔═╗┌─┐┬─┐┌─┐╔╦╗┌─┐┌┐┌
+║ 	│ ╚═╗│  ├┬┘├┤ ║║║│ ││││
+╩═╝ ┴ ╚═╝└─┘┴└─└─┘╩ ╩└─┘┘└┘`
 
 	art3 string = `
-+-+-+-+-+-+-+-+-+-+
-|L|i|S|c|r|e|M|o|n|
-+-+-+-+-+-+-+-+-+-+`
+
+	LISCREMON
+`
 )
 
 var arrayOfArt = []string{art1, art2, art3}
@@ -86,6 +86,9 @@ func getImageFilePath(filename string, imageData []byte) string {
 
 func formatTimeToHumanReadable(t time.Time) string {
 	return t.Format("Monday, 02 January 2006, 03:04 PM")
+}
+func formatTimeToHumanReadableShort(t time.Time) string {
+	return t.Format("03:04 PM")
 }
 
 func intToDuration(minutes int) time.Duration {
