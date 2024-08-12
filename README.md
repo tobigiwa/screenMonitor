@@ -2,17 +2,15 @@
 
 ## Liscremon
 
-Liscremon, Linux Screen Monitor, is the linux specific distribution of this project, all intention is to make this available on [Windows](https://en.wikipedia.org/wiki/Microsoft_Windows) and [MacOS](https://en.wikipedia.org/wiki/MacOS), which are very doable.
+Liscremon, Linux Screen Monitor, is the linux specific distribution of this project, all intention is to make this available on [Windows](https://en.wikipedia.org/wiki/Microsoft_Windows) and [MacOS](https://en.wikipedia.org/wiki/MacOS). It's Linux for now, because it is the development environment I use. I own a banged-up HP Pavilion, so Windows support is definately coming(WinScreMon). I can't say much of MacOS(DaScreMon), shit is too expensive.
 
-It's Linux for now, because it is the development environment I use. I own a banged-up HP Pavilion, so Windows support is definately coming(WinScreMon). I can't say much of MacOS(DaScreMon), shit is too expensive.
-
-This README.md is meant to invite contributions to the project, I believe am working too slow on it, mostly probable because I just want more opinions on the features that would be useful (building in secret is not so much fun I think). So if you want to touch grass with this codebase, THANK YOU 🙌🏿🙌🏿🙌🏿 and here are the things you should know.
+This README.md is meant to invite contributions to the project, I believe am working too slow on it, also because I just want more opinions on the features that would be useful (building in secret is not so much fun as I thought). So, if you want to touch grass with this codebase, THANK YOU 🙌🏿🙌🏿🙌🏿 and here are the things you should know.
 
 ## Project Scope:
 
 The suitable name for this project is something like a 'screen monitor' without any operating system name attached. The central feature is to monitor **desktop screentime and application usage** something like the iOS screentime in the iPhone Settings or projects like [ActivityWatch](https://activitywatch.net/), [RescueTime](https://www.rescuetime.com/), [ManicTime](https://www.manictime.com/) or [WakaTime](https://wakatime.com/).
 
-The plan is to follow more on the path with ActivityWatch, but in [Go](https://go.dev/), ActivityWatch is built with [Python](https://www.python.org/), with plans to have some part of it now in [Rust](https://www.rust-lang.org/).
+The plan is to follow more on the path with ActivityWatch, but in [Go](https://go.dev/), ActivityWatch is built with [Python](https://www.python.org/), with plans to rewrite some part of it in [Rust](https://www.rust-lang.org/).
 
 So far on this project, the central feature is available;
 
@@ -39,19 +37,19 @@ So far on this project, the central feature is available;
     <img src="./images/weekly-app.png" alt="Weekly Report">
 </details>
 
-As for me, this page, the 'Sceentime', is completed. I said as for me, meaning any new idea is welcome to add or teardown. The other features as noticed from the menu bar includes;
+As for me, this page, the 'Sceentime', is completed. I said as for me, so other new ideas are welcomed, to add or teardown. The other features as noticed from the menu bar includes;
 
 [implementation details is discussed below]().
 
 > **Tasks**
 
-The third option on the left menu, is meant to consist of a 'Reminder' and 'Daily App Limit', Both of this feauture are availabe for the first developer release (functional but the UI is very shitty). Sounds cool but not central to the scope of the project.
+The third option on the left menu, is meant to consist of a 'Reminder' and 'Daily App Limit'. Both of this feauture would be availabe in the first developer release (functional but the UI is very shitty). Sounds cool but not central to the scope of the project.
 
-The **Reminder system** is just something that sends a desktop notification, with or without sound, as created for a task by the user, with a two pre-notification, also with an option to either launch an app on _StartTime_. Everything here is up for debate but I believe these are sane defaults.
+The **Reminder system** is just something that sends a desktop notification, with or without sound, as created for a task by the user, with two pre-notification, also with an option to launch an the app on _StartTime_. Everything here is up for debate but I believe these are sane defaults.
 
 [implementation details is discussed below]()
 
-The **Daily App Limit** is also a notification that just tells you when your usage for a particular application is reached for a day, also with the option to exist the app on limit reached.
+The **Daily App Limit** is also a notification that tells you when your usage for a particular application is reached for a day, also with the option to exist the app on limit reached.
 
 [implementation details is discussed below]().
 
@@ -63,7 +61,7 @@ This part should be fun, ActivityWatch has something like that, it is called "Qu
 
 > **ToDo**
 
-This one, not central at all, is the last thing we should handle if we agree it is "Okay" to have. The idea is to have a UI like the mobile app version of [Trello](https://trello.com/), where we have three columns; "ToDo", "Doing" and "Done"; with drag and drop. Ideally Todo items should be limited to two weeks. Seeing we have a Reminder system already, it would only be frontend heavy, so small work on the Go side of things.
+This one, not central at all, is the last thing we should handle if we agree it is "Okay" to have. The idea is to have a UI like the mobile app version of [Trello](https://trello.com/), where we have three columns; "ToDo", "Doing" and "Done"; with drag and drop. Ideally Todo items should be limited to two weeks. Seeing we have a Reminder system already, it would only be frontend heavy,and just few rewiring on the Go side of things.
 
 ## Project Architecture
 
@@ -85,7 +83,7 @@ I cannot think of a better way to introduce the project codebase other than it f
   <img src="./images/trayIcon.png" alt="Weekly Report">
   </details>
 
-- **utils/**: This standalone module cotains shared funtionalities (functions) and Types for other mdoules.
+- **utils/**: This standalone module contains shared functions and Types for other mdoules.
 
 ## Installation
 
@@ -93,7 +91,7 @@ Since this is a developer-release, you need to clone the project first. In the r
 
 > `make all`
 
-This would run a dependencies-check first, if all is fufilled, it then compile all four binaries. It would also place the binaries in your `GOPATH/bin` directory and add to two .desktop file to your `~/.config/autostart` for the `daemon and the tray-Icon`.
+This would run a dependencies-check first, if all is fufilled, it then compiles all four binaries. It would also place the binaries in your `GOPATH/bin` directory and add to two .desktop file to your `~/.config/autostart` for the `daemon and the tray-Icon`.
 
 ## Development
 
@@ -105,7 +103,7 @@ If you want to contribute or run these programs yourself, here is a good guide;
 
   > `make dev`
 
-  to start the daemon service. This would actually try to kill other daemon process running, and also enable printing to the terminal
+  to start the daemon service, this has to be running before others. This would actually try to kill other daemon process running, and also enable printing to the terminal
 
 - if you would be working on the `browser/`, `desktop/` or `trayIcon`, open a terminal for them and also run;
 
@@ -117,7 +115,7 @@ If you want to contribute or run these programs yourself, here is a good guide;
 
   > `make tailwindcss`
 
-  this would enable live reload for the tailwindwind ouput file.
+  this would enable live reload for the tailwindcss ouput file.
 
   > `make dev`
 
@@ -126,9 +124,15 @@ If you want to contribute or run these programs yourself, here is a good guide;
 ## Contribution guide
 
 ### Note
+
 Thanks for doing this, before you proceed I'll recommend seeing the Project scope, the architecture and development. This project is birth in the spirit of Go as the backend language, it employs HMTX, a-h Templ, Hyperscript and Tailwindcss for it frontend. I believe with this stack we can complete this project, if need requires...maybe AlpineJS but not React or any other over-powerful JS framework.
 You can pick up any part of the projects and make your contribution(s).
 
 ### Story
-This first developer release of this project has 
 
+- Why Go?
+
+Go **simplicity**, **superb performance** and **EXPLICIT-ness** makes it my love-language. It is the perfect balance between *low performance, extremely simple **Python*** to *high performance, pain-in-the-ass **Rust***. It is the better brother of [Java](https://www.java.com/en/download/help/whatis_java.html), the true prodigy of [C](<https://en.wikipedia.org/wiki/C_(programming_language)>), the final blessing of software development for [grug brain developers](https://grugbrain.dev/) and the [Q.E.D](Quite Easyily Done) of professional software development.
+
+- Why HTMX?
+  For me, argubaly the best software principle is ["Locality of Behaviour"](https://htmx.org/essays/locality-of-behaviour/) and HTMX does it better. Coupled with [Hyperscript](https://hyperscript.org/), 😘.
