@@ -2,13 +2,13 @@
 
 ## Liscremon
 
-Liscremon, Linux Screen Monitor, is the linux specific distribution of this project, all intention is to make this available on [Windows](https://en.wikipedia.org/wiki/Microsoft_Windows) and [MacOS](https://en.wikipedia.org/wiki/MacOS). It's Linux for now, because it is the development environment I use. I own a banged-up HP Pavilion, so Windows support is definately coming(WinScreMon). I can't say much of MacOS(DaScreMon), shit is too expensive. After the first developer release, support for windows is my next to-do.
+Liscremon, Linux Screen Monitor, is the linux specific distribution of this project, all intention is to make this available on [Windows](https://en.wikipedia.org/wiki/Microsoft_Windows) and [MacOS](https://en.wikipedia.org/wiki/MacOS). It's Linux for now, because it is the development environment I use. I own a banged-up HP Pavilion, so Windows(WinScreMon) support is definately coming. For the MacOS(DaScreMon🤗),I'll be expecting the PR, I seriously cannot afford a Mac, shit is just too expensive. After the first developer release, support for windows would make the second developer release.
 
 This README.md is meant to invite contributions to the project, I believe am working too slow on it, also because I just want more opinions on the features that would be useful (building in secret is not so much fun as I thought). So, if you want to touch grass with this codebase, THANK YOU 🙌🏿🙌🏿🙌🏿 and here are the things you should know.
 
 ## Project Scope:
 
-The suitable name for this project is something like a 'screen monitor' without any operating system name attached. The central feature is to monitor **desktop screentime and application usage** something like the iOS screentime in the iPhone Settings or projects like [ActivityWatch](https://activitywatch.net/), [RescueTime](https://www.rescuetime.com/), [ManicTime](https://www.manictime.com/) or [WakaTime](https://wakatime.com/).
+The suitable name for this project is something like a 'screen monitor' without any operating system name attached. The central feature is to monitor **desktop screentime and application usage**, something like the iOS screentime in the iPhone Settings or projects like [ActivityWatch](https://activitywatch.net/), [RescueTime](https://www.rescuetime.com/), [ManicTime](https://www.manictime.com/) or [WakaTime](https://wakatime.com/).
 
 The plan is to follow more on the path with ActivityWatch, but in [Go](https://go.dev/), ActivityWatch is built with [Python](https://www.python.org/), with plans to rewrite some part of it in [Rust](https://www.rust-lang.org/).
 
@@ -32,7 +32,7 @@ So far on this project, the central feature is available;
 
 <details>
     <summary>
-        Application Screentime for the week
+        Weekly Application Screentime
     </summary>
     <img src="./images/weekly-app.png" alt="Weekly Report">
 </details>
@@ -63,7 +63,7 @@ This part should be fun, ActivityWatch has something like that, it is called "Qu
 
 This one, not central at all, is the last thing we should handle if we agree it is "Okay" to have. The idea is to have a UI like the mobile app version of [Trello](https://trello.com/), where we have three columns; "ToDo", "Doing" and "Done"; with drag and drop. Ideally Todo items should be limited to two weeks. Seeing we have a Reminder system already, it would only be frontend heavy,and just few rewiring on the Go side of things.
 
-## Project Architecture
+## Project Architecture:
 
 I cannot think of a better way to introduce the project codebase other than it folder structure, it actually a Go thing...it module and package management system, which is very good;
 
@@ -121,7 +121,7 @@ If you want to contribute or run these programs yourself, here is a good guide;
 
   this would enable templ hot reload.
 
-## Contribution guide
+## Contribution guide:
 
 ### Note
 
@@ -138,7 +138,7 @@ You can pick up any part of the projects and make your contribution(s).
 
   For me, argubaly the best software principle is ["Locality of Behaviour"](https://htmx.org/essays/locality-of-behaviour/) and HTMX does it better, coupled with [Hyperscript](https://hyperscript.org/) & [Tailwindcss](https://tailwindcss.com/), 😘😘😘. Also, [Vue.js](https://vuejs.org/), [Svelte](https://svelte.dev/) and other supposedly said simple altervenatives...seems hard, I'm a backend guy.
 
-## Other Code discussions:
+## Other discussions:
 
 - **Protobuf** is included in the codebase, but we'll use it later in development once we're confident in our type definitions. Since frequent serialization/deserialization will occur at every user window switch, Protobuf offers better performance and storage efficiency. However, we're currently using JSON for ease of development.
 
@@ -151,7 +151,7 @@ You can pick up any part of the projects and make your contribution(s).
 
 I don't have anything else meaningful to add, so I'll be looking forward to your feedback on my work with Go. Feel free to give strong critiques—those are the most appreciated. Thanks!
 
-A friend of mine added this to his open-source project and had no regrets. So, if you'd like to support me in building this—or just appreciate the effort—a burger 🍔 with extra toppings 🧀🥓would be much appreciated. God bless you.
+A friend of mine added this to his open-source project and had no regrets. So, if you'd like to support me in building this—or just appreciate the effort—a burger 🍔 with extra toppings 🧀🥓 would be much appreciated. God bless you.
 
 [Solana Network](https://solana.com/)
 
