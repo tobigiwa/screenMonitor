@@ -44,15 +44,20 @@ func main() {
 func onReady() {
 
 	logger.Info("TrayIcon is alive!!!")
+	var toolTip string
+	
+	if utils.APP_NAME == "LiScreMon" {
+		toolTip = "Linux Screen Monitor"
+	}
 
-	systray.SetTemplateIcon(icon, icon)
-	systray.SetTitle(title)
+	systray.SetTemplateIcon(utils.UnixIcon, utils.UnixIcon)
+	systray.SetTitle(utils.APP_NAME)
 	systray.SetTooltip(toolTip)
 
 	// We can manipulate the systray in other goroutines
 	go func() {
-		systray.SetTemplateIcon(icon, icon)
-		systray.SetTitle(title)
+		systray.SetTemplateIcon(utils.UnixIcon, utils.UnixIcon)
+		systray.SetTitle(utils.APP_NAME)
 		systray.SetTooltip(toolTip)
 
 		launchBrowser := systray.AddMenuItem("Launch browser view", "Launch browser view")
@@ -65,7 +70,7 @@ func onReady() {
 		systray.AddSeparator()
 		logFolder := systray.AddMenuItem("Open log folder", "Open log folder")
 		about := systray.AddMenuItem("More Information", "More Information")
-		killDaemon := about.AddSubMenuItem("Quit daemon service", fmt.Sprintf("Quit %s daemon service", title))
+		killDaemon := about.AddSubMenuItem("Quit daemon service", fmt.Sprintf("Quit %s daemon service", utils.APP_NAME))
 		remove := about.AddSubMenuItem("Remove this tray-icon", "Remove this Icon")
 
 		binaries := [3]string{"smDaemon", "smDesktop", "smBrowser"}
@@ -75,9 +80,9 @@ func onReady() {
 
 				switch binary {
 				case binaries[0]:
-					utils.NotifyWithoutBeep(fmt.Sprintf("%s binary not found in GOPATH", title),
-						fmt.Sprintf("%s binary not found in GOPATH, program cannot be initiated. Please see installation at %s", title, "https.github.com/tobigiwa/LiScreMon"))
-					logger.Error(fmt.Sprintf("%s binary not found in GOPATH", title))
+					utils.NotifyWithoutBeep(fmt.Sprintf("%s binary not found in GOPATH", utils.APP_NAME),
+						fmt.Sprintf("%s binary not found in GOPATH, program cannot be initiated. Please see installation at %s", utils.APP_NAME, "https.github.com/tobigiwa/LiScreMon"))
+					logger.Error(fmt.Sprintf("%s binary not found in GOPATH", utils.APP_NAME))
 					systray.Quit()
 
 				case binaries[1]:
@@ -93,14 +98,14 @@ func onReady() {
 			case <-launchBrowserSubOne.ClickedCh:
 				if strings.Contains(launchBrowser.String(), "running 🟢") {
 					if err := jumpToBrowserView(); err != nil { // opens **another** browser tab of the `browser server's` port Addr
-						utils.NotifyWithBeep("Operation failed", fmt.Sprintf("Could not launch %s browser view.", title))
+						utils.NotifyWithBeep("Operation failed", fmt.Sprintf("Could not launch %s browser view.", utils.APP_NAME))
 						logger.Error(err.Error())
 					}
 					continue
 				}
 
 				if err := launchBrowserView(); err != nil { // starts the browser server
-					utils.NotifyWithBeep("Operation failed", fmt.Sprintf("Could not launch %s browser view.", title))
+					utils.NotifyWithBeep("Operation failed", fmt.Sprintf("Could not launch %s browser view.", utils.APP_NAME))
 					logger.Error(err.Error())
 					continue
 				}
@@ -116,7 +121,7 @@ func onReady() {
 
 			case <-launchDesktop.ClickedCh:
 				if err := launcDesktopView(); err != nil { // desktop app is launched
-					utils.NotifyWithBeep("Operation failed", fmt.Sprintf("Could not launch %s desktop view.", title))
+					utils.NotifyWithBeep("Operation failed", fmt.Sprintf("Could not launch %s desktop view.", utils.APP_NAME))
 					logger.Error(err.Error())
 					continue
 				}

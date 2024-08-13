@@ -2,7 +2,7 @@
 
 ## Liscremon
 
-Liscremon, Linux Screen Monitor, is the linux specific distribution of this project, all intention is to make this available on [Windows](https://en.wikipedia.org/wiki/Microsoft_Windows) and [MacOS](https://en.wikipedia.org/wiki/MacOS). It's Linux for now, because it is the development environment I use. I own a banged-up HP Pavilion, so Windows(WinScreMon) support is definately coming. For the MacOS(DaScreMon🤗),I'll be expecting the PR, I seriously cannot afford a Mac, shit is just too expensive. After the first developer release, support for windows would make the second developer release.
+Liscremon, [Linux](https://en.wikipedia.org/wiki/Linux) Screen Monitor, is the linux specific distribution of this project, all intention is to make this available on [Windows](https://en.wikipedia.org/wiki/Microsoft_Windows) and [MacOS](https://en.wikipedia.org/wiki/MacOS). It's Linux for now, because it is the development environment I use. I own a banged-up HP Pavilion, so Windows (WinScreMon) support is definately coming. For the MacOS(DaScreMon🤗), I'll be expecting the PR, I seriously cannot afford a Mac, shit is just too expensive. After the first developer release, support for windows would make the second developer release.
 
 This README.md is meant to invite contributions to the project, I believe am working too slow on it, also because I just want more opinions on the features that would be useful (building in secret is not so much fun as I thought). So, if you want to touch grass with this codebase, THANK YOU 🙌🏿🙌🏿🙌🏿 and here are the things you should know.
 
@@ -69,7 +69,7 @@ I cannot think of a better way to introduce the project codebase other than it f
 
 - **cli/ & daemon/**: This is the **daemon service**, like every cobra-cli app, it has a main.go file (the entrypoint) and a cli/ folder which house the commands. The commands in the cli/ folder are just to start and stop the _daemon_. The deamon/ folder house the daemon functionalities; the screen monitoring, task scheduling and database management. It is always running, so it has an autostart script. Compiled at the root of the project directory, produces the **smDaemon binary**.
 
-- **agent/**: This is the backend that talks to the daemon service, and also contains the frontend that displays to the user. It houses the webserver app struct and the frontend codebase; the htmx, templ, tailwind and static files. It is just a package with two public function.
+- **agent/**: This is the backend that talks to the daemon service, and also contains the frontend that displays to the user. It houses the webserver app struct and the frontend codebase; the [htmx](https://htmx.org/), [a-h templ](https://templ.guide/), [tailwind](https://tailwindcss.com/) and static files. It is just a package with two public function.
 
 - **browser/**: This renders the frontend via the browser, it contains the **webserver** and imports _agent/_.It is a module and produces the **smBrowser** binary.
 
@@ -140,7 +140,7 @@ You can pick up any part of the projects and make your contribution(s).
 
 ## Other discussions:
 
-- **Protobuf** is included in the codebase, but we'll use it later in development once we're confident in our type definitions. Since frequent serialization/deserialization will occur at every user window switch, Protobuf offers better performance and storage efficiency. However, we're currently using JSON for ease of development.
+- **[Protobuf](https://protobuf.dev/getting-started/gotutorial/)** is included in the codebase, but we'll use it later in development once we're confident in our type definitions. Since frequent serialization/deserialization will occur at every user window switch, Protobuf offers better performance and storage efficiency. However, we're currently using JSON for ease of development.
 
 - **Active and passive screentime**, it you peruse the codebase regarding screen monitoring, you'll notice a distinction in the screentime recorded. The idea of a **active screentime** is the window with the active focus & **passive screentime** includes windows that aren't in focus but are still interacted with, like scrolling on a webpage while focused on another window _(two-hand scrolling)_, or those that remain visible in a split screen. These nuances are still under consideration. I tried working on the two-hand scrolling feature, but it proved too machine-dependent, requiring mouse-driver interfacing _(I forsee writing C code here)_. For window visibility, with the help of a C++ friend, we were able to capture that metric, though it brings its own set of debates, such as how large must a non-overlaped window be to be regarded as still in passive use; especially when you consider big screens.
   It would be nice capturing this metrics as a screentime record but...it is too opinionated; I'll rather we discuss it before implementing and removing later.

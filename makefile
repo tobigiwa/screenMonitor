@@ -24,8 +24,13 @@ browser:
 trayIcon:
 	@cd icon && $(MAKE) -f makefile install
 
+
 desktop:
+	# we need to start the daemon first before compiling the desktop app.
+	@go run . restart & 	 
+	@echo "waiting for daemon to setup (4secs)..."  && sleep 4
 	@cd desktop && $(MAKE) -f makefile install
+	@go run . stop
 
 
 
