@@ -1,5 +1,7 @@
 GOPATH := $(shell go env GOPATH)
 
+all: check install agent browser trayIcon desktop
+
 dev:
 	@go run . restart -d
 
@@ -17,22 +19,19 @@ check:
 	fi
 
 
-.PHONY: browser trayIcon desktop
+.PHONY: browser trayIcon desktop agent
+agent:
+	@cd agent/internal/frontend && $(MAKE) -f Makefile build
+
 browser:
-	@cd browser && $(MAKE) -f makefile install
+	@cd browser && $(MAKE) -f Makefile install
 
 trayIcon:
-	@cd icon && $(MAKE) -f makefile install
-
+	@cd icon && $(MAKE) -f Makefile install
 
 desktop:
 	# we need to start the daemon first before compiling the desktop app.
 	@go run . restart & 	 
 	@echo "waiting for daemon to setup (4secs)..."  && sleep 4
-	@cd desktop && $(MAKE) -f makefile install
+	@cd desktop && $(MAKE) -f Makefile install
 	@go run . stop
-
-
-
-
-all: check install browser trayIcon desktop
