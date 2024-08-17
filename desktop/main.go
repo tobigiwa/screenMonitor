@@ -4,7 +4,6 @@ import (
 	"context"
 	"embed"
 	"flag"
-	"fmt"
 	"log"
 	"log/slog"
 
@@ -14,6 +13,7 @@ import (
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
+	"github.com/wailsapp/wails/v2/pkg/options/linux"
 )
 
 //go:generate go run gen.go
@@ -40,11 +40,11 @@ func main() {
 	}
 
 	// Create an instance of the app structure
-	app := NewApp(desktopAgent)
+	app := NewApp(desktopAgent)	
 
 	// Create application with options
 	if err = wails.Run(&options.App{
-		Title:  "smDaemon",
+		Title:  utils.APP_NAME + "-Desktop",
 		Width:  1024,
 		Height: 768,
 		AssetServer: &assetserver.Options{
@@ -57,6 +57,10 @@ func main() {
 		Bind: []interface{}{
 			app,
 		},
+		Linux: &linux.Options{
+			Icon: utils.UnixIcon,
+		},
+		
 	}); err != nil {
 		logger.Error(err.Error())
 	}
@@ -83,8 +87,7 @@ func NewApp(desktopApp AppInterface) *App {
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 	if _, err := a.desktopAgent.CheckDaemonService(); err != nil {
-		fmt.Println("it seems the daemon is not running :error :", err.Error())
-		// log.Fatalln("error connecting to daemon service:", err) // exit
+		log.Fatalln("seems the daemon service is not running:", err) // exit
 	}
 }
 

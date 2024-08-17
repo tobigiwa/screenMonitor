@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 )
 
 func init() {
@@ -35,6 +36,15 @@ func init() {
 	file.Write(byteData)
 	file.Close()
 
+	switch runtime.GOOS {
+	case "linux":
+		APP_NAME = "LiScreMon"
+	case "windows":
+		APP_NAME = "WinScreMon"
+	case "darwin":
+		APP_NAME = "DarScreMon"
+	}
+
 	APP_LOGO_FILE_PATH = filepath.Join(configDir, "liscremon.jpeg")
 	APP_CONFIG_DIR = configDir
 	APP_LOGS_DIR = logDir
@@ -45,5 +55,6 @@ var (
 	APP_LOGO_FILE_PATH,
 	APP_CONFIG_DIR,
 	APP_LOGS_DIR,
-	APP_JSON_CONFIG_FILE_PATH string
+	APP_JSON_CONFIG_FILE_PATH,
+	APP_NAME string
 )
