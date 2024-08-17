@@ -42,8 +42,8 @@ func (s *Service) StartService(socketDir string, db *db.BadgerDBStore) error {
 	}
 	s.handleConnection(listener) // blocking
 
-	listener.Close()
-	return nil
+	
+	return listener.Close()
 }
 
 func unixDomainSocket(socketDir string) (*net.UnixListener, error) {

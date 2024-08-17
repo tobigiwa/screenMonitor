@@ -12,7 +12,7 @@ The suitable name for this project is something like a 'screen monitor' without 
 
 The plan is to follow more on the path with ActivityWatch, but in [Go](https://go.dev/), ActivityWatch is built with [Python](https://www.python.org/), with plans to rewrite some part of it in [Rust](https://www.rust-lang.org/).
 
-So far on this project, the central feature is available;
+So far on this project, the central feature are available;
 
 > **Screentime**
 
@@ -37,9 +37,9 @@ So far on this project, the central feature is available;
     <img src="./images/weekly-app.png" alt="Weekly Report">
 </details>
 
-As for me, this page, the 'Sceentime', is completed. I said as for me, so other new ideas are welcomed, to add or teardown. The other features as noticed from the menu bar includes;
+As for me, this page, the 'Sceentime', is completed. I said as for me, so other new ideas are welcomed; to add or teardown. 
 
-[implementation details is discussed below]().
+The other features as noticed from the menu bar includes;
 
 > **Tasks**
 
@@ -47,11 +47,8 @@ The third option on the left menu, is meant to consist of a 'Reminder' and 'Dail
 
 The **Reminder system** is just something that sends a desktop notification, with or without sound, as created for a task by the user, with two pre-notification, also with an option to launch an the app on _StartTime_. Everything here is up for debate but I believe these are sane defaults.
 
-[implementation details is discussed below]()
 
 The **Daily App Limit** is also a notification that tells you when your usage for a particular application is reached for a day, also with the option to exist the app on limit reached.
-
-[implementation details is discussed below]().
 
 > **Analytics**
 
@@ -69,7 +66,7 @@ I cannot think of a better way to introduce the project codebase other than it f
 
 - **cli/ & daemon/**: This is the **daemon service**, like every cobra-cli app, it has a main.go file (the entrypoint) and a cli/ folder which house the commands. The commands in the cli/ folder are just to start and stop the _daemon_. The deamon/ folder house the daemon functionalities; the screen monitoring, task scheduling and database management. It is always running, so it has an autostart script. Compiled at the root of the project directory, produces the **smDaemon binary**.
 
-- **agent/**: This is the backend that talks to the daemon service, and also contains the frontend that displays to the user. It houses the webserver app struct and the frontend codebase; the [htmx](https://htmx.org/), [a-h templ](https://templ.guide/), [tailwind](https://tailwindcss.com/) and static files. It is just a package with two public function.
+- **agent/**: This is the backend that talks to the daemon service, and also contains the frontend that displays to the user. It houses the webserver app struct and the frontend codebase; the [htmx](https://htmx.org/), [a-h templ](https://templ.guide/), [tailwind](https://tailwindcss.com/) and static files. It is just a package with three public function.
 
 - **browser/**: This renders the frontend via the browser, it contains the **webserver** and imports _agent/_.It is a module and produces the **smBrowser** binary.
 
@@ -132,26 +129,32 @@ You can pick up any part of the projects and make your contribution(s).
 
 - Why Go?
 
-  Go **simplicity**, **superb performance** and **EXPLICIT-ness** makes it my love-language. It is the perfect balance between *low performance, extremely simple **Python*** to *high performance, pain-in-the-ass **Rust***. It is the better brother of [Java](https://www.java.com/en/download/help/whatis_java.html), the true prodigy of [C](<https://en.wikipedia.org/wiki/C_(programming_language)>), the final blessing of software development for [grug brain developers](https://grugbrain.dev/) and the "Q.E.D" (Quite Easyily Done) of professional software development.
+  Go **simplicity**, **superb performance** and **EXPLICIT-ness** makes it the **most _Practical programming language_**. It is the perfect balance between the *low performance, extremely simple **Python*** to *high performance, pain-in-the-ass **Rust***. It is the better brother of [Java](https://www.java.com/en/download/help/whatis_java.html), the true prodigy of [C](<https://en.wikipedia.org/wiki/C_(programming_language)>), the awaited blessing of software development for [grug brain developers](https://grugbrain.dev/) and the "Q.E.D" (Quite Easily Done) of professional software development.
+
+                - me.
+              
+Come fight me on this [Reddit Post](https://www.reddit.com/user/Boring-Kangaroo-6153/comments/1eudpck/awesom_go/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button), if you think otherwise.
 
 - Why HTMX?
 
-  For me, argubaly the best software principle is ["Locality of Behaviour"](https://htmx.org/essays/locality-of-behaviour/) and HTMX does it better, coupled with [Hyperscript](https://hyperscript.org/) & [Tailwindcss](https://tailwindcss.com/), 😘😘😘. Also, [Vue.js](https://vuejs.org/), [Svelte](https://svelte.dev/) and other supposedly said simple altervenatives...seems hard, I'm a backend guy.
+  For me, argubaly the best software principle is ["Locality of Behaviour"](https://htmx.org/essays/locality-of-behaviour/) and HTMX does it better, coupled with [Hyperscript](https://hyperscript.org/) & [Tailwindcss](https://tailwindcss.com/), 😘😘😘. Also, [Vue.js](https://vuejs.org/), [Svelte](https://svelte.dev/) and other supposedly said simple altervenatives...seems hard, I'm a backend guy and not a very smart chad 😎.
 
 ## Other discussions:
 
 - **[Protobuf](https://protobuf.dev/getting-started/gotutorial/)** is included in the codebase, but we'll use it later in development once we're confident in our type definitions. Since frequent serialization/deserialization will occur at every user window switch, Protobuf offers better performance and storage efficiency. However, we're currently using JSON for ease of development.
 
-- **Active and passive screentime**, it you peruse the codebase regarding screen monitoring, you'll notice a distinction in the screentime recorded. The idea of a **active screentime** is the window with the active focus & **passive screentime** includes windows that aren't in focus but are still interacted with, like scrolling on a webpage while focused on another window _(two-hand scrolling)_, or those that remain visible in a split screen. These nuances are still under consideration. I tried working on the two-hand scrolling feature, but it proved too machine-dependent, requiring mouse-driver interfacing _(I forsee writing C code here)_. For window visibility, with the help of a C++ friend, we were able to capture that metric, though it brings its own set of debates, such as how large must a non-overlaped window be to be regarded as still in passive use; especially when you consider big screens.
-  It would be nice capturing this metrics as a screentime record but...it is too opinionated; I'll rather we discuss it before implementing and removing later.
+- **Active and passive screentime**, it you peruse the codebase regarding screen monitoring, you'll notice a distinction in the screentime recorded. The idea of a **active screentime** is the window with the active focus & **passive screentime** includes windows that aren't in focus but are still interacted with, like scrolling on a webpage while focused on another window _(two-hand scrolling)_, or those that remain visible in a split screen. These nuances are still under consideration. I tried working on the two-hand scrolling feature, but it proved too machine-dependent, requiring mouse-driver interfacing _(I forsee writing C code here)_. For window visibility, with the help of a [C++ friend](https://github.com/zenon8adams), we were able to capture that metric, though it brings its own set of debates such as how large must a non-overlaped window be to be regarded as still in passive use; especially when you consider big screens.
+  It would be nice capturing this metrics as a screentime record but...it is too opinionated; I'll rather we discuss it before implementing.
 
 - **Browser watch history**, ActivityWatch includes this feature, so maybe we should consider adding it as well. What are your thoughts?
 
 - **Application Logo**, that was the best I could get from BingAI, I cannot even remember what the prompt was but if you think that logo is terrible; I agree and we should change it.
 
+- **Shitty UI**, I know—the Task UI page is unbearably bad... Design isn't my strong suit. I'm consulting with a UI/UX friend to help improve the pages.
+
 I don't have anything else meaningful to add, so I'll be looking forward to your feedback on my work with Go. Feel free to give strong critiques—those are the most appreciated. Thanks!
 
-A friend of mine added this to his open-source project and had no regrets. So, if you'd like to support me in building this—or just appreciate the effort—a burger 🍔 with extra toppings 🧀🥓 would be much appreciated. God bless you.
+A friend of mine added this to his open-source project and remarked, "it was a good decision."  So, if you'd like to support me in building this— or just appreciate the effort— a burger 🍔 with all the fixings 🧀🥓 would be much appreciated. God bless you.
 
 [Solana Network](https://solana.com/)
 
