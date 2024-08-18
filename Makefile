@@ -19,7 +19,6 @@ check:
 	fi
 
 
-.PHONY: browser trayIcon desktop agent
 agent:
 	@cd agent/internal/frontend && $(MAKE) -f Makefile build
 
@@ -35,3 +34,5 @@ desktop:
 	@echo "waiting for daemon to setup (4secs)..."  && sleep 4
 	@cd desktop && $(MAKE) -f Makefile install
 	@go run . stop
+
+.PHONY: agent browser trayIcon desktop  dev install all

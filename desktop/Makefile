@@ -14,3 +14,6 @@ run:
 
 install:
 	@go generate && wails build --clean && cp ./build/bin/smDesktop $(GOPATH)/bin/
+
+
+.PHONY: build dev debug run install
