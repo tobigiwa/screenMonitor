@@ -16,6 +16,7 @@ var dependencies = map[string]string{
 	"wails":       "You'll need the wails cli to build the desktop application, run `go install github.com/wailsapp/wails/v2/cmd/wails@latest` or visit https://wails.io/docs/gettingstarted/installation",
 	"templ":       "You'll need the templ cli to compile the frontend, run `go install github.com/a-h/templ/cmd/templ@latest` or visit https://templ.guide/quick-start/installation",
 	"tailwindcss": "You'll need the tailwindcss cli to compile the frontend, visit https://tailwindcss.com/blog/standalone-cli and ensure to rename the binary to `tailwindcss`",
+	"badger": 		"You'll need the badger cli for the database, run `go install go install github.com/dgraph-io/badger/v4/badger@latest",
 }
 
 func main() {
