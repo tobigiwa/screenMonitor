@@ -1,5 +1,6 @@
 # SCREEN MONITOR
 
+![](/images/frontPage.png)
 ## Liscremon
 
 Liscremon, [Linux](https://en.wikipedia.org/wiki/Linux) Screen Monitor, is the linux specific distribution of this project, all intention is to make this available on [Windows](https://en.wikipedia.org/wiki/Microsoft_Windows) and [MacOS](https://en.wikipedia.org/wiki/MacOS). It's Linux for now, because it is the development environment I use. I own a banged-up HP Pavilion, so Windows (WinScreMon) support is definately coming. For the MacOS(DaScreMon🤗), I'll be expecting the PR, I seriously cannot afford a Mac, shit is just too expensive. After the first developer release, support for windows would make the second developer release.
